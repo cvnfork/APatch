@@ -111,9 +111,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     Scaffold(
         topBar = {
             TopBar(
-                onInstallClick = dropUnlessResumed {
-                    navigator.navigate(InstallModeSelectScreenDestination)
-                },
                 navigator,
                 kpState,
                 scrollBehavior = scrollBehavior
@@ -257,7 +254,6 @@ fun AuthSuperKey(showDialog: MutableState<Boolean>, showFailedDialog: MutableSta
 
 @Composable
 private fun TopBar(
-    onInstallClick: () -> Unit,
     navigator: DestinationsNavigator,
     kpState: APApplication.State,
     scrollBehavior: ScrollBehavior
@@ -282,7 +278,9 @@ private fun TopBar(
     TopAppBar(
         title = stringResource(R.string.app_name),
         actions = {
-            IconButton(onClick = onInstallClick) {
+            IconButton(onClick = dropUnlessResumed {
+                navigator.navigate(InstallModeSelectScreenDestination)
+            }) {
                 Icon(
                     imageVector = Icons.Filled.InstallMobile,
                     contentDescription = stringResource(id = R.string.mode_select_page_title)
@@ -335,7 +333,7 @@ private fun TopBar(
 
                     ListPopup(
                         show = showDropdownMoreOptions,
-                        alignment = PopupPositionProvider.Align.Left,
+                        alignment = PopupPositionProvider.Align.Right,
                         onDismissRequest = { showDropdownMoreOptions.value = false }
                     ) {
                         ListPopupColumn {

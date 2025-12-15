@@ -30,7 +30,6 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Back
@@ -47,7 +46,8 @@ fun InstallModeSelectScreen(navigator: DestinationsNavigator) {
             TopBar(
                 onBack = dropUnlessResumed { navigator.popBackStack() },
             )
-    }) { paddingValues ->
+        }, popupHost = {}
+    ) { paddingValues ->
         Column(
             modifier = Modifier.padding(paddingValues)
         ) {

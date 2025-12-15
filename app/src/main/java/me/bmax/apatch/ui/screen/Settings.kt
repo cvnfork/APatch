@@ -108,29 +108,7 @@ fun SettingScreen() {
     val showLogBottomSheet = remember { mutableStateOf(false) }
     val showClearKeyDialog = rememberSaveable { mutableStateOf(false) }
 
-    val loadingDialog = rememberLoadingDialog()
-
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val logSavedMessage = stringResource(R.string.log_saved)
-    val exportBugreportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/gzip")
-    ) { uri: Uri? ->
-        if (uri != null) {
-            scope.launch(Dispatchers.IO) {
-                loadingDialog.show()
-                uri.outputStream().use { output ->
-                    getBugreportFile(context).inputStream().use {
-                        it.copyTo(output)
-                    }
-                }
-                loadingDialog.hide()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, logSavedMessage, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -138,19 +116,13 @@ fun SettingScreen() {
                 title = stringResource(R.string.settings),
                 scrollBehavior = scrollBehavior
             )
-        },
-        popupHost = {
-            ResetSUPathDialog(showResetSuPathDialog)
-            LogBottomSheet(
-                showLogBottomSheet,
-                scope,
-                exportBugreportLauncher,
-                loadingDialog,
-                context
-            )
-        }
+        }, popupHost = {}
     )
     { paddingValues ->
+
+        ResetSUPathDialog(showResetSuPathDialog)
+        LogBottomSheet(showLogBottomSheet)
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -408,16 +380,35 @@ fun SettingScreen() {
 }
 
 @Composable
-fun LogBottomSheet(
-    showLogBottomSheet: MutableState<Boolean>,
-    scope: CoroutineScope,
-    exportBugreportLauncher: ActivityResultLauncher<String>,
-    loadingDialog: LoadingDialogHandle,
-    context: Context
-) {
+fun LogBottomSheet(showLogBottomSheet: MutableState<Boolean>) {
+    val scope = rememberCoroutineScope()
+    val loadingDialog = rememberLoadingDialog()
+    val context = LocalContext.current
+    val logSavedMessage = stringResource(R.string.log_saved)
+
+    val exportBugreportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/gzip")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch(Dispatchers.IO) {
+                loadingDialog.show()
+                uri.outputStream().use { output ->
+                    getBugreportFile(context).inputStream().use {
+                        it.copyTo(output)
+                    }
+                }
+                loadingDialog.hide()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, logSavedMessage, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+
     SuperBottomSheet(
         show = showLogBottomSheet,
-        title = "Save Log", // tmp hard code strings
+        title = logSavedMessage,
         onDismissRequest = { showLogBottomSheet.value = false }
     ) {
         SuperArrow(
@@ -457,7 +448,7 @@ fun LogBottomSheet(
                     context.startActivity(
                         Intent.createChooser(
                             shareIntent,
-                            context.getString(R.string.send_log)
+                            logSavedMessage
                         )
                     )
                     showLogBottomSheet.value = false
