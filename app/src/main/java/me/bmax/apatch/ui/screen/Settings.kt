@@ -1,11 +1,9 @@
 package me.bmax.apatch.ui.screen
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,7 +36,6 @@ import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,7 +43,6 @@ import me.bmax.apatch.APApplication
 import me.bmax.apatch.BuildConfig
 import me.bmax.apatch.Natives
 import me.bmax.apatch.R
-import me.bmax.apatch.ui.component.LoadingDialogHandle
 import me.bmax.apatch.ui.component.rememberLoadingDialog
 import me.bmax.apatch.util.APatchKeyHelper
 import me.bmax.apatch.util.getBugreportFile
@@ -199,11 +196,7 @@ fun SettingScreen() {
                             checked = isGlobalNamespaceEnabled,
                             onCheckedChange = {
                                 setGlobalNamespaceEnabled(
-                                    if (isGlobalNamespaceEnabled) {
-                                        "0"
-                                    } else {
-                                        "1"
-                                    }
+                                    if (isGlobalNamespaceEnabled) "0" else "1"
                                 )
                                 isGlobalNamespaceEnabled = it
                             })
@@ -344,7 +337,7 @@ fun SettingScreen() {
                         if (index >= 0) index else 0
                     }
 
-                    var selectedIndex by remember { mutableStateOf(initialIndex) }
+                    var selectedIndex by remember { mutableIntStateOf(initialIndex) }
 
                     SuperDropdown(
                         title = stringResource(R.string.settings_app_language),

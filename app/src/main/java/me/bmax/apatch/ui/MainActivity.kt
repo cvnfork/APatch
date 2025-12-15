@@ -1,6 +1,5 @@
 package me.bmax.apatch.ui
 
-import android.annotation.SuppressLint
 import android.os.Build
 import android.net.Uri
 import android.os.Bundle
@@ -20,16 +19,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -46,18 +40,11 @@ import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationSty
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.rememberNavHostEngine
 import com.ramcosta.composedestinations.utils.rememberDestinationsNavigator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.bmax.apatch.APApplication
-import me.bmax.apatch.R
-import me.bmax.apatch.ui.component.rememberConfirmCallback
-import me.bmax.apatch.ui.component.rememberConfirmDialog
-import me.bmax.apatch.ui.component.rememberLoadingDialog
+import me.bmax.apatch.ui.component.ModuleInstallHandler
 import me.bmax.apatch.ui.screen.BottomBarDestination
-import me.bmax.apatch.ui.screen.MODULE_TYPE
 import me.bmax.apatch.ui.theme.APatchTheme
 import me.bmax.apatch.ui.viewmodel.APModuleViewModel
-import me.bmax.apatch.util.ModuleParser
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
 import top.yukonga.miuix.kmp.basic.NavigationBar
@@ -68,7 +55,6 @@ class MainActivity : AppCompatActivity() {
 
     private var isLoading = true
 
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         installSplashScreen().setKeepOnScreenCondition { isLoading }
@@ -101,39 +87,9 @@ class MainActivity : AppCompatActivity() {
                     BottomBarDestination.entries.map { it.direction.route }.toSet()
                 }
 
-                val loadingDialog = rememberLoadingDialog()
                 val viewModel = viewModel<APModuleViewModel>()
-                val context = LocalContext.current
-                val currentUri by rememberUpdatedState(uri)
 
-                val confirmDialog = rememberConfirmDialog(
-                    callback = rememberConfirmCallback(
-                        onConfirm = {
-                            currentUri?.let { uri ->
-                                navigator.navigate(InstallScreenDestination(uri, MODULE_TYPE.APM))
-                            }
-                        }, onDismiss = { }
-                    )
-                )
-
-                var moduleInstallDesc by remember { mutableStateOf("") }
-
-                LaunchedEffect(currentUri) {
-                    currentUri?.let { uri ->
-                        viewModel.fetchModuleList()
-                        val desc = loadingDialog.withLoading {
-                            withContext(Dispatchers.IO) {
-                                ModuleParser.getModuleInstallDesc(context, uri, viewModel.moduleList)
-                            }
-                        }
-                        moduleInstallDesc = desc
-
-                        confirmDialog.showConfirm(
-                            title = context.getString(R.string.apm),
-                            content = moduleInstallDesc
-                        )
-                    }
-                }
+                ModuleInstallHandler(uri, viewModel, navigator)    // uri install
 
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = currentBackStackEntry?.destination?.route

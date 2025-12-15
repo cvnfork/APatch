@@ -85,7 +85,6 @@ import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Destination<RootGraph>
@@ -516,7 +515,7 @@ private fun ModuleItem(
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
                     thickness = 0.5.dp,
-                    color = colorScheme.outline.copy(alpha = 0.5f)
+                    color = MiuixTheme.colorScheme.outline.copy(alpha = 0.5f)
                 )
 
                 Row(
