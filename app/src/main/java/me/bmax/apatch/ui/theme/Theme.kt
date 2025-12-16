@@ -1,7 +1,9 @@
 package me.bmax.apatch.ui.theme
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -35,6 +37,7 @@ fun APatchTheme(
 
         else -> ThemeController(ColorSchemeMode.System)
     }
+    Log.d("MIUIX_DEBUG", "Mode:"+colorMode)
     return MiuixTheme(
         controller = controller,
         content = {
@@ -42,4 +45,14 @@ fun APatchTheme(
             content()
         }
     )
+}
+
+@Composable
+@ReadOnlyComposable
+fun isInDarkTheme(themeMode: Int): Boolean {
+    return when (themeMode) {
+        1, 4 -> false  // Force light mode
+        2, 5 -> true   // Force dark mode
+        else -> isSystemInDarkTheme()  // Follow system (0 or default)
+    }
 }

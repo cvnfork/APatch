@@ -227,6 +227,14 @@
     <string name="kpm_control_ok">Operation succeeded!</string>
     <string name="kpm_control_failed">Operation failed!</string>
 
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_mode_system">Follow system</string>
+    <string name="settings_theme_mode_light">Light</string>
+    <string name="settings_theme_mode_dark">Dark</string>
+    <string name="settings_theme_mode_monet_system">Monet (Follow system)</string>
+    <string name="settings_theme_mode_monet_light">Monet (Light)</string>
+    <string name="settings_theme_mode_monet_dark">Monet (Dark)</string>
+
     <string name="settings_night_mode_follow_sys">Follow system\'s dark theme</string>
     <string name="settings_night_mode_follow_sys_summary">Automatically switch to dark theme based on system settings</string>
 

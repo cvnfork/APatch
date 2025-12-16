@@ -627,7 +627,7 @@ private fun AStatusCard(apState: APApplication.State) {
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
                         Button(
-                            colors = ButtonDefaults.buttonColorsPrimary(),
+                            colors = ButtonDefaults.buttonColors(),
                             onClick = {
                                 when (apState) {
                                     APApplication.State.ANDROIDPATCH_NOT_INSTALLED, APApplication.State.ANDROIDPATCH_NEED_UPDATE -> {

@@ -194,6 +194,13 @@
     <string name="kpm_control_outMsg">输出信息</string>
     <string name="kpm_control_ok">操作成功！</string>
     <string name="kpm_control_failed">操作失败！</string>
+    <string name="settings_theme">主题</string>
+    <string name="settings_theme_mode_system">跟随系统</string>
+    <string name="settings_theme_mode_light">浅色</string>
+    <string name="settings_theme_mode_dark">深色</string>
+    <string name="settings_theme_mode_monet_system">Monet（跟随系统）</string>
+    <string name="settings_theme_mode_monet_light">Monet（浅色）</string>
+    <string name="settings_theme_mode_monet_dark">Monet（深色）</string>
     <string name="settings_night_mode_follow_sys">深色模式跟随系统</string>
     <string name="settings_night_mode_follow_sys_summary">根据系统的深色模式自动切换</string>
     <string name="settings_night_theme_enabled">深色主题</string>

@@ -1,9 +1,11 @@
 package me.bmax.apatch.ui
 
+import android.content.SharedPreferences
 import android.os.Build
 import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -19,9 +21,12 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -78,8 +83,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         setContent {
-            APatchTheme {
+            val context = LocalActivity.current ?: this
+            val prefs = context.getSharedPreferences("config", MODE_PRIVATE)
+            var colorMode by remember { mutableIntStateOf(prefs.getInt("color_mode", 0)) }
+
+            DisposableEffect(prefs) {
+                val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                    if (key == "color_mode") {
+                        colorMode = prefs.getInt("color_mode", 0)
+                    }
+                }
+                prefs.registerOnSharedPreferenceChangeListener(listener)
+                onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+            }
+
+            APatchTheme(colorMode = colorMode) {
                 val navController = rememberNavController()
                 val navigator = navController.rememberDestinationsNavigator()
 
