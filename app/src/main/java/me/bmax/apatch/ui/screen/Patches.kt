@@ -43,10 +43,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -219,9 +221,8 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                     Text(
                         modifier = Modifier.padding(8.dp),
                         text = viewModel.patchLog,
-//                        fontSize = MiuixTheme.typography.bodySmall.fontSize,
-//                        fontFamily = MiuixTheme.typography.bodySmall.fontFamily,
-//                        lineHeight = MiuixTheme.typography.bodySmall.lineHeight,
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
                 LaunchedEffect(viewModel.patchLog) {
