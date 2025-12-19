@@ -170,7 +170,8 @@ fun APModuleScreen(navigator: DestinationsNavigator) {
                     )
                 }
             }
-        }, ){ innerPadding ->
+        }, popupHost = {}
+        ) { innerPadding ->
         when {
             hasMagisk -> {
                 Box(
@@ -239,6 +240,7 @@ private fun ModuleList(
     val changelogText = stringResource(R.string.apm_changelog)
     val downloadingText = stringResource(R.string.apm_downloading)
     val startDownloadingText = stringResource(R.string.apm_start_downloading)
+    val changelogFailed = stringResource(R.string.apm_changelog_failed)
 
     val loadingDialog = rememberLoadingDialog()
     val confirmDialog = rememberConfirmDialog()
@@ -252,30 +254,32 @@ private fun ModuleList(
         fileName: String
     ) {
         val changelog = loadingDialog.withLoading {
-            withContext(Dispatchers.IO) {
-                if (Patterns.WEB_URL.matcher(changelogUrl).matches()) {
-                    apApp.okhttpClient.newCall(
-                        okhttp3.Request.Builder().url(changelogUrl).build()
-                    ).execute().body!!.string()
-                } else {
-                    changelogUrl
+                withContext(Dispatchers.IO) {
+                    runCatching {
+                        if (Patterns.WEB_URL.matcher(changelogUrl).matches()) {
+                            apApp.okhttpClient
+                                .newCall(
+                                    okhttp3.Request.Builder().url(changelogUrl).build()
+                                )
+                                .execute()
+                                .use { it.body?.string().orEmpty() }
+                        } else {
+                            changelogUrl
+                        }
+                    }.getOrDefault("")
                 }
-            }
         }
 
 
-        if (changelog.isNotEmpty()) {
-            // changelog is not empty, show it and wait for confirm
-            val confirmResult = confirmDialog.awaitConfirm(
-                changelogText,
-                content = changelog,
-                markdown = true,
-                confirm = updateText,
-            )
+        val confirmResult = confirmDialog.awaitConfirm(
+            changelogText,
+            content = changelog.ifEmpty { changelogFailed },
+            markdown = true,
+            confirm = updateText,
+        )
 
-            if (confirmResult != ConfirmResult.Confirmed) {
-                return
-            }
+        if (confirmResult != ConfirmResult.Confirmed){
+            return
         }
 
         withContext(Dispatchers.Main) {
