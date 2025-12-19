@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
@@ -28,11 +31,12 @@ import me.bmax.apatch.R
 import me.bmax.apatch.ui.theme.APatchTheme
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Save
+import top.yukonga.miuix.kmp.icon.icons.useful.Copy
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -88,11 +92,14 @@ private fun CrashHandleScreen(
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
 
+    val scrollBehavior = MiuixScrollBehavior()
+
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
-            SmallTopAppBar(
-                title = stringResource(R.string.crash_handle_title)
+            TopAppBar(
+                title = stringResource(R.string.crash_handle_title),
+                scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
@@ -106,13 +113,15 @@ private fun CrashHandleScreen(
                     }
                 }
             ) {
-                Icon(imageVector = MiuixIcons.Useful.Save, contentDescription = "save")
+                Icon(imageVector = MiuixIcons.Useful.Copy, contentDescription = "copy")
             }
         }
     ) { paddingValues ->
         SelectionContainer(
             modifier = Modifier
                 .fillMaxSize()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
         ) {
