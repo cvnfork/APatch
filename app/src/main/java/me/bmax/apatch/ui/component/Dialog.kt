@@ -465,7 +465,7 @@ private fun ConfirmDialog(
         content = {
             Layout(
                 content = {
-                    visuals.content?.let { content ->
+                    visuals.content.let { content ->
                         if (visuals.isMarkdown) {
                             MarkdownContent(content = visuals.content)
                         } else {
