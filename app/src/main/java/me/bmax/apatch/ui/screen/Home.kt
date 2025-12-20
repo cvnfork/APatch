@@ -139,7 +139,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                     if (kpState != APApplication.State.UNKNOWN_STATE && apState != APApplication.State.ANDROIDPATCH_INSTALLED) {
                         AStatusCard(apState)
                     }
-                    UnofficialVersionCard()
                     val checkUpdate =
                         APApplication.sharedPreferences.getBoolean("check_update", true)
                     if (checkUpdate) {
@@ -717,42 +716,6 @@ fun BackupWarningCard() {
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun UnofficialVersionCard() {
-    Card {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Warning,
-                contentDescription = null,
-                tint = MiuixTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-
-            Spacer(Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = (stringResource(R.string.unofficial_warning_title)),
-                    style = MiuixTheme.textStyles.body1,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = (stringResource(R.string.unofficial_warning_summary)),
-                    style = MiuixTheme.textStyles.body2
-                )
             }
         }
     }
