@@ -8,7 +8,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,21 +16,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,9 +71,13 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+
 
 private const val TAG = "Patches"
 
@@ -104,7 +109,8 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                 },
             )
         }
-    }) { innerPadding ->
+    }, popupHost = {}
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -269,7 +275,78 @@ private fun StartButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
+private fun ExtraConfigDialog(
+    kpmInfo: KPModel.KPMInfo,
+    show: MutableState<Boolean>
+) {
+    var event by remember { mutableStateOf(kpmInfo.event) }
+    var args by remember { mutableStateOf(kpmInfo.args) }
+
+    SuperDialog(
+        title = stringResource(R.string.kpm_control_dialog_title),
+        show = show,
+        onDismissRequest = { show.value = false },
+    ) {
+        TextField(
+            value = event,
+            label = stringResource(R.string.patch_item_extra_event),
+            onValueChange = {
+                event = it
+            },
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
+            value = args,
+            label = stringResource(id = R.string.patch_item_extra_args),
+            onValueChange = {
+                args = it
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                text = stringResource(android.R.string.cancel),
+                onClick = {
+                    show.value = false
+                },
+                modifier = Modifier.weight(1f),
+            )
+
+            Spacer(Modifier.width(20.dp))
+
+            TextButton(
+                text = stringResource(android.R.string.ok),
+                onClick = {
+                    kpmInfo.event = event
+                    kpmInfo.args = args
+                    show.value = false
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary()
+            )
+        }
+    }
+}
+
+@Composable
 private fun ExtraItem(extra: KPModel.IExtraInfo, existed: Boolean, onDelete: () -> Unit) {
+    val showConfigDialog =  remember { mutableStateOf(false) }
+
+    if (extra is KPModel.KPMInfo && showConfigDialog.value) {
+        ExtraConfigDialog(
+            kpmInfo = extra,
+            show = showConfigDialog
+        )
+    }
+
     Card {
         Column(
             modifier = Modifier
@@ -288,6 +365,15 @@ private fun ExtraItem(extra: KPModel.IExtraInfo, existed: Boolean, onDelete: () 
                         .weight(1f)
                         .wrapContentWidth(Alignment.CenterHorizontally)
                 )
+                if (extra.type == KPModel.ExtraType.KPM) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Config",
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clickable { showConfigDialog.value = true }
+                    )
+                }
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
@@ -317,46 +403,6 @@ private fun ExtraItem(extra: KPModel.IExtraInfo, existed: Boolean, onDelete: () 
                     text = "${stringResource(id = R.string.patch_item_extra_kpm_desciption) + " "} ${kpmInfo.description}",
                     style = MiuixTheme.textStyles.body2
                 )
-                var event by remember { mutableStateOf(kpmInfo.event) }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.patch_item_extra_event) + " ",
-                        style = MiuixTheme.textStyles.body2
-                    )
-                    BasicTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = event,
-                        textStyle = MiuixTheme.textStyles.body2,
-                        onValueChange = {
-                            event = it
-                            kpmInfo.event = it
-                        },
-                    )
-                }
-                var args by remember { mutableStateOf(kpmInfo.args) }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.patch_item_extra_args) + " ",
-                        style = MiuixTheme.textStyles.body2
-                    )
-                    BasicTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = args,
-                        textStyle = MiuixTheme.textStyles.body2,
-                        onValueChange = {
-                            args = it
-                            kpmInfo.args = it
-                        },
-                    )
-                }
             }
         }
     }
@@ -393,7 +439,6 @@ private fun SetSuperKeyView(viewModel: PatchesViewModel) {
                 )
             }
             Column {
-                //Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     contentAlignment = Alignment.CenterEnd,
                 ) {
