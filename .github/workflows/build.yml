@@ -93,6 +93,12 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
           zipAlign: true
 
+      - name: Upload mappings
+        uses: actions/upload-artifact@v5
+        with:
+          name: "mappings"
+          path: "app/build/outputs/mapping/release/"
+
       - name: Upload build artifact
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
