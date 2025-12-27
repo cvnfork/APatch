@@ -176,7 +176,8 @@ fun KPModuleScreen(navigator: DestinationsNavigator) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.package_import),
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = MiuixTheme.colorScheme.onPrimary
                     )
                 }
 

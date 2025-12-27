@@ -104,7 +104,8 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                 content = {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
-                        contentDescription = reboot
+                        contentDescription = reboot,
+                        tint = MiuixTheme.colorScheme.onPrimary
                     )
                 },
             )

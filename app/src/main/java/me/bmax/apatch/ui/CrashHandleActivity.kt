@@ -37,6 +37,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Copy
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -113,7 +114,11 @@ private fun CrashHandleScreen(
                     }
                 }
             ) {
-                Icon(imageVector = MiuixIcons.Useful.Copy, contentDescription = "copy")
+                Icon(
+                    imageVector = MiuixIcons.Useful.Copy,
+                    contentDescription = "copy",
+                    tint = MiuixTheme.colorScheme.onPrimary
+                )
             }
         }
     ) { paddingValues ->

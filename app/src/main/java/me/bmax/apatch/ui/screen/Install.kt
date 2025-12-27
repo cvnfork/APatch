@@ -126,7 +126,11 @@ fun InstallScreen(uri: Uri, type: MODULE_TYPE) {
                         }
                     },
                 ) {
-                    Icon(Icons.Filled.Refresh, reboot)
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = reboot,
+                        tint = MiuixTheme.colorScheme.onPrimary
+                    )
                 }
             }
 
