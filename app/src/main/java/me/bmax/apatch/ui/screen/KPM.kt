@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -117,6 +118,7 @@ fun KPModuleScreen(navigator: DestinationsNavigator) {
     }
 
     val viewModel = viewModel<KPModuleViewModel>()
+    val controlDialogState = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (viewModel.moduleList.isEmpty() || viewModel.isNeedRefresh) {
@@ -126,117 +128,127 @@ fun KPModuleScreen(navigator: DestinationsNavigator) {
 
     val kpModuleListState = rememberLazyListState()
 
-    Scaffold(
-        topBar = { TopBar() },
-        popupHost = { },
-        floatingActionButton = {
-            val scope = rememberCoroutineScope()
-            val context = LocalContext.current
+    Box {
+        Scaffold(
+            topBar = { TopBar() },
+            popupHost = { },
+            floatingActionButton = {
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current
 
-            val moduleLoad = stringResource(id = R.string.kpm_load)
-            val moduleInstall = stringResource(id = R.string.kpm_install)
-            val moduleEmbed = stringResource(id = R.string.kpm_embed)
-            val successToastText = stringResource(id = R.string.kpm_load_toast_succ)
-            val failToastText = stringResource(id = R.string.kpm_load_toast_failed)
-            val loadingDialog = rememberLoadingDialog()
+                val moduleLoad = stringResource(id = R.string.kpm_load)
+                val moduleInstall = stringResource(id = R.string.kpm_install)
+                val moduleEmbed = stringResource(id = R.string.kpm_embed)
+                val successToastText = stringResource(id = R.string.kpm_load_toast_succ)
+                val failToastText = stringResource(id = R.string.kpm_load_toast_failed)
+                val loadingDialog = rememberLoadingDialog()
 
-            val selectZipLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.StartActivityForResult()
-            ) {
-                if (it.resultCode != RESULT_OK) return@rememberLauncherForActivityResult
-                val data = it.data ?: return@rememberLauncherForActivityResult
-                val uri = data.data ?: return@rememberLauncherForActivityResult
-                Log.i(TAG, "select zip result: $uri")
-                navigator.navigate(InstallScreenDestination(uri, MODULE_TYPE.KPM))
-            }
+                val selectZipLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+                ) {
+                    if (it.resultCode != RESULT_OK) return@rememberLauncherForActivityResult
+                    val data = it.data ?: return@rememberLauncherForActivityResult
+                    val uri = data.data ?: return@rememberLauncherForActivityResult
+                    Log.i(TAG, "select zip result: $uri")
+                    navigator.navigate(InstallScreenDestination(uri, MODULE_TYPE.KPM))
+                }
 
-            val selectKpmLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.StartActivityForResult()
-            ) {
-                if (it.resultCode != RESULT_OK) return@rememberLauncherForActivityResult
-                val data = it.data ?: return@rememberLauncherForActivityResult
-                val uri = data.data ?: return@rememberLauncherForActivityResult
+                val selectKpmLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+                ) {
+                    if (it.resultCode != RESULT_OK) return@rememberLauncherForActivityResult
+                    val data = it.data ?: return@rememberLauncherForActivityResult
+                    val uri = data.data ?: return@rememberLauncherForActivityResult
 
-                scope.launch {
-                    val rc = loadModule(loadingDialog, uri, "") == 0
-                    val toastText = if (rc) successToastText else failToastText
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show()
+                    scope.launch {
+                        val rc = loadModule(loadingDialog, uri, "") == 0
+                        val toastText = if (rc) successToastText else failToastText
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show()
+                        }
+                        viewModel.markNeedRefresh()
+                        viewModel.fetchModuleList()
                     }
-                    viewModel.markNeedRefresh()
-                    viewModel.fetchModuleList()
-                }
-            }
-
-            val expanded = remember { mutableStateOf(false) }
-            val options = listOf(moduleEmbed, moduleInstall, moduleLoad)
-
-            Column {
-                FloatingActionButton(
-                    onClick = { expanded.value = !expanded.value },
-                    containerColor = MiuixTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 30.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Archive,
-                        contentDescription = null,
-                        tint = MiuixTheme.colorScheme.onPrimary
-                    )
                 }
 
-                ListPopup(
-                    show = expanded,
-                    alignment = PopupPositionProvider.Align.Left,
-                    onDismissRequest = { expanded.value = false }
-                ) {
+                val expanded = remember { mutableStateOf(false) }
+                val options = listOf(moduleEmbed, moduleInstall, moduleLoad)
 
-                    ListPopupColumn {
-                        options.forEachIndexed { index, label ->
-                            DropdownItem(
-                                text = label,
-                                optionSize = options.size,
-                                index = index,
-                                onSelectedIndexChange = {
-                                    when (label) {
-                                        moduleEmbed -> navigator.navigate(
-                                            PatchesDestination(PatchesViewModel.PatchMode.PATCH_AND_INSTALL)
-                                        )
+                Column {
+                    FloatingActionButton(
+                        onClick = { expanded.value = !expanded.value },
+                        containerColor = MiuixTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 30.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Archive,
+                            contentDescription = null,
+                            tint = MiuixTheme.colorScheme.onPrimary
+                        )
+                    }
 
-                                        moduleInstall -> {
+                    ListPopup(
+                        show = expanded,
+                        alignment = PopupPositionProvider.Align.Right,
+                        onDismissRequest = { expanded.value = false }
+                    ) {
+
+                        ListPopupColumn {
+                            options.forEachIndexed { index, label ->
+                                DropdownItem(
+                                    text = label,
+                                    optionSize = options.size,
+                                    index = index,
+                                    onSelectedIndexChange = {
+                                        when (label) {
+                                            moduleEmbed -> navigator.navigate(
+                                                PatchesDestination(PatchesViewModel.PatchMode.PATCH_AND_INSTALL)
+                                            )
+
+                                            moduleInstall -> {
 //                                            val intent = Intent(Intent.ACTION_GET_CONTENT)
 //                                            intent.type = "application/zip"
 //                                            selectZipLauncher.launch(intent)
-                                            Toast.makeText(
-                                                context,
-                                                "Under development",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                                                Toast.makeText(
+                                                    context,
+                                                    "Under development",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
 
-                                        moduleLoad -> {
-                                            val intent = Intent(Intent.ACTION_GET_CONTENT)
-                                            intent.type = "*/*"
-                                            selectKpmLauncher.launch(intent)
+                                            moduleLoad -> {
+                                                val intent = Intent(Intent.ACTION_GET_CONTENT)
+                                                intent.type = "*/*"
+                                                selectKpmLauncher.launch(intent)
+                                            }
                                         }
-                                    }
-                                    expanded.value = false
-                                },
-                            )
+                                        expanded.value = false
+                                    },
+                                )
+                            }
                         }
                     }
                 }
             }
+        ) { innerPadding ->
+            KPModuleList(
+                viewModel = viewModel,
+                state = kpModuleListState,
+                scaffoldPadding = PaddingValues(
+                    start = 16.dp,
+                    top = innerPadding.calculateTopPadding() + 16.dp,
+                    end = 16.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 16.dp
+                ),
+                onShowControlDialog = { controlDialogState.value = true }
+            )
         }
-    ) { innerPadding ->
-        KPModuleList(
-            viewModel = viewModel,
-            state = kpModuleListState,
-            scaffoldPadding = PaddingValues(
-                start = 16.dp,
-                top = innerPadding.calculateTopPadding() + 16.dp,
-                end = 16.dp,
-                bottom = innerPadding.calculateBottomPadding() + 16.dp)
-        )
+        if (controlDialogState.value) {
+            KPMControlDialog(
+                controlDialog = controlDialogState,
+                viewModel = viewModel
+            )
+        }
     }
 }
 
@@ -268,7 +280,10 @@ suspend fun loadModule(loadingDialog: LoadingDialogHandle, uri: Uri, args: Strin
 }
 
 @Composable
-fun KPMControlDialog(ControlDialog: MutableState<Boolean>) {
+fun KPMControlDialog(
+    controlDialog: MutableState<Boolean>,
+    viewModel: KPModuleViewModel
+) {
     var controlParam by remember { mutableStateOf("") }
     var enable by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -305,8 +320,8 @@ fun KPMControlDialog(ControlDialog: MutableState<Boolean>) {
     SuperDialog(
         title = stringResource(R.string.kpm_control_dialog_title),
         summary = stringResource(R.string.kpm_control_dialog_content),
-        show = ControlDialog,
-        onDismissRequest = { ControlDialog.value = false }
+        show = controlDialog,
+        onDismissRequest = { controlDialog.value = false }
     ) {
         TextField(
             value = controlParam,
@@ -326,7 +341,7 @@ fun KPMControlDialog(ControlDialog: MutableState<Boolean>) {
             TextButton(
                 text = stringResource(android.R.string.cancel),
                 onClick = {
-                    ControlDialog.value = false
+                    controlDialog.value = false
                 },
                 modifier = Modifier.weight(1f),
             )
@@ -336,7 +351,7 @@ fun KPMControlDialog(ControlDialog: MutableState<Boolean>) {
             TextButton(
                 text = stringResource(android.R.string.ok),
                 onClick = {
-                    ControlDialog.value = false
+                    controlDialog.value = false
                     scope.launch { onModuleControl(targetKPMToControl) }
                 },
                 modifier = Modifier.weight(1f),
@@ -352,6 +367,7 @@ private fun KPModuleList(
     viewModel: KPModuleViewModel,
     state: LazyListState,
     scaffoldPadding: PaddingValues = PaddingValues(),
+    onShowControlDialog: () -> Unit = {}
 ) {
     val moduleStr = stringResource(id = R.string.kpm)
     val moduleUninstallConfirm = stringResource(id = R.string.kpm_unload_confirm)
@@ -360,7 +376,6 @@ private fun KPModuleList(
 
     val confirmDialog = rememberConfirmDialog()
     val loadingDialog = rememberLoadingDialog()
-    val ControlDialog = remember { mutableStateOf(false) }
 
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -421,7 +436,7 @@ private fun KPModuleList(
                                 },
                                 onControl = {
                                     targetKPMToControl = module
-                                    ControlDialog.value = true
+                                    onShowControlDialog()
                                 },
                             )
 
@@ -432,9 +447,6 @@ private fun KPModuleList(
                 }
             }
         }
-    }
-    if (ControlDialog.value) {
-        KPMControlDialog(ControlDialog = ControlDialog)
     }
 }
 
@@ -514,7 +526,8 @@ private fun KPModuleItem(
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
                 ) {
                     IconTextButton(
                         iconRes = Icons.Default.Settings,

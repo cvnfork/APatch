@@ -373,12 +373,16 @@ private fun KStatusCard(
     AuthSuperKey(showAuthKeyDialog, showAuthFailedTipDialog)
 
     Card(
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.primaryContainer
+        ),
         onClick = {
             if (kpState != APApplication.State.KERNELPATCH_INSTALLED) {
                 navigator.navigate(InstallModeSelectScreenDestination)
             }
         },
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -464,7 +468,9 @@ private fun KStatusCard(
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    Button(onClick = {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(Color.Transparent),
+                        onClick = {
                         when (kpState) {
                             APApplication.State.UNKNOWN_STATE -> {
                                 showAuthKeyDialog.value = true
