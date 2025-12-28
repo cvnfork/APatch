@@ -25,6 +25,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.InstallMobile
+import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,7 +45,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -165,7 +170,7 @@ fun APModuleScreen(navigator: DestinationsNavigator) {
                         selectZipLauncher.launch(intent)
                     }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.package_import),
+                        imageVector = Icons.Default.Archive,
                         contentDescription = null,
                         tint = MiuixTheme.colorScheme.onPrimary
                     )
@@ -529,19 +534,9 @@ private fun ModuleItem(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    if (module.hasWebUi) {
-                        IconTextButton(
-                            iconRes = R.drawable.webui,
-                            onClick = { onClick(module) }
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                    }
-
-
                     if (module.hasActionScript) {
                         IconTextButton(
-                            iconRes = R.drawable.settings,
+                            iconRes = Icons.Default.PlayArrow,
                             onClick = {
                                 navigator.navigate(ExecuteAPMActionScreenDestination(module.id))
                                 viewModel.markNeedRefresh()
@@ -550,11 +545,19 @@ private fun ModuleItem(
                         Spacer(modifier = Modifier.width(12.dp))
                     }
 
+                    if (module.hasWebUi) {
+                        IconTextButton(
+                            iconRes = Icons.Default.OpenInBrowser,
+                            onClick = { onClick(module) }
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                    }
+
                     Spacer(modifier = Modifier.weight(1f))
 
                     if (updateUrl.isNotEmpty()) {
                         IconTextButton(
-                            iconRes = R.drawable.device_mobile_down,
+                            iconRes = Icons.Default.InstallMobile,
                             onClick = { onUpdate(module) }
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -562,14 +565,14 @@ private fun ModuleItem(
 
                     if (!module.remove) {
                         IconTextButton(
-                            iconRes = R.drawable.trash,
+                            iconRes = Icons.Default.Delete,
                             onClick = { onUninstall(module) }
                         )
                     }
                 }
             }
             if (module.update) {
-                ModuleStateIndicator(R.drawable.device_mobile_down)
+                ModuleStateIndicator(Icons.Default.InstallMobile)
             }
         }
     }
