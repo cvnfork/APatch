@@ -90,6 +90,7 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
     val scope = rememberCoroutineScope()
     val viewModel = viewModel<PatchesViewModel>()
 
+
     val context = LocalContext.current
     val activity = context as Activity
     val originalMode = remember { activity.window.attributes.softInputMode }
@@ -106,7 +107,6 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
             activity.window.setSoftInputMode(originalMode)
         }
     }
-
 
     Scaffold(topBar = {
         TopBar()
@@ -168,6 +168,17 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                 }
             }
 
+            // select boot.img
+            if (mode == PatchesViewModel.PatchMode.PATCH_ONLY && viewModel.kimgInfo.banner.isEmpty()) {
+                SelectFileButton(
+                    text = stringResource(id = R.string.patch_select_bootimg_btn),
+                    onSelected = { data, uri ->
+                        Log.d(TAG, "select boot.img, data: $data, uri: $uri")
+                        viewModel.copyAndParseBootimg(uri)
+                    }
+                )
+            }
+
             if (viewModel.bootSlot.isNotEmpty() || viewModel.bootDev.isNotEmpty()) {
                 BootimgView(slot = viewModel.bootSlot, boot = viewModel.bootDev)
             }
@@ -189,22 +200,6 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                 })
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-
-            // select boot.img
-            if (mode == PatchesViewModel.PatchMode.PATCH_ONLY && viewModel.kimgInfo.banner.isEmpty()) {
-                SelectFileButton(
-                    text = stringResource(id = R.string.patch_select_bootimg_btn),
-                    onSelected = { data, uri ->
-                        Log.d(TAG, "select boot.img, data: $data, uri: $uri")
-                        viewModel.copyAndParseBootimg(uri)
-                    }
-                )
-            }
-
             // add new extras
             if (mode != PatchesViewModel.PatchMode.UNPATCH) {
                 viewModel.newExtras.forEach(action = {
@@ -215,8 +210,6 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                     })
                 })
             }
-
-            Spacer(Modifier.width(20.dp))
 
             // add new KPM
             if (viewModel.superkey.isNotEmpty() && !viewModel.patching && !viewModel.patchdone && mode != PatchesViewModel.PatchMode.UNPATCH) {
@@ -229,14 +222,14 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                 )
             }
 
-            Spacer(Modifier.width(20.dp))
-
             // do patch, update, unpatch
             if (!viewModel.patching && !viewModel.patchdone) {
                 // patch start
                 if (mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.superkey.isNotEmpty()) {
                     StartButton(stringResource(id = R.string.patch_start_patch_btn)) {
-                        viewModel.doPatch(mode)
+                        viewModel.doPatch(
+                            mode
+                        )
                     }
                 }
                 // unpatch
@@ -244,7 +237,6 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                     StartButton(stringResource(id = R.string.patch_start_unpatch_btn)) { viewModel.doUnpatch() }
                 }
             }
-        }
 
             // patch log
             if (viewModel.patching || viewModel.patchdone) {
@@ -285,12 +277,18 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
 
 @Composable
 private fun StartButton(text: String, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        content = {
-            Text(text = text)
-        }
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.End
+    ) {
+        Button(
+            onClick = onClick,
+            content = {
+                Text(text = text)
+            }
+        )
+    }
 }
 
 @Composable
@@ -433,7 +431,6 @@ private fun SetSuperKeyView(viewModel: PatchesViewModel) {
     var skey by remember { mutableStateOf(viewModel.superkey) }
     var showWarn by remember { mutableStateOf(!viewModel.checkSuperKeyValidation(skey)) }
     var keyVisible by remember { mutableStateOf(false) }
-
     Card {
         Column(
             modifier = Modifier
@@ -458,35 +455,42 @@ private fun SetSuperKeyView(viewModel: PatchesViewModel) {
                     style = MiuixTheme.textStyles.body2
                 )
             }
-
-            Box (Modifier.padding(top = 6.dp)) {
-                TextField(
-                    value = skey,
-                    label = stringResource(id = R.string.patch_set_superkey),
-                    visualTransformation = if (keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    onValueChange = {
-                        skey = it
-                        if (viewModel.checkSuperKeyValidation(it)) {
-                            viewModel.superkey = it
-                            showWarn = false
-                        } else {
-                            viewModel.superkey = ""
-                            showWarn = true
-                        }
-                    },
-                )
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 5.dp),
-                    onClick = { keyVisible = !keyVisible }
+            Column {
+                Box(
+                    contentAlignment = Alignment.CenterEnd,
                 ) {
-                    Icon(
-                        imageVector = if (keyVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = null,
-                        tint = Color.Gray
+                    TextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp),
+                        value = skey,
+                        label = stringResource(id = R.string.patch_set_superkey),
+                        visualTransformation = if (keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        cornerRadius = 50.dp,
+                        onValueChange = {
+                            skey = it
+                            if (viewModel.checkSuperKeyValidation(it)) {
+                                viewModel.superkey = it
+                                showWarn = false
+                            } else {
+                                viewModel.superkey = ""
+                                showWarn = true
+                            }
+                        },
                     )
+                    IconButton(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(top = 15.dp, end = 5.dp),
+                        onClick = { keyVisible = !keyVisible }
+                    ) {
+                        Icon(
+                            imageVector = if (keyVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            tint = Color.Gray
+                        )
+                    }
                 }
             }
         }
@@ -597,14 +601,21 @@ private fun SelectFileButton(text: String, onSelected: (data: Intent, uri: Uri) 
         val uri = data.data ?: return@rememberLauncherForActivityResult
         onSelected(data, uri)
     }
-    Button(
-        onClick = {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*"
-            selectFileLauncher.launch(intent)
-        },
-        content = { Text(text = text) }
-    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.End
+    ) {
+        Button(
+            onClick = {
+                val intent = Intent(Intent.ACTION_GET_CONTENT)
+                intent.type = "*/*"
+                selectFileLauncher.launch(intent)
+            },
+            content = { Text(text = text) }
+        )
+    }
 }
 
 @Composable
