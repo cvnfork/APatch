@@ -482,7 +482,12 @@ private fun ModuleItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(all = 16.dp),
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 5.dp
+                    ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -530,9 +535,12 @@ private fun ModuleItem(
 
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 6.dp
+                        )
+                        .fillMaxWidth()
                 ) {
                     if (module.hasActionScript) {
                         IconTextButton(

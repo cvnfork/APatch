@@ -510,7 +510,7 @@ private fun KPModuleItem(
                 Text(
                     modifier = Modifier
                         .alpha(alpha = alpha)
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 14.dp),
                     text = module.description,
                     style = MiuixTheme.textStyles.body2,
                     textDecoration = decoration,
