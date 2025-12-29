@@ -52,7 +52,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.basic.ListPopup
+import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
@@ -93,7 +93,7 @@ fun SuperUserScreen() {
                             contentDescription = stringResource(id = R.string.settings)
                         )
 
-                        ListPopup(
+                        SuperListPopup(
                             show = showDropdown,
                             onDismissRequest = { showDropdown.value = false }
                         ) {

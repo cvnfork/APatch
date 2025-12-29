@@ -528,7 +528,8 @@ private fun ModuleItem(
                 )
 
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .padding(vertical = 8.dp, horizontal = 16.dp),
                     thickness = 0.5.dp,
                     color = MiuixTheme.colorScheme.outline.copy(alpha = 0.5f)
                 )
@@ -538,7 +539,7 @@ private fun ModuleItem(
                         .padding(
                             start = 16.dp,
                             end = 16.dp,
-                            bottom = 6.dp
+                            bottom = 7.dp
                         )
                         .fillMaxWidth()
                 ) {
