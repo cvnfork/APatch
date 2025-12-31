@@ -297,7 +297,7 @@ private fun TopBar(
 
                     SuperListPopup(
                         show = howDropdownReboot,
-                        alignment = PopupPositionProvider.Align.Left,
+                        alignment = PopupPositionProvider.Align.BottomStart,
                         onDismissRequest = { howDropdownReboot.value = false }
                     ) {
                         ListPopupColumn {
@@ -332,7 +332,7 @@ private fun TopBar(
 
                     SuperListPopup(
                         show = showDropdownMoreOptions,
-                        alignment = PopupPositionProvider.Align.Right,
+                        alignment = PopupPositionProvider.Align.BottomEnd,
                         onDismissRequest = { showDropdownMoreOptions.value = false }
                     ) {
                         ListPopupColumn {

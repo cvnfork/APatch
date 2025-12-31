@@ -7,7 +7,7 @@ lifecycle = "2.10.0"
 compose-destination = "2.3.0"
 libsu = "6.0.0"
 sheets-compose-dialogs = "1.3.0"
-miuix = "0.7.3-287ce2a-SNAPSHOT"
+miuix = "0.8.0-rc01"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }

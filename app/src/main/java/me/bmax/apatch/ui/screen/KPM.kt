@@ -188,7 +188,7 @@ fun KPModuleScreen(navigator: DestinationsNavigator) {
 
                     SuperListPopup(
                         show = expanded,
-                        alignment = PopupPositionProvider.Align.Right,
+                        alignment = PopupPositionProvider.Align.TopEnd,
                         onDismissRequest = { expanded.value = false }
                     ) {
 
