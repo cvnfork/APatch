@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -344,28 +345,32 @@ private fun ModuleList(
         isRefreshing = viewModel.isRefreshing,
         onRefresh = { viewModel.fetchModuleList() },
     ) {
-        SearchBar(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
-            inputField = {
-                InputField(
-                    query = viewModel.search,
-                    onQueryChange = { viewModel.search = it },
-                    onSearch = {
-                        expanded = false
-                    },
-                    expanded = expanded,
-                    onExpandedChange = {
-                        expanded = it
-                        if (!it) viewModel.search = ""
-                    }
-                )
-            },
-            expanded = expanded,
-            onExpandedChange = { expanded = it },
-            content = {}
-        )
+                .padding(top = 5.dp)
+                .zIndex(10f)
+        ) {
+            SearchBar(
+                inputField = {
+                    InputField(
+                        query = viewModel.search,
+                        onQueryChange = { viewModel.search = it },
+                        onSearch = {
+                            expanded = false
+                        },
+                        expanded = expanded,
+                        onExpandedChange = {
+                            expanded = it
+                            if (!it) viewModel.search = ""
+                        }
+                    )
+                },
+                expanded = expanded,
+                onExpandedChange = { expanded = it },
+                content = {}
+            )
+        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
