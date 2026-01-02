@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
-import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -32,7 +31,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
@@ -77,11 +75,10 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-
+import top.yukonga.miuix.kmp.extra.WindowDialog
 
 private const val TAG = "Patches"
 
@@ -93,21 +90,8 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
     val scrollBehavior = MiuixScrollBehavior()
     val viewModel = viewModel<PatchesViewModel>()
 
-    val context = LocalContext.current
-    val activity = context as Activity
-    val originalMode = remember { activity.window.attributes.softInputMode }
-
-    // Get Activity from context, remember original soft input mode,
-    // set ADJUST_PAN while on this page, and restore it when leaving
     SideEffect {
         viewModel.prepare(mode)
-        activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            activity.window.setSoftInputMode(originalMode)
-        }
     }
 
     Scaffold(topBar = {
@@ -312,7 +296,7 @@ private fun ExtraConfigDialog(
     var event by remember { mutableStateOf(kpmInfo.event) }
     var args by remember { mutableStateOf(kpmInfo.args) }
 
-    SuperDialog(
+    WindowDialog(
         title = stringResource(R.string.kpm_control_dialog_title),
         show = show,
         onDismissRequest = { show.value = false },

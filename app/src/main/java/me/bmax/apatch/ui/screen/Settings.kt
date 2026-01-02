@@ -64,11 +64,11 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperBottomSheet
-import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Destination<RootGraph>
@@ -111,9 +111,8 @@ fun SettingScreen() {
                 title = stringResource(R.string.settings),
                 scrollBehavior = scrollBehavior
             )
-        }, popupHost = {}
-    )
-    { paddingValues ->
+        }
+    ) { paddingValues ->
 
         ResetSUPathDialog(showResetSuPathDialog)
         LogBottomSheet(showLogBottomSheet)
@@ -143,7 +142,7 @@ fun SettingScreen() {
                             onClick = { showClearKeyDialog.value = true }
                         )
                         if (showClearKeyDialog.value) {
-                            SuperDialog(
+                            WindowDialog(
                                 show = showClearKeyDialog,
                                 title = clearKeyDialogTitle,
                                 summary = clearKeyDialogContent
@@ -432,7 +431,7 @@ fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
         it.startsWith("/") && it.trim().length > 1
     }
 
-    SuperDialog(
+    WindowDialog(
         show = showDialog,
         title = stringResource(R.string.setting_reset_su_path),
         onDismissRequest = { showDialog.value = false }

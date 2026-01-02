@@ -93,9 +93,9 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 private val managerVersion = getManagerVersion()
@@ -115,8 +115,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 kpState,
                 scrollBehavior = scrollBehavior
             )
-        },
-        popupHost = { },
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -155,7 +154,7 @@ fun HomeScreen(navigator: DestinationsNavigator) {
 
 @Composable
 fun AuthFailedTipDialog(showDialog: MutableState<Boolean>) {
-    SuperDialog(
+    WindowDialog(
         title = stringResource(R.string.home_dialog_auth_fail_title),
         summary = stringResource(R.string.home_dialog_auth_fail_content),
         show = showDialog,
@@ -184,7 +183,7 @@ fun AuthSuperKey(showDialog: MutableState<Boolean>, showFailedDialog: MutableSta
     var keyVisible by remember { mutableStateOf(false) }
     var enable by remember { mutableStateOf(false) }
 
-    SuperDialog(
+    WindowDialog(
         show = showDialog,
         title = stringResource(R.string.home_auth_key_title),
         summary = stringResource(R.string.home_auth_key_desc),

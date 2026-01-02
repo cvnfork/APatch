@@ -83,11 +83,11 @@ import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.extra.WindowDialog
 import java.io.IOException
 
 private const val TAG = "KernelPatchModule"
@@ -129,8 +129,9 @@ fun KPModuleScreen(navigator: DestinationsNavigator) {
 
     Box {
         Scaffold(
-            topBar = { TopBar() },
-            popupHost = { },
+            topBar = {
+                TopAppBar(title = stringResource(R.string.kpm))
+            },
             floatingActionButton = {
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
@@ -316,7 +317,7 @@ fun KPMControlDialog(
         }
     }
 
-    SuperDialog(
+    WindowDialog(
         title = stringResource(R.string.kpm_control_dialog_title),
         summary = stringResource(R.string.kpm_control_dialog_content),
         show = controlDialog,
@@ -447,11 +448,6 @@ private fun KPModuleList(
             }
         }
     }
-}
-
-@Composable
-private fun TopBar() {
-    TopAppBar(title = stringResource(R.string.kpm))
 }
 
 @Composable

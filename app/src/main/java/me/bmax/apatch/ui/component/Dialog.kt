@@ -62,7 +62,7 @@ import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.coroutines.resume
 
@@ -453,7 +453,7 @@ private fun ConfirmDialog(
     dismiss: () -> Unit,
     showDialog: MutableState<Boolean>
 ) {
-    SuperDialog(
+    WindowDialog(
         modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
         show = showDialog,
         title = visuals.title,
