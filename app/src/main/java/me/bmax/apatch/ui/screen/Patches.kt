@@ -223,9 +223,7 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
                         // patch start
                         if (mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.superkey.isNotEmpty()) {
                             StartButton(stringResource(id = R.string.patch_start_patch_btn)) {
-                                viewModel.doPatch(
-                                    mode
-                                )
+                                viewModel.doPatch(mode)
                             }
                         }
                         // unpatch
@@ -428,6 +426,7 @@ private fun SetSuperKeyView(viewModel: PatchesViewModel) {
     var skey by remember { mutableStateOf(viewModel.superkey) }
     var showWarn by remember { mutableStateOf(!viewModel.checkSuperKeyValidation(skey)) }
     var keyVisible by remember { mutableStateOf(false) }
+
     Card {
         Column(
             modifier = Modifier
@@ -452,42 +451,35 @@ private fun SetSuperKeyView(viewModel: PatchesViewModel) {
                     style = MiuixTheme.textStyles.body2
                 )
             }
-            Column {
-                Box(
-                    contentAlignment = Alignment.CenterEnd,
+
+            Box (Modifier.padding(top = 6.dp)) {
+                TextField(
+                    value = skey,
+                    label = stringResource(id = R.string.patch_set_superkey),
+                    visualTransformation = if (keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    onValueChange = {
+                        skey = it
+                        if (viewModel.checkSuperKeyValidation(it)) {
+                            viewModel.superkey = it
+                            showWarn = false
+                        } else {
+                            viewModel.superkey = ""
+                            showWarn = true
+                        }
+                    },
+                )
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 5.dp),
+                    onClick = { keyVisible = !keyVisible }
                 ) {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 6.dp),
-                        value = skey,
-                        label = stringResource(id = R.string.patch_set_superkey),
-                        visualTransformation = if (keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        cornerRadius = 50.dp,
-                        onValueChange = {
-                            skey = it
-                            if (viewModel.checkSuperKeyValidation(it)) {
-                                viewModel.superkey = it
-                                showWarn = false
-                            } else {
-                                viewModel.superkey = ""
-                                showWarn = true
-                            }
-                        },
+                    Icon(
+                        imageVector = if (keyVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = null,
+                        tint = Color.Gray
                     )
-                    IconButton(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(top = 15.dp, end = 5.dp),
-                        onClick = { keyVisible = !keyVisible }
-                    ) {
-                        Icon(
-                            imageVector = if (keyVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = null,
-                            tint = Color.Gray
-                        )
-                    }
                 }
             }
         }

@@ -22,6 +22,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -37,7 +38,6 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -116,9 +116,8 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
             Text(
                 modifier = Modifier.padding(8.dp),
                 text = text,
-                fontSize = MiuixTheme.textStyles.body2.fontSize,
-                fontFamily = FontFamily.Monospace,
-                lineHeight = MiuixTheme.textStyles.body2.lineHeight,
+                fontSize = 12.sp,
+                fontFamily = FontFamily.Monospace
             )
         }
     }
