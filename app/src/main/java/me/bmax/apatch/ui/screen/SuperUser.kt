@@ -58,6 +58,7 @@ import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
@@ -73,7 +74,6 @@ fun SuperUserScreen() {
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
     var expanded by remember { mutableStateOf(false) }
-    val appListItemsCount = 2
 
     LaunchedEffect(Unit) {
         if (viewModel.appList.isEmpty()) {
@@ -82,53 +82,7 @@ fun SuperUserScreen() {
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = stringResource(R.string.su_title),
-                actions = {
-                    val showDropdown = remember { mutableStateOf(false) }
-
-                    IconButton(onClick = { showDropdown.value = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreVert,
-                            contentDescription = stringResource(id = R.string.settings)
-                        )
-
-                        SuperListPopup(
-                            show = showDropdown,
-                            onDismissRequest = { showDropdown.value = false }
-                        ) {
-                            ListPopupColumn {
-                                DropdownItem(
-                                    text = stringResource(R.string.su_refresh),
-                                    optionSize = appListItemsCount,
-                                    index = 0,
-                                    onSelectedIndexChange = {
-                                        scope.launch { viewModel.fetchAppList() }
-                                        showDropdown.value = false
-                                    }
-                                )
-
-                                DropdownItem(
-                                    text = if (viewModel.showSystemApps) {
-                                        stringResource(R.string.su_hide_system_apps)
-                                    } else {
-                                        stringResource(R.string.su_show_system_apps)
-                                    },
-                                    optionSize = appListItemsCount,
-                                    index = 1,
-                                    onSelectedIndexChange = {
-                                        viewModel.showSystemApps = !viewModel.showSystemApps
-                                        showDropdown.value = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
-                scrollBehavior = scrollBehavior
-            )
-        }
+        topBar = { SuperTopBar(viewModel, scrollBehavior) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             PullToRefresh(
@@ -176,6 +130,61 @@ fun SuperUserScreen() {
             }
         }
     }
+}
+
+@Composable
+fun SuperTopBar(
+    viewModel: SuperUserViewModel,
+    scrollBehavior: ScrollBehavior
+) {
+    val scope = rememberCoroutineScope()
+    val appListItemsCount = 2
+
+    TopAppBar(
+        title = stringResource(R.string.su_title),
+        actions = {
+            val showDropdown = remember { mutableStateOf(false) }
+
+            IconButton(onClick = { showDropdown.value = true }) {
+                Icon(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = stringResource(id = R.string.settings)
+                )
+
+                SuperListPopup(
+                    show = showDropdown,
+                    onDismissRequest = { showDropdown.value = false }
+                ) {
+                    ListPopupColumn {
+                        DropdownItem(
+                            text = stringResource(R.string.su_refresh),
+                            optionSize = appListItemsCount,
+                            index = 0,
+                            onSelectedIndexChange = {
+                                scope.launch { viewModel.fetchAppList() }
+                                showDropdown.value = false
+                            }
+                        )
+
+                        DropdownItem(
+                            text = if (viewModel.showSystemApps) {
+                                stringResource(R.string.su_hide_system_apps)
+                            } else {
+                                stringResource(R.string.su_show_system_apps)
+                            },
+                            optionSize = appListItemsCount,
+                            index = 1,
+                            onSelectedIndexChange = {
+                                viewModel.showSystemApps = !viewModel.showSystemApps
+                                showDropdown.value = false
+                            }
+                        )
+                    }
+                }
+            }
+        },
+        scrollBehavior = scrollBehavior
+    )
 }
 
 

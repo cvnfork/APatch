@@ -123,9 +123,9 @@ fun SettingScreen() {
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             contentPadding = PaddingValues(
-                start = 10.dp,
+                start = 16.dp,
                 top = paddingValues.calculateTopPadding() + 16.dp,
-                end = 10.dp,
+                end = 16.dp,
                 bottom = paddingValues.calculateBottomPadding() + 16.dp
             )
         ) {

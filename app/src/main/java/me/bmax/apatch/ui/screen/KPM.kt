@@ -244,10 +244,7 @@ fun KPModuleScreen(navigator: DestinationsNavigator) {
             )
         }
         if (controlDialogState.value) {
-            KPMControlDialog(
-                controlDialog = controlDialogState,
-                viewModel = viewModel
-            )
+            KPMControlDialog(controlDialog = controlDialogState)
         }
     }
 }
@@ -281,8 +278,7 @@ suspend fun loadModule(loadingDialog: LoadingDialogHandle, uri: Uri, args: Strin
 
 @Composable
 fun KPMControlDialog(
-    controlDialog: MutableState<Boolean>,
-    viewModel: KPModuleViewModel
+    controlDialog: MutableState<Boolean>
 ) {
     var controlParam by remember { mutableStateOf("") }
     var enable by remember { mutableStateOf(false) }
@@ -470,7 +466,12 @@ private fun KPModuleItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(all = 16.dp),
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp,
+                        bottom = 5.dp
+                    ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -499,27 +500,30 @@ private fun KPModuleItem(
                             textDecoration = decoration,
                         )
                     }
-
                 }
 
                 Text(
                     modifier = Modifier
                         .alpha(alpha = alpha)
-                        .padding(horizontal = 14.dp),
+                        .padding(horizontal = 16.dp),
                     text = module.description,
                     style = MiuixTheme.textStyles.body2,
                     textDecoration = decoration,
                 )
 
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
                     thickness = 0.5.dp,
                     color = MiuixTheme.colorScheme.outline.copy(alpha = 0.5f)
                 )
 
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 6.dp
+                        )
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
