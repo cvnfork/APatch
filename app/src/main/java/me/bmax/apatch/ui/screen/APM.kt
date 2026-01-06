@@ -69,6 +69,7 @@ import me.bmax.apatch.apApp
 import me.bmax.apatch.ui.WebUIActivity
 import me.bmax.apatch.ui.component.ConfirmResult
 import me.bmax.apatch.ui.component.IconTextButton
+import me.bmax.apatch.ui.component.LoadingIndicator
 import me.bmax.apatch.ui.component.ModuleStateIndicator
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.component.rememberLoadingDialog
@@ -79,6 +80,7 @@ import me.bmax.apatch.util.hasMagisk
 import me.bmax.apatch.util.toggleModule
 import me.bmax.apatch.util.uninstallModule
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
@@ -100,6 +102,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 fun APModuleScreen(navigator: DestinationsNavigator) {
     val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
+    var expanded by remember { mutableStateOf(false) }
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     if (state != APApplication.State.ANDROIDPATCH_INSTALLED && state != APApplication.State.ANDROIDPATCH_NEED_UPDATE) {
@@ -181,45 +184,71 @@ fun APModuleScreen(navigator: DestinationsNavigator) {
             }
         }, popupHost = {}
         ) { innerPadding ->
-        when {
-            hasMagisk -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        stringResource(R.string.apm_magisk_conflict),
-                        textAlign = TextAlign.Center,
+        Column(modifier = Modifier.padding(innerPadding)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, bottom = 16.dp)
+                    .zIndex(10f)
+            ) {
+                SearchBar(
+                    inputField = {
+                        InputField(
+                            query = viewModel.search,
+                            onQueryChange = { viewModel.search = it },
+                            onSearch = { expanded = false },
+                            expanded = expanded,
+                            onExpandedChange = {
+                                expanded = it
+                                if (!it) viewModel.search = ""
+                            }
+                        )
+                    },
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                    content = {}
+                )
+            }
+            when {
+                hasMagisk -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            stringResource(R.string.apm_magisk_conflict),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+
+                else -> {
+                    ModuleList(
+                        navigator,
+                        viewModel = viewModel,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        state = moduleListState,
+                        onInstallModule = {
+                            navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM))
+                        },
+                        onClickModule = { id, name, hasWebUi ->
+                            if (hasWebUi) {
+                                webUILauncher.launch(
+                                    Intent(
+                                        context, WebUIActivity::class.java
+                                    ).setData("apatch://webui/$id".toUri()).putExtra("id", id)
+                                        .putExtra("name", name)
+                                )
+                            }
+                        },
+                        context = context,
+                        scrollBehavior = scrollBehavior
                     )
                 }
-            }
-
-            else -> {
-                ModuleList(
-                    navigator,
-                    viewModel = viewModel,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize(),
-                    state = moduleListState,
-                    onInstallModule = {
-                        navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM))
-                    },
-                    onClickModule = { id, name, hasWebUi ->
-                        if (hasWebUi) {
-                            webUILauncher.launch(
-                                Intent(
-                                    context, WebUIActivity::class.java
-                                ).setData("apatch://webui/$id".toUri()).putExtra("id", id)
-                                    .putExtra("name", name)
-                            )
-                        }
-                    },
-                    context = context,
-                    scrollBehavior = scrollBehavior
-                )
             }
         }
     }
@@ -253,8 +282,6 @@ private fun ModuleList(
 
     val loadingDialog = rememberLoadingDialog()
     val confirmDialog = rememberConfirmDialog()
-
-    var expanded by remember { mutableStateOf(false) }
 
     suspend fun onModuleUpdate(
         module: APModuleViewModel.ModuleInfo,
@@ -347,32 +374,6 @@ private fun ModuleList(
         isRefreshing = viewModel.isRefreshing,
         onRefresh = { viewModel.fetchModuleList() },
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 5.dp)
-                .zIndex(10f)
-        ) {
-            SearchBar(
-                inputField = {
-                    InputField(
-                        query = viewModel.search,
-                        onQueryChange = { viewModel.search = it },
-                        onSearch = {
-                            expanded = false
-                        },
-                        expanded = expanded,
-                        onExpandedChange = {
-                            expanded = it
-                            if (!it) viewModel.search = ""
-                        }
-                    )
-                },
-                expanded = expanded,
-                onExpandedChange = { expanded = it },
-                content = {}
-            )
-        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -383,7 +384,6 @@ private fun ModuleList(
             contentPadding = remember {
                 PaddingValues(
                     start = 16.dp,
-                    top = 16.dp,
                     end = 16.dp,
                     bottom = 16.dp /*  Scaffold Fab Spacing + Fab container height */
                 )
@@ -396,9 +396,14 @@ private fun ModuleList(
                             modifier = Modifier.fillParentMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                stringResource(R.string.apm_empty), textAlign = TextAlign.Center
-                            )
+                            if (viewModel.isRefreshing) {
+                                LoadingIndicator()
+                            } else {
+                                Text(
+                                    stringResource(R.string.apm_empty),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                 }

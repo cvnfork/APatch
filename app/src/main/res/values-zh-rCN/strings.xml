@@ -19,6 +19,7 @@
     <string name="reboot_edl">重启至 EDL</string>
     <string name="home_installing">安装中</string>
     <string name="safe_mode">安全模式</string>
+    <string name="loading">加载中…</string>
     <string name="reboot_recovery">重启至 Recovery</string>
     <string name="home_learn_apatch">了解 APatch</string>
     <string name="kernel_patch">内核补丁</string>

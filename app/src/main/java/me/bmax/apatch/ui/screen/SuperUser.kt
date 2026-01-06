@@ -27,11 +27,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,11 +45,13 @@ import me.bmax.apatch.Natives
 import me.bmax.apatch.R
 import me.bmax.apatch.apApp
 import me.bmax.apatch.ui.component.DropdownItem
+import me.bmax.apatch.ui.component.LoadingIndicator
 import me.bmax.apatch.ui.viewmodel.SuperUserViewModel
 import me.bmax.apatch.util.PkgConfig
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
@@ -86,52 +86,64 @@ fun SuperUserScreen() {
         topBar = { SuperTopBar(viewModel, scrollBehavior) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, bottom = 16.dp)
+                    .zIndex(10f)
+            ) {
+                SearchBar(
+                    inputField = {
+                        InputField(
+                            query = viewModel.search,
+                            onQueryChange = { viewModel.search = it },
+                            onSearch = { expanded = false },
+                            expanded = expanded,
+                            onExpandedChange = {
+                                expanded = it
+                                if (!it) viewModel.search = ""
+                            }
+                        )
+                    },
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                    content = {}
+                )
+            }
             PullToRefresh(
                 onRefresh = { scope.launch { viewModel.fetchAppList() } },
                 isRefreshing = viewModel.isRefreshing
             ) {
-                Box (
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 5.dp)
-                        .zIndex(10f)
-                ) {
-                    SearchBar(
-                        inputField = {
-                            InputField(
-                                query = viewModel.search,
-                                onQueryChange = { viewModel.search = it },
-                                onSearch = {
-                                    expanded = false
-                                },
-                                expanded = expanded,
-                                onExpandedChange = {
-                                    expanded = it
-                                    if (!it) viewModel.search = ""
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when {
+                        viewModel.isRefreshing && viewModel.appList.isEmpty() -> {
+                            LoadingIndicator()
+                        }
+
+                        else -> {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .overScrollVertical()
+                                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                            ) {
+                                items(
+                                    viewModel.appList.filter {
+                                        it.packageName != apApp.packageName
+                                    },
+                                    key = { it.packageName + it.uid }
+                                ) { app ->
+                                    AppItem(app)
                                 }
-                            )
-                        },
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                        content = {}
-                    )
-                }
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .overScrollVertical()
-                        .nestedScroll(scrollBehavior.nestedScrollConnection),
-                    contentPadding = PaddingValues(top = 16.dp)
-                ) {
-                    items(viewModel.appList.filter { it.packageName != apApp.packageName },
-                        key = { it.packageName + it.uid }) { app ->
-                        AppItem(app)
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun SuperTopBar(
