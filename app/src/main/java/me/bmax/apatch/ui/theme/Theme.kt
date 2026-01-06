@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import me.bmax.apatch.ui.webui.MonetColorsProvider.UpdateCss
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
@@ -37,11 +38,10 @@ fun APatchTheme(
 
         else -> ThemeController(ColorSchemeMode.System)
     }
-    Log.d("MIUIX_DEBUG", "Mode:"+colorMode)
     return MiuixTheme(
         controller = controller,
         content = {
-//            UpdateCss()
+            UpdateCss()
             content()
         }
     )

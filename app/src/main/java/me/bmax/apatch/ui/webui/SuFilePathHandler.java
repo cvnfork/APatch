@@ -64,6 +64,7 @@ public final class SuFilePathHandler implements WebViewAssetLoader.PathHandler {
 
     private final Shell mShell;
     private final InsetsSupplier mInsetsSupplier;
+    private final Context mContext;
     @NonNull
     private final OnInsetsRequestedListener mOnInsetsRequestedListener;
 
@@ -102,6 +103,7 @@ public final class SuFilePathHandler implements WebViewAssetLoader.PathHandler {
      */
     public SuFilePathHandler(@NonNull Context context, @NonNull File directory, @NonNull InsetsSupplier insetsSupplier, @NonNull OnInsetsRequestedListener onInsetsRequestedListener) {
         try {
+            mContext = context;
             mInsetsSupplier = insetsSupplier;
             mOnInsetsRequestedListener = onInsetsRequestedListener;
             mDirectory = new File(getCanonicalDirPath(directory));
@@ -154,6 +156,20 @@ public final class SuFilePathHandler implements WebViewAssetLoader.PathHandler {
         if ("internal/insets.css".equals(path)) {
             mOnInsetsRequestedListener.onInsetsRequested(true);
             String css = mInsetsSupplier.get().getCss();
+            return new WebResourceResponse(
+                    "text/css",
+                    "utf-8",
+                    new ByteArrayInputStream(css.getBytes(StandardCharsets.UTF_8))
+            );
+        }
+        if ("internal/colors.css".equals(path)) {
+            int colorMode = mContext.getSharedPreferences("config", Context.MODE_PRIVATE).getInt("color_mode", 0);
+            String css = "";
+            if (colorMode >= 3 && colorMode <= 5) {
+                css = MonetColorsProvider.INSTANCE.getColorsCss();
+            }
+            Log.d(TAG, "handle colors.css requested, colorMode=" + colorMode
+                    + ", css length=" + (css != null ? css.length() : "null"));
             return new WebResourceResponse(
                     "text/css",
                     "utf-8",
