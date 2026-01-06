@@ -6,15 +6,22 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -25,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -63,9 +71,10 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.WindowBottomSheet
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.extra.WindowDialog
@@ -102,7 +111,7 @@ fun SettingScreen() {
     }
 
     val showResetSuPathDialog = remember { mutableStateOf(false) }
-    val showLogBottomSheet = remember { mutableStateOf(false) }
+    val showLogDialog = remember { mutableStateOf(false) }
     val showClearKeyDialog = rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -115,7 +124,7 @@ fun SettingScreen() {
     ) { paddingValues ->
 
         ResetSUPathDialog(showResetSuPathDialog)
-        LogBottomSheet(showLogBottomSheet)
+        LogDialog(showLogDialog)
 
         LazyColumn(
             modifier = Modifier
@@ -334,7 +343,7 @@ fun SettingScreen() {
                     SuperArrow(
                         title = stringResource(R.string.send_log),
                         onClick = {
-                            showLogBottomSheet.value = true
+                            showLogDialog.value = true
                         }
                     )
                 }
@@ -344,7 +353,7 @@ fun SettingScreen() {
 }
 
 @Composable
-fun LogBottomSheet(showLogBottomSheet: MutableState<Boolean>) {
+fun LogDialog(showLogDialog: MutableState<Boolean>) {
     val scope = rememberCoroutineScope()
     val loadingDialog = rememberLoadingDialog()
     val context = LocalContext.current
@@ -357,9 +366,7 @@ fun LogBottomSheet(showLogBottomSheet: MutableState<Boolean>) {
             scope.launch(Dispatchers.IO) {
                 loadingDialog.show()
                 uri.outputStream().use { output ->
-                    getBugreportFile(context).inputStream().use {
-                        it.copyTo(output)
-                    }
+                    getBugreportFile(context).inputStream().use { it.copyTo(output) }
                 }
                 loadingDialog.hide()
                 withContext(Dispatchers.Main) {
@@ -369,58 +376,79 @@ fun LogBottomSheet(showLogBottomSheet: MutableState<Boolean>) {
         }
     }
 
-
-    WindowBottomSheet(
-        show = showLogBottomSheet,
-        title = logSavedMessage,
-        onDismissRequest = { showLogBottomSheet.value = false }
+    WindowDialog(
+        show = showLogDialog,
+        title = stringResource(R.string.send_log),
+        onDismissRequest = { showLogDialog.value = false }
     ) {
-        SuperArrow(
-            title = stringResource(R.string.save_log),
-            onClick = {
-                scope.launch {
-                    val formatter =
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
-                    val current = LocalDateTime.now().format(formatter)
-                    exportBugreportLauncher.launch("APatch_bugreport_${current}.tar.gz")
-                    showLogBottomSheet.value = false
-                }
-            }
-        )
-        SuperArrow(
-            title = stringResource(R.string.send_log),
-            onClick = {
-                scope.launch {
-                    val bugreport = loadingDialog.withLoading {
-                        withContext(Dispatchers.IO) {
-                            getBugreportFile(context)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clickable {
+                        scope.launch {
+                            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH_mm")
+                            val current = LocalDateTime.now().format(formatter)
+                            exportBugreportLauncher.launch("APatch_bugreport_${current}.tar.gz")
+                            showLogDialog.value = false
                         }
                     }
-
-                    val uri: Uri = FileProvider.getUriForFile(
-                        context,
-                        "${BuildConfig.APPLICATION_ID}.fileprovider",
-                        bugreport
-                    )
-
-                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                        putExtra(Intent.EXTRA_STREAM, uri)
-                        setDataAndType(uri, "application/gzip")
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-
-                    context.startActivity(
-                        Intent.createChooser(
-                            shareIntent,
-                            logSavedMessage
-                        )
-                    )
-                    showLogBottomSheet.value = false
-                }
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(stringResource(R.string.save_log))
             }
-        )
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clickable {
+                        scope.launch {
+                            val bugreport = loadingDialog.withLoading {
+                                withContext(Dispatchers.IO) { getBugreportFile(context) }
+                            }
+
+                            val uri: Uri = FileProvider.getUriForFile(
+                                context,
+                                "${BuildConfig.APPLICATION_ID}.fileprovider",
+                                bugreport
+                            )
+
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                putExtra(Intent.EXTRA_STREAM, uri)
+                                setDataAndType(uri, "application/gzip")
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+
+                            context.startActivity(
+                                Intent.createChooser(shareIntent, logSavedMessage)
+                            )
+                            showLogDialog.value = false
+                        }
+                    }
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(stringResource(R.string.send_log))
+            }
+        }
     }
 }
+
+
 
 @Composable
 fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
