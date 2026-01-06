@@ -65,6 +65,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Destination<RootGraph>
@@ -303,16 +304,18 @@ fun LabelText(label: String) {
         modifier = Modifier
             .padding(top = 4.dp, end = 4.dp)
             .background(
-                Color.Black, shape = RoundedCornerShape(4.dp)
+                color = colorScheme.primary,
+                shape = RoundedCornerShape(4.dp)
             )
     ) {
         Text(
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
             text = label,
-            modifier = Modifier.padding(vertical = 2.dp, horizontal = 5.dp),
-            style = TextStyle(
-                fontSize = 8.sp,
-                color = Color.White,
-            )
+            color = colorScheme.onPrimary,
+            fontSize = 9.sp,
+            fontWeight = FontWeight(750),
+            maxLines = 1,
+            softWrap = false
         )
     }
 }

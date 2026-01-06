@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -88,6 +89,7 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import java.io.IOException
 
 private const val TAG = "KernelPatchModule"
@@ -466,12 +468,7 @@ private fun KPModuleItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = 5.dp
-                    ),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -482,49 +479,62 @@ private fun KPModuleItem(
                     ) {
                         Text(
                             text = module.name,
-                            style = MiuixTheme.textStyles.title4.copy(fontWeight = FontWeight.Bold),
-                            maxLines = 2,
-                            textDecoration = decoration,
-                            overflow = TextOverflow.Ellipsis
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight(550),
+                            color = colorScheme.onSurface,
+                            textDecoration = decoration
                         )
 
                         Text(
-                            text = "$moduleVersion: ${module.version}\n$moduleAuthor: ${module.author}",
-                            style = MiuixTheme.textStyles.body2,
-                            textDecoration = decoration,
+                            text = "$moduleVersion: ${module.version}",
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 2.dp),
+                            fontWeight = FontWeight(550),
+                            color = colorScheme.onSurfaceVariantSummary,
+                            textDecoration = decoration
+                        )
+                        Text(
+                            text = "$moduleAuthor: ${module.author}",
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(bottom = 1.dp),
+                            fontWeight = FontWeight(550),
+                            color = colorScheme.onSurfaceVariantSummary,
+                            textDecoration = decoration
                         )
 
                         Text(
                             text = "$moduleArgs: ${module.args}",
-                            style = MiuixTheme.textStyles.body2,
-                            textDecoration = decoration,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(bottom = 1.dp),
+                            fontWeight = FontWeight(550),
+                            color = colorScheme.onSurfaceVariantSummary,
+                            textDecoration = decoration
                         )
                     }
                 }
 
                 Text(
-                    modifier = Modifier
-                        .alpha(alpha = alpha)
-                        .padding(horizontal = 16.dp),
                     text = module.description,
-                    style = MiuixTheme.textStyles.body2,
-                    textDecoration = decoration,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 14.sp,
+                    color = colorScheme.onSurfaceVariantSummary,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4,
+                    textDecoration = decoration
                 )
 
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                        .padding(horizontal = 16.dp),
                     thickness = 0.5.dp,
-                    color = MiuixTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    color = colorScheme.outline.copy(alpha = 0.5f)
                 )
 
                 Row(
                     modifier = Modifier
-                        .padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 6.dp
-                        )
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
                 ) {

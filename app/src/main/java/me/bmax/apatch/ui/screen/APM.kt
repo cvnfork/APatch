@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,6 +92,7 @@ import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Destination<RootGraph>
@@ -162,7 +164,7 @@ fun APModuleScreen(navigator: DestinationsNavigator) {
                 }
 
                 FloatingActionButton(
-                    containerColor = MiuixTheme.colorScheme.primary,
+                    containerColor = colorScheme.primary,
                     modifier = Modifier.padding(bottom = 30.dp),
                     onClick = {
                         // select the zip file to install
@@ -173,7 +175,7 @@ fun APModuleScreen(navigator: DestinationsNavigator) {
                     Icon(
                         imageVector = Icons.Default.Archive,
                         contentDescription = null,
-                        tint = MiuixTheme.colorScheme.onPrimary
+                        tint = colorScheme.onPrimary
                     )
                 }
             }
@@ -487,12 +489,7 @@ private fun ModuleItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = 5.dp
-                    ),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(
@@ -503,16 +500,29 @@ private fun ModuleItem(
                     ) {
                         Text(
                             text = module.name,
-                            style = MiuixTheme.textStyles.title4.copy(fontWeight = FontWeight.Bold),
-                            maxLines = 2,
-                            textDecoration = decoration,
-                            overflow = TextOverflow.Ellipsis
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight(550),
+                            color = colorScheme.onSurface,
+                            overflow = TextOverflow.Ellipsis,
+                            textDecoration = decoration
                         )
 
                         Text(
-                            text = "$moduleVersion: ${module.version}\n$moduleAuthor: ${module.author}",
-                            style = MiuixTheme.textStyles.body2,
-                            textDecoration = decoration,
+                            text = "$moduleVersion: ${module.version}",
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 2.dp),
+                            fontWeight = FontWeight(550),
+                            color = colorScheme.onSurfaceVariantSummary,
+                            textDecoration = decoration
+                        )
+
+                        Text(
+                            text = "$moduleAuthor: ${module.author}",
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(bottom = 1.dp),
+                            fontWeight = FontWeight(550),
+                            color = colorScheme.onSurfaceVariantSummary,
+                            textDecoration = decoration
                         )
                     }
 
@@ -524,29 +534,28 @@ private fun ModuleItem(
                 }
 
                 Text(
-                    modifier = Modifier
-                        .alpha(alpha = alpha)
-                        .padding(horizontal = 16.dp),
                     text = module.description,
-                    style = MiuixTheme.textStyles.body2,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontSize = 14.sp,
+                    color = colorScheme.onSurfaceVariantSummary,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4,
                     textDecoration = decoration
                 )
 
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                        .padding(horizontal = 16.dp),
                     thickness = 0.5.dp,
-                    color = MiuixTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    color = colorScheme.outline.copy(alpha = 0.5f)
                 )
 
                 Row(
-                    modifier = Modifier
-                        .padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 7.dp
-                        )
-                        .fillMaxWidth()
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                        .padding(bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+
                     if (module.hasActionScript) {
                         IconTextButton(
                             iconRes = Icons.Default.PlayArrow,

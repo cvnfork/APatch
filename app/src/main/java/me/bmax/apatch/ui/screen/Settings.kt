@@ -63,7 +63,7 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperBottomSheet
+import top.yukonga.miuix.kmp.extra.WindowBottomSheet
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.extra.SuperDropdown
@@ -370,7 +370,7 @@ fun LogBottomSheet(showLogBottomSheet: MutableState<Boolean>) {
     }
 
 
-    SuperBottomSheet(
+    WindowBottomSheet(
         show = showLogBottomSheet,
         title = logSavedMessage,
         onDismissRequest = { showLogBottomSheet.value = false }

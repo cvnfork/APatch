@@ -19,6 +19,8 @@ fun IconTextButton(
     onClick: () -> Unit
 ) {
     IconButton(
+        minHeight = 35.dp,
+        minWidth = 35.dp,
         onClick = onClick,
         enabled = true,
         backgroundColor = MiuixTheme.colorScheme.secondaryContainer,
