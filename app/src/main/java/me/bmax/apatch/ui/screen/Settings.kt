@@ -38,6 +38,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
@@ -80,9 +81,8 @@ import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
-@Destination<RootGraph>
 @Composable
-fun SettingScreen() {
+fun SettingScreen(bottomPadding: Dp) {
     val scrollBehavior = MiuixScrollBehavior()
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
@@ -115,6 +115,7 @@ fun SettingScreen() {
     val showClearKeyDialog = rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
+        modifier = Modifier.padding(bottom = bottomPadding),
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.settings),

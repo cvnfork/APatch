@@ -31,6 +31,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -68,9 +69,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
-@Destination<RootGraph>
 @Composable
-fun SuperUserScreen() {
+fun SuperUserScreen(bottomPadding: Dp) {
     val viewModel = viewModel<SuperUserViewModel>()
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
@@ -83,6 +83,7 @@ fun SuperUserScreen() {
     }
 
     Scaffold(
+        modifier = Modifier.padding(bottom = bottomPadding),
         topBar = { SuperTopBar(viewModel, scrollBehavior) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {

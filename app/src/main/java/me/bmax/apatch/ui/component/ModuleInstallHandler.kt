@@ -25,7 +25,8 @@ import me.bmax.apatch.util.ModuleParser
 fun ModuleInstallHandler(
     uri: Uri?,
     viewModel: APModuleViewModel,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    onReset: () -> Unit
 ) {
     val apmTitle = stringResource(R.string.apm)
     val context = LocalContext.current
@@ -49,7 +50,12 @@ fun ModuleInstallHandler(
 
     LaunchedEffect(uri) {
         val currentUri = uri ?: return@LaunchedEffect
-        if (currentUri == handledUri) return@LaunchedEffect // skip install
+
+        // skip install
+        if (currentUri == handledUri) {
+            onReset()
+            return@LaunchedEffect
+        }
 
         viewModel.fetchModuleList()
         val desc = loadingDialog.withLoading {

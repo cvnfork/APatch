@@ -50,13 +50,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.InstallScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -80,7 +79,6 @@ import me.bmax.apatch.util.hasMagisk
 import me.bmax.apatch.util.toggleModule
 import me.bmax.apatch.util.uninstallModule
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
@@ -97,9 +95,11 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
-@Destination<RootGraph>
 @Composable
-fun APModuleScreen(navigator: DestinationsNavigator) {
+fun APModuleScreen(
+    bottomPadding: Dp,
+    navigator: DestinationsNavigator
+) {
     val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
     var expanded by remember { mutableStateOf(false) }
@@ -141,6 +141,7 @@ fun APModuleScreen(navigator: DestinationsNavigator) {
     val moduleListState = rememberLazyListState()
 
     Scaffold(
+        modifier = Modifier.padding(bottom = bottomPadding),
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.apm),

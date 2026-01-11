@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -96,9 +97,11 @@ import java.io.IOException
 private const val TAG = "KernelPatchModule"
 private lateinit var targetKPMToControl: KPModel.KPMInfo
 
-@Destination<RootGraph>
 @Composable
-fun KPModuleScreen(navigator: DestinationsNavigator) {
+fun KPModuleScreen(
+    bottomPadding: Dp,
+    navigator: DestinationsNavigator
+) {
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     if (state == APApplication.State.UNKNOWN_STATE) {
@@ -132,6 +135,7 @@ fun KPModuleScreen(navigator: DestinationsNavigator) {
 
     Box {
         Scaffold(
+            modifier = Modifier.padding(bottom = bottomPadding),
             topBar = {
                 TopAppBar(title = stringResource(R.string.kpm))
             },
