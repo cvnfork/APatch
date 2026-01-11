@@ -57,12 +57,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.InstallModeSelectScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ModeSelectScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.PatchesDestination
-import com.ramcosta.composedestinations.generated.destinations.UninstallModeSelectScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -281,7 +278,7 @@ private fun TopBar(
         title = stringResource(R.string.app_name),
         actions = {
             IconButton(onClick = dropUnlessResumed {
-                navigator.navigate(InstallModeSelectScreenDestination)
+                navigator.navigate(ModeSelectScreenDestination(ActionType.INSTALL))
             }) {
                 Icon(
                     imageVector = Icons.Filled.InstallMobile,
@@ -382,7 +379,7 @@ private fun KStatusCard(
         ),
         onClick = {
             if (kpState != APApplication.State.KERNELPATCH_INSTALLED) {
-                navigator.navigate(InstallModeSelectScreenDestination)
+                navigator.navigate(ModeSelectScreenDestination(ActionType.INSTALL))
             }
         },
     ) {
@@ -492,7 +489,7 @@ private fun KStatusCard(
                                 if (Version.installedKPVUInt() < 0x900u) {
                                     navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.PATCH_ONLY))
                                 } else {
-                                    navigator.navigate(InstallModeSelectScreenDestination)
+                                    navigator.navigate(ModeSelectScreenDestination(ActionType.INSTALL))
                                 }
                             }
 
@@ -506,7 +503,7 @@ private fun KStatusCard(
 
                             else -> {
                                 if (apState == APApplication.State.ANDROIDPATCH_INSTALLED || apState == APApplication.State.ANDROIDPATCH_NEED_UPDATE) {
-                                    navigator.navigate(UninstallModeSelectScreenDestination)
+                                    navigator.navigate(ModeSelectScreenDestination(ActionType.UNINSTALL))
                                 } else {
                                     navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.UNPATCH))
                                 }
