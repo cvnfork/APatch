@@ -38,6 +38,7 @@ class APModuleViewModel : ViewModel() {
         val updateJson: String,
         val hasWebUi: Boolean,
         val hasActionScript: Boolean,
+        val metamodule: Boolean,
     )
 
     data class ModuleUpdateInfo(
@@ -53,7 +54,9 @@ class APModuleViewModel : ViewModel() {
     var search by mutableStateOf("")
 
     val moduleList by derivedStateOf {
-        val comparator = compareBy(Collator.getInstance(Locale.getDefault()), ModuleInfo::id)
+        val collator = Collator.getInstance(Locale.getDefault())
+        val comparator = compareByDescending<ModuleInfo> { it.metamodule && it.enabled }
+            .thenBy(collator) { it.id }
         modules.filter {
             it.id.contains(search, true) || it.name.contains(search, true) || HanziToPinyin.getInstance()
                 .toPinyinString(it.name).contains(search, true)
@@ -93,7 +96,6 @@ class APModuleViewModel : ViewModel() {
                     .map { obj ->
                         ModuleInfo(
                             obj.getString("id"),
-
                             obj.optString("name"),
                             obj.optString("author", "Unknown"),
                             obj.optString("version", "Unknown"),
@@ -103,8 +105,9 @@ class APModuleViewModel : ViewModel() {
                             obj.getBoolean("update"),
                             obj.getBoolean("remove"),
                             obj.optString("updateJson"),
-                            obj.optBoolean("web"),
-                            obj.optBoolean("action")
+                            obj.getBooleanCompat("web"),
+                            obj.getBooleanCompat("action"),
+                            obj.getBooleanCompat("metamodule")
                         )
                     }.toList()
                 isNeedRefresh = false
@@ -168,5 +171,15 @@ class APModuleViewModel : ViewModel() {
         }
 
         return Triple(zipUrl, version, changelog)
+    }
+}
+
+private fun JSONObject.getBooleanCompat(key: String, default: Boolean = false): Boolean {
+    if (!has(key)) return default
+    return when (val value = opt(key)) {
+        is Boolean -> value
+        is String -> value.equals("true", ignoreCase = true) || value == "1"
+        is Number -> value.toInt() != 0
+        else -> default
     }
 }

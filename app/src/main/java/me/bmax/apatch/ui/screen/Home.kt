@@ -67,6 +67,7 @@ import me.bmax.apatch.APApplication
 import me.bmax.apatch.Natives
 import me.bmax.apatch.R
 import me.bmax.apatch.apApp
+import me.bmax.apatch.ui.component.WarningCard
 import me.bmax.apatch.ui.component.DropdownItem
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
@@ -811,25 +812,6 @@ private fun InfoCard(kpState: APApplication.State, apState: APApplication.State)
             Spacer(Modifier.height(16.dp))
             InfoCardItem(stringResource(R.string.home_selinux_status), getSELinuxStatus())
 
-        }
-    }
-}
-
-@Composable
-fun WarningCard(
-    message: String, color: Color = MiuixTheme.colorScheme.error, onClick: (() -> Unit)? = null
-) {
-    Card(
-        colors = CardDefaults.defaultColors(color)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(onClick?.let { Modifier.clickable { it() } } ?: Modifier)
-                .padding(24.dp)) {
-            Text(
-                text = message, style = MiuixTheme.textStyles.body1
-            )
         }
     }
 }

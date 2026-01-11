@@ -25,12 +25,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.InstallMobile
-import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,12 +45,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +63,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.InstallScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.topjohnwu.superuser.io.SuFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,6 +75,7 @@ import me.bmax.apatch.ui.component.ConfirmResult
 import me.bmax.apatch.ui.component.IconTextButton
 import me.bmax.apatch.ui.component.LoadingIndicator
 import me.bmax.apatch.ui.component.ModuleStateIndicator
+import me.bmax.apatch.ui.component.WarningCard
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.component.rememberLoadingDialog
 import me.bmax.apatch.ui.viewmodel.APModuleViewModel
@@ -91,6 +96,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.SearchBar
+import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
@@ -257,6 +263,47 @@ fun APModuleScreen(
 }
 
 @Composable
+private fun MetaModuleWarningCard(
+    viewModel: APModuleViewModel
+) {
+    val hasSystemModule = viewModel.moduleList.any { module ->
+        SuFile.open("/data/adb/modules/${module.id}/system").exists()
+    }
+
+
+    if (!hasSystemModule) return
+
+    val metaProp = SuFile.open("/data/adb/metamodule/module.prop").exists()
+    val metaRemoved = SuFile.open("/data/adb/metamodule/remove").exists()
+    val metaDisabled = SuFile.open("/data/adb/metamodule/disable").exists()
+
+    val warningText = when {
+        !metaProp ->
+            stringResource(R.string.no_meta_module_installed)
+
+        metaProp && metaRemoved ->
+            stringResource(R.string.meta_module_removed)
+
+        metaProp && metaDisabled ->
+            stringResource(R.string.meta_module_disabled)
+
+        else -> null
+    }
+
+    if (warningText == null) return
+    var show by remember { mutableStateOf(true) }
+
+        WarningCard(
+            message = warningText,
+            onClose = {
+                show = false
+            }
+        )
+
+        Spacer(Modifier.height(8.dp))
+}
+
+@Composable
 private fun ModuleList(
     navigator: DestinationsNavigator,
     viewModel: APModuleViewModel,
@@ -276,6 +323,7 @@ private fun ModuleList(
     val uninstall = stringResource(id = R.string.apm_remove)
     val cancel = stringResource(id = android.R.string.cancel)
     val moduleUninstallConfirm = stringResource(id = R.string.apm_uninstall_confirm)
+    val metaModuleUninstallConfirm = stringResource(R.string.metamodule_uninstall_confirm)
     val updateText = stringResource(R.string.apm_update)
     val changelogText = stringResource(R.string.apm_changelog)
     val downloadingText = stringResource(R.string.apm_downloading)
@@ -343,9 +391,10 @@ private fun ModuleList(
     }
 
     suspend fun onModuleUninstall(module: APModuleViewModel.ModuleInfo) {
+        val formatter = if (module.metamodule) metaModuleUninstallConfirm else moduleUninstallConfirm
         val confirmResult = confirmDialog.awaitConfirm(
             moduleStr,
-            content = moduleUninstallConfirm.format(module.name),
+            content = formatter.format(module.name),
             confirm = uninstall,
             dismiss = cancel
         )
@@ -391,6 +440,9 @@ private fun ModuleList(
                 )
             },
         ) {
+            item {
+                MetaModuleWarningCard(viewModel)
+            }
             when {
                 viewModel.moduleList.isEmpty() -> {
                     item {
@@ -505,14 +557,53 @@ private fun ModuleItem(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        Text(
-                            text = module.name,
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight(550),
-                            color = colorScheme.onSurface,
-                            overflow = TextOverflow.Ellipsis,
-                            textDecoration = decoration
-                        )
+                        SubcomposeLayout { constraints ->
+                            val spacingPx = 6.dp.roundToPx()
+                            var nameTextLayout: TextLayoutResult? = null
+                            val metaPlaceable = if (module.metamodule) {
+                                subcompose("meta") {
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = colorScheme.tertiaryContainer
+                                    ) {
+                                        Text(
+                                            text = "META",
+                                            fontSize = 12.sp,
+                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                            color = colorScheme.onTertiaryContainer,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }.first().measure(Constraints(0, constraints.maxWidth, 0, constraints.maxHeight))
+                            } else null
+
+                            val reserved = (metaPlaceable?.width ?: 0) + if (metaPlaceable != null) spacingPx else 0
+                            val nameMax = (constraints.maxWidth - reserved).coerceAtLeast(0)
+                            val namePlaceable = subcompose("name") {
+                                Text(
+                                    text = module.name,
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight(550),
+                                    maxLines = 2,
+                                    textDecoration = decoration,
+                                    overflow = TextOverflow.Ellipsis,
+                                    onTextLayout = { nameTextLayout = it }
+                                )
+                            }.first().measure(Constraints(constraints.minWidth, nameMax, constraints.minHeight, constraints.maxHeight))
+
+                            val width = (namePlaceable.width + reserved).coerceIn(constraints.minWidth, constraints.maxWidth)
+                            val height = maxOf(namePlaceable.height, metaPlaceable?.height ?: 0)
+
+                            layout(width, height) {
+                                namePlaceable.placeRelative(0, 0)
+                                val endX = nameTextLayout?.let { layoutRes ->
+                                    val last = (layoutRes.lineCount - 1).coerceAtLeast(0)
+                                    layoutRes.getLineRight(last).toInt()
+                                } ?: namePlaceable.width
+                                metaPlaceable?.placeRelative(endX + spacingPx, (height - (metaPlaceable.height)) / 2)
+                            }
+                        }
 
                         Text(
                             text = "$moduleVersion: ${module.version}",

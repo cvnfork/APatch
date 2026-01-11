@@ -43,8 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,15 +53,9 @@ import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.rememberLoadingDialog
 import me.bmax.apatch.util.APatchKeyHelper
 import me.bmax.apatch.util.getBugreportFile
-import me.bmax.apatch.util.isForceUsingOverlayFS
-import me.bmax.apatch.util.isGlobalNamespaceEnabled
-import me.bmax.apatch.util.isLiteModeEnabled
 import me.bmax.apatch.util.outputStream
-import me.bmax.apatch.util.overlayFsAvailable
 import me.bmax.apatch.util.rootShellForResult
-import me.bmax.apatch.util.setForceUsingOverlayFS
 import me.bmax.apatch.util.setGlobalNamespaceEnabled
-import me.bmax.apatch.util.setLiteMode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -101,15 +93,6 @@ fun SettingScreen(bottomPadding: Dp) {
     var bSkipStoreSuperKey by rememberSaveable {
         mutableStateOf(APatchKeyHelper.shouldSkipStoreSuperKey())
     }
-    val isOverlayFSAvailable by rememberSaveable {
-        mutableStateOf(overlayFsAvailable())
-    }
-    if (kPatchReady && aPatchReady) {
-        isGlobalNamespaceEnabled = isGlobalNamespaceEnabled()
-        isLiteModeEnabled = isLiteModeEnabled()
-        forceUsingOverlayFS = isForceUsingOverlayFS()
-    }
-
     val showResetSuPathDialog = remember { mutableStateOf(false) }
     val showLogDialog = remember { mutableStateOf(false) }
     val showClearKeyDialog = rememberSaveable { mutableStateOf(false) }
@@ -206,30 +189,6 @@ fun SettingScreen(bottomPadding: Dp) {
                                     if (isGlobalNamespaceEnabled) "0" else "1"
                                 )
                                 isGlobalNamespaceEnabled = it
-                            })
-                    }
-
-                    // Lite Mode
-                    if (kPatchReady && aPatchReady) {
-                        SuperSwitch(
-                            title = stringResource(id = R.string.settings_lite_mode),
-                            summary = stringResource(id = R.string.settings_lite_mode_mode_summary),
-                            checked = isLiteModeEnabled,
-                            onCheckedChange = {
-                                setLiteMode(it)
-                                isLiteModeEnabled = it
-                            })
-                    }
-
-                    // Force OverlayFS
-                    if (kPatchReady && aPatchReady && isOverlayFSAvailable) {
-                        SuperSwitch(
-                            title = stringResource(id = R.string.settings_force_overlayfs_mode),
-                            summary = stringResource(id = R.string.settings_force_overlayfs_mode_summary),
-                            checked = forceUsingOverlayFS,
-                            onCheckedChange = {
-                                setForceUsingOverlayFS(it)
-                                forceUsingOverlayFS = it
                             })
                     }
 
