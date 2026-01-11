@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.OpenInBrowser
@@ -575,7 +576,7 @@ private fun ModuleItem(
 
                     if (module.hasWebUi) {
                         IconTextButton(
-                            iconRes = Icons.Default.OpenInBrowser,
+                            iconRes = Icons.Default.Code,
                             onClick = { onClick(module) }
                         )
                         Spacer(modifier = Modifier.width(12.dp))

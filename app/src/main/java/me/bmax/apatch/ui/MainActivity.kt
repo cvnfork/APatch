@@ -9,6 +9,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -33,11 +34,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.Coil
 import coil.ImageLoader
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.navigation.NavBackStackEntry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -87,6 +96,39 @@ class MainActivity : AppCompatActivity() {
             APatchTheme(colorMode = colorMode) {
                 DestinationsNavHost(
                     navGraph = NavGraphs.root,
+                    defaultTransitions = object : NavHostAnimatedDestinationStyle() {
+                        override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
+                            {
+                                slideInHorizontally(
+                                    initialOffsetX = { it },
+                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                )
+                            }
+
+                        override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
+                            {
+                                slideOutHorizontally(
+                                    targetOffsetX = { -it / 5 },
+                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                )
+                            }
+
+                        override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition =
+                            {
+                                slideInHorizontally(
+                                    initialOffsetX = { -it / 5 },
+                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                )
+                            }
+
+                        override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition =
+                            {
+                                slideOutHorizontally(
+                                    targetOffsetX = { it },
+                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                )
+                            }
+                    },
                     dependenciesContainerBuilder = {
                         dependency(intentState)
                         dependency(this@MainActivity)
