@@ -321,7 +321,7 @@ private fun ModuleList(
     val failedUninstall = stringResource(R.string.apm_uninstall_failed)
     val failedUndoUninstall = stringResource(R.string.apm_module_undo_uninstall_failed)
     val successUninstall = stringResource(R.string.apm_uninstall_success)
-    val successUndoUninstall = stringResource(R.string.apm_uninstall_success)
+    val successUndoUninstall = stringResource(R.string.apm_module_undo_uninstall_success)
     val rebootToApply = stringResource(id = R.string.apm_reboot_to_apply)
     val moduleStr = stringResource(id = R.string.apm)
     val uninstall = stringResource(id = R.string.apm_remove)
@@ -423,7 +423,7 @@ private fun ModuleList(
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 
-    suspend fun onUndoModuleUninstall(module: APModuleViewModel.ModuleInfo) {
+    suspend fun onModuleUndoUninstall(module: APModuleViewModel.ModuleInfo) {
         val success = withContext(Dispatchers.IO) {
                 undoUninstallModule(module.id)
         }
@@ -501,7 +501,7 @@ private fun ModuleList(
                                 scope.launch { onModuleUninstall(module) }
                             },
                             onUndoUninstall = {
-                                scope.launch { onUndoModuleUninstall(module) }
+                                scope.launch { onModuleUndoUninstall(module) }
                             },
                             onCheckChanged = {
                                 scope.launch {
