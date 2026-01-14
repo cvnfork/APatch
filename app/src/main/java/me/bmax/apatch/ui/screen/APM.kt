@@ -26,12 +26,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.InstallMobile
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -99,6 +93,12 @@ import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Add
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Download
+import top.yukonga.miuix.kmp.icon.extended.HorizontalSplit
+import top.yukonga.miuix.kmp.icon.extended.Play
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
@@ -184,7 +184,7 @@ fun APModuleScreen(
                         selectZipLauncher.launch(intent)
                     }) {
                     Icon(
-                        imageVector = Icons.Default.Archive,
+                        imageVector = MiuixIcons.Add,
                         contentDescription = null,
                         tint = colorScheme.onPrimary
                     )
@@ -658,7 +658,7 @@ private fun ModuleItem(
 
                     if (module.hasActionScript) {
                         IconTextButton(
-                            iconRes = Icons.Default.PlayArrow,
+                            iconRes = MiuixIcons.Play,
                             textRes = R.string.apm_action,
                             showText = !hideText,
                             onClick = {
@@ -671,7 +671,7 @@ private fun ModuleItem(
 
                     if (module.hasWebUi) {
                         IconTextButton(
-                            iconRes = Icons.Default.Code,
+                            iconRes = MiuixIcons.HorizontalSplit,
                             textRes = R.string.apm_webui_open,
                             showText = !hideText,
                             onClick = { onClick(module) }
@@ -683,7 +683,7 @@ private fun ModuleItem(
 
                     if (updateUrl.isNotEmpty()) {
                         IconTextButton(
-                            iconRes =  Icons.Filled.InstallMobile,
+                            iconRes =  MiuixIcons.Download,
                             textRes = R.string.apm_update,
                             onClick = { onUpdate(module) }
                         )
@@ -693,14 +693,14 @@ private fun ModuleItem(
                     if (!module.remove) {
                         IconTextButton(
                             textRes = R.string.apm_remove,
-                            iconRes = Icons.Default.Delete,
+                            iconRes = MiuixIcons.Delete,
                             onClick = { onUninstall(module) }
                         )
                     }
                 }
             }
             if (module.update) {
-                ModuleStateIndicator(Icons.Default.InstallMobile)
+                ModuleStateIndicator(MiuixIcons.Download)
             }
         }
     }

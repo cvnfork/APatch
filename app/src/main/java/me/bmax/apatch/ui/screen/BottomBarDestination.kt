@@ -4,11 +4,13 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Settings
@@ -45,8 +47,8 @@ enum class BottomBarDestination(
     ),
     AModule(
         R.string.apm,
-        Icons.Filled.Apps,
-        Icons.Outlined.Apps,
+        Icons.Filled.Extension,
+        Icons.Outlined.Extension,
         false,
         true
     ),

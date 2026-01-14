@@ -48,7 +48,7 @@ fun IconTextButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(horizontal = if (finalShowText) 8.dp else 4.dp)
+                .padding(horizontal = if (finalShowText) 10.dp else 4.dp)
         ) {
             Icon(
                 imageVector = iconRes,

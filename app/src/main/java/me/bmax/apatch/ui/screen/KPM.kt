@@ -24,8 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -48,8 +46,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.InstallScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.PatchesDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -91,6 +87,10 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
 import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Add
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import java.io.IOException
 
@@ -184,13 +184,13 @@ fun KPModuleScreen(
                 Column {
                     FloatingActionButton(
                         onClick = { expanded.value = !expanded.value },
-                        containerColor = MiuixTheme.colorScheme.primary,
+                        containerColor = colorScheme.primary,
                         modifier = Modifier.padding(bottom = 30.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Archive,
+                            imageVector = MiuixIcons.Add,
                             contentDescription = null,
-                            tint = MiuixTheme.colorScheme.onPrimary
+                            tint = colorScheme.onPrimary
                         )
                     }
 
@@ -548,7 +548,7 @@ private fun KPModuleItem(
                     horizontalArrangement = Arrangement.End
                 ) {
                     IconTextButton(
-                        iconRes = Icons.Default.Settings,
+                        iconRes = MiuixIcons.Settings,
                         textRes = R.string.kpm_control,
                         onClick = { onControl(module) },
                     )
@@ -556,7 +556,7 @@ private fun KPModuleItem(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     IconTextButton(
-                        iconRes = Icons.Default.Delete,
+                        iconRes = MiuixIcons.Delete,
                         textRes = R.string.kpm_unload,
                         onClick = { onUninstall(module) },
                     )
