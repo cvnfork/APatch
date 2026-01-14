@@ -549,6 +549,7 @@ private fun KPModuleItem(
                 ) {
                     IconTextButton(
                         iconRes = Icons.Default.Settings,
+                        textRes = R.string.kpm_control,
                         onClick = { onControl(module) },
                     )
 
@@ -556,6 +557,7 @@ private fun KPModuleItem(
 
                     IconTextButton(
                         iconRes = Icons.Default.Delete,
+                        textRes = R.string.kpm_unload,
                         onClick = { onUninstall(module) },
                     )
                 }

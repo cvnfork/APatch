@@ -654,9 +654,13 @@ private fun ModuleItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
+                    val hideText = module.hasWebUi && module.hasActionScript
+
                     if (module.hasActionScript) {
                         IconTextButton(
                             iconRes = Icons.Default.PlayArrow,
+                            textRes = R.string.apm_action,
+                            showText = !hideText,
                             onClick = {
                                 navigator.navigate(ExecuteAPMActionScreenDestination(module.id))
                                 viewModel.markNeedRefresh()
@@ -668,6 +672,8 @@ private fun ModuleItem(
                     if (module.hasWebUi) {
                         IconTextButton(
                             iconRes = Icons.Default.Code,
+                            textRes = R.string.apm_webui_open,
+                            showText = !hideText,
                             onClick = { onClick(module) }
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -677,7 +683,8 @@ private fun ModuleItem(
 
                     if (updateUrl.isNotEmpty()) {
                         IconTextButton(
-                            iconRes = Icons.Default.InstallMobile,
+                            iconRes =  Icons.Filled.InstallMobile,
+                            textRes = R.string.apm_update,
                             onClick = { onUpdate(module) }
                         )
                         Spacer(modifier = Modifier.width(12.dp))
@@ -685,6 +692,7 @@ private fun ModuleItem(
 
                     if (!module.remove) {
                         IconTextButton(
+                            textRes = R.string.apm_remove,
                             iconRes = Icons.Default.Delete,
                             onClick = { onUninstall(module) }
                         )
