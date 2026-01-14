@@ -21,12 +21,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
@@ -54,9 +56,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -75,17 +79,22 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
 
 private const val TAG = "Patches"
 
 @Destination<RootGraph>
 @Composable
-fun Patches(mode: PatchesViewModel.PatchMode) {
+fun Patches(
+    mode: PatchesViewModel.PatchMode,
+    navigator: DestinationsNavigator
+) {
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
@@ -96,161 +105,178 @@ fun Patches(mode: PatchesViewModel.PatchMode) {
     }
 
     Scaffold(topBar = {
-        TopAppBar(
+        TopBar(
             title = stringResource(R.string.patch_config_title),
-            scrollBehavior = scrollBehavior
+            onBack = dropUnlessResumed { navigator.popBackStack() }
         )
     }, floatingActionButton = {
-        if (viewModel.needReboot) {
-            val reboot = stringResource(id = R.string.reboot)
-            FloatingActionButton(
-                onClick = {
-                    scope.launch { withContext(Dispatchers.IO) { reboot() } }
-                },
-                content = {
-                    Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = reboot,
-                        tint = MiuixTheme.colorScheme.onPrimary
-                    )
-                },
-            )
+        when {
+            viewModel.needReboot -> {
+                val reboot = stringResource(id = R.string.reboot)
+                FloatingActionButton(
+                    modifier = Modifier.padding(bottom = 30.dp),
+                    onClick = {
+                        scope.launch {
+                            withContext(Dispatchers.IO) { reboot() }
+                        }
+                    },
+                    content = {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = reboot,
+                            tint = MiuixTheme.colorScheme.onPrimary
+                        )
+                    }
+                )
+            }
+            viewModel.patchdone -> {
+                FloatingActionButton(
+                    modifier = Modifier.padding(bottom = 30.dp),
+                    onClick = { navigator.popBackStack() },
+                    content = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "back",
+                            tint = MiuixTheme.colorScheme.onPrimary
+                        )
+                    }
+                )
+            }
         }
     }, popupHost = {}
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .padding(innerPadding)
+                    .verticalScroll(scrollState)
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
             ) {
-                item {
-                    Column(
-                        Modifier.padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                Column(
+                    Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
 
-                    ) {
-                        val context = LocalContext.current
+                ) {
+                    val context = LocalContext.current
 
-                        // request permissions
-                        val permissions = arrayOf(
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        )
-                        val permissionsToRequest = permissions.filter {
-                            ContextCompat.checkSelfPermission(
-                                context,
-                                it
-                            ) != PackageManager.PERMISSION_GRANTED
-                        }
-                        if (permissionsToRequest.isNotEmpty()) {
-                            ActivityCompat.requestPermissions(
-                                context as Activity,
-                                permissionsToRequest.toTypedArray(),
-                                1001
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(5.dp))
-
-                        PatchMode(mode)
-                        ErrorView(viewModel.error)
-                        KernelPatchImageView(viewModel.kpimgInfo)
-
-                        if (mode == PatchesViewModel.PatchMode.PATCH_ONLY && selectedBootImage != null && viewModel.kimgInfo.banner.isEmpty()) {
-                            viewModel.copyAndParseBootimg(selectedBootImage!!)
-                            // Fix endless loop. It's not normal if (parse done && working thread is not working) but banner still null
-                            // Leave user re-choose
-                            if (!viewModel.running && viewModel.kimgInfo.banner.isEmpty()) {
-                                selectedBootImage = null
-                            }
-                        }
-
-                        // select boot.img
-                        if (mode == PatchesViewModel.PatchMode.PATCH_ONLY && viewModel.kimgInfo.banner.isEmpty()) {
-                            SelectFileButton(
-                                text = stringResource(id = R.string.patch_select_bootimg_btn),
-                                onSelected = { data, uri ->
-                                    Log.d(TAG, "select boot.img, data: $data, uri: $uri")
-                                    viewModel.copyAndParseBootimg(uri)
-                                }
-                            )
-                        }
-
-                        if (viewModel.bootSlot.isNotEmpty() || viewModel.bootDev.isNotEmpty()) {
-                            BootimgView(slot = viewModel.bootSlot, boot = viewModel.bootDev)
-                        }
-
-                        if (viewModel.kimgInfo.banner.isNotEmpty()) {
-                            KernelImageView(viewModel.kimgInfo)
-                        }
-
-                        if (mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.kimgInfo.banner.isNotEmpty()) {
-                            SetSuperKeyView(viewModel)
-                        }
-
-                        // existed extras
-                        if (mode == PatchesViewModel.PatchMode.PATCH_AND_INSTALL || mode == PatchesViewModel.PatchMode.INSTALL_TO_NEXT_SLOT) {
-                            viewModel.existedExtras.forEach(action = {
-                                ExtraItem(extra = it, true, onDelete = {
-                                    viewModel.existedExtras.remove(it)
-                                })
-                            })
-                        }
-
-                        // add new extras
-                        if (mode != PatchesViewModel.PatchMode.UNPATCH) {
-                            viewModel.newExtras.forEach(action = {
-                                ExtraItem(extra = it, false, onDelete = {
-                                    val idx = viewModel.newExtras.indexOf(it)
-                                    viewModel.newExtras.remove(it)
-                                    viewModel.newExtrasFileName.removeAt(idx)
-                                })
-                            })
-                        }
-
-                        // add new KPM
-                        if (viewModel.superkey.isNotEmpty() && !viewModel.patching && !viewModel.patchdone && mode != PatchesViewModel.PatchMode.UNPATCH) {
-                            SelectFileButton(
-                                text = stringResource(id = R.string.patch_embed_kpm_btn),
-                                onSelected = { data, uri ->
-                                    Log.d(TAG, "select kpm, data: $data, uri: $uri")
-                                    viewModel.embedKPM(uri)
-                                }
-                            )
-                        }
-
-                        // do patch, update, unpatch
-                        if (!viewModel.patching && !viewModel.patchdone) {
-                            // patch start
-                            if (mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.superkey.isNotEmpty()) {
-                                StartButton(stringResource(id = R.string.patch_start_patch_btn)) {
-                                    viewModel.doPatch(mode)
-                                }
-                            }
-                            // unpatch
-                            if (mode == PatchesViewModel.PatchMode.UNPATCH && viewModel.kimgInfo.banner.isNotEmpty()) {
-                                StartButton(stringResource(id = R.string.patch_start_unpatch_btn)) { viewModel.doUnpatch() }
-                            }
-                        }
-
-                        // patch log
-                        if (viewModel.patching || viewModel.patchdone) {
-                            SelectionContainer {
-                                Text(
-                                    modifier = Modifier.padding(8.dp),
-                                    text = viewModel.patchLog,
-                                    fontSize = 12.sp,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            }
-                            LaunchedEffect(viewModel.patchLog) {
-                                scrollState.animateScrollTo(scrollState.maxValue)
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
+                    // request permissions
+                    val permissions = arrayOf(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    )
+                    val permissionsToRequest = permissions.filter {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            it
+                        ) != PackageManager.PERMISSION_GRANTED
                     }
+                    if (permissionsToRequest.isNotEmpty()) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            permissionsToRequest.toTypedArray(),
+                            1001
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(5.dp))
+
+                    PatchMode(mode)
+                    ErrorView(viewModel.error)
+                    KernelPatchImageView(viewModel.kpimgInfo)
+
+                    if (mode == PatchesViewModel.PatchMode.PATCH_ONLY && selectedBootImage != null && viewModel.kimgInfo.banner.isEmpty()) {
+                        viewModel.copyAndParseBootimg(selectedBootImage!!)
+                        // Fix endless loop. It's not normal if (parse done && working thread is not working) but banner still null
+                        // Leave user re-choose
+                        if (!viewModel.running && viewModel.kimgInfo.banner.isEmpty()) {
+                            selectedBootImage = null
+                        }
+                    }
+
+                    // select boot.img
+                    if (mode == PatchesViewModel.PatchMode.PATCH_ONLY && viewModel.kimgInfo.banner.isEmpty()) {
+                        SelectFileButton(
+                            text = stringResource(id = R.string.patch_select_bootimg_btn),
+                            onSelected = { data, uri ->
+                                Log.d(TAG, "select boot.img, data: $data, uri: $uri")
+                                viewModel.copyAndParseBootimg(uri)
+                            }
+                        )
+                    }
+
+                    if (viewModel.bootSlot.isNotEmpty() || viewModel.bootDev.isNotEmpty()) {
+                        BootimgView(slot = viewModel.bootSlot, boot = viewModel.bootDev)
+                    }
+
+                    if (viewModel.kimgInfo.banner.isNotEmpty()) {
+                        KernelImageView(viewModel.kimgInfo)
+                    }
+
+                    if (mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.kimgInfo.banner.isNotEmpty()) {
+                        SetSuperKeyView(viewModel)
+                    }
+
+                    // existed extras
+                    if (mode == PatchesViewModel.PatchMode.PATCH_AND_INSTALL || mode == PatchesViewModel.PatchMode.INSTALL_TO_NEXT_SLOT) {
+                        viewModel.existedExtras.forEach(action = {
+                            ExtraItem(extra = it, true, onDelete = {
+                                viewModel.existedExtras.remove(it)
+                            })
+                        })
+                    }
+
+                    // add new extras
+                    if (mode != PatchesViewModel.PatchMode.UNPATCH) {
+                        viewModel.newExtras.forEach(action = {
+                            ExtraItem(extra = it, false, onDelete = {
+                                val idx = viewModel.newExtras.indexOf(it)
+                                viewModel.newExtras.remove(it)
+                                viewModel.newExtrasFileName.removeAt(idx)
+                            })
+                        })
+                    }
+
+                    // add new KPM
+                    if (viewModel.superkey.isNotEmpty() && !viewModel.patching && !viewModel.patchdone && mode != PatchesViewModel.PatchMode.UNPATCH) {
+                        SelectFileButton(
+                            text = stringResource(id = R.string.patch_embed_kpm_btn),
+                            onSelected = { data, uri ->
+                                Log.d(TAG, "select kpm, data: $data, uri: $uri")
+                                viewModel.embedKPM(uri)
+                            }
+                        )
+                    }
+
+                    // do patch, update, unpatch
+                    if (!viewModel.patching && !viewModel.patchdone) {
+                        // patch start
+                        if (mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.superkey.isNotEmpty()) {
+                            StartButton(stringResource(id = R.string.patch_start_patch_btn)) {
+                                viewModel.doPatch(mode)
+                            }
+                        }
+                        // unpatch
+                        if (mode == PatchesViewModel.PatchMode.UNPATCH && viewModel.kimgInfo.banner.isNotEmpty()) {
+                            StartButton(stringResource(id = R.string.patch_start_unpatch_btn)) { viewModel.doUnpatch() }
+                        }
+                    }
+
+                    // patch log
+                    if (viewModel.patching || viewModel.patchdone) {
+                        SelectionContainer {
+                            Text(
+                                modifier = Modifier.padding(8.dp),
+                                text = viewModel.patchLog,
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                        LaunchedEffect(viewModel.patchLog) {
+                            scrollState.animateScrollTo(scrollState.maxValue)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
             // loading progress
@@ -637,4 +663,19 @@ private fun PatchMode(mode: PatchesViewModel.PatchMode) {
             Text(text = stringResource(id = mode.sId), style = MiuixTheme.textStyles.body2)
         }
     }
+}
+
+@Composable
+private fun TopBar(title: String, onBack: () -> Unit) {
+    SmallTopAppBar(
+        title = title,
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(MiuixIcons.Back,
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 20.dp)
+                )
+            }
+        },
+    )
 }
