@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
@@ -46,6 +47,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavBackStackEntry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,29 +74,52 @@ class MainActivity : AppCompatActivity() {
 
         installSplashScreen().setKeepOnScreenCondition { isLoading }
 
-        enableEdgeToEdge()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-        }
-
         super.onCreate(savedInstanceState)
 
         setContent {
             val context = LocalActivity.current ?: this
             val prefs = context.getSharedPreferences("config", MODE_PRIVATE)
             var colorMode by remember { mutableIntStateOf(prefs.getInt("color_mode", 0)) }
+            var keyColorInt by remember { mutableIntStateOf(prefs.getInt("key_color", 0)) }
+            val keyColor = remember(keyColorInt) { if (keyColorInt == 0) null else Color(keyColorInt) }
 
-            DisposableEffect(prefs) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+
+
+            val darkMode = when (colorMode) {
+                2, 5 -> true
+                0, 3 -> isSystemInDarkTheme()
+                else -> false
+            }
+
+            DisposableEffect(prefs, darkMode) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT
+                    ) { darkMode },
+                    navigationBarStyle = SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT
+                    ) { darkMode },
+                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.isNavigationBarContrastEnforced = false
+                }
+
                 val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-                    if (key == "color_mode") {
-                        colorMode = prefs.getInt("color_mode", 0)
+                    when (key) {
+                        "color_mode" -> colorMode = prefs.getInt("color_mode", 0)
+                        "key_color" -> keyColorInt = prefs.getInt("key_color", 0)
                     }
                 }
                 prefs.registerOnSharedPreferenceChangeListener(listener)
                 onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
             }
 
-            APatchTheme(colorMode = colorMode) {
+            APatchTheme(colorMode = colorMode, keyColor = keyColor) {
                 DestinationsNavHost(
                     navGraph = NavGraphs.root,
                     defaultTransitions = object : NavHostAnimatedDestinationStyle() {
