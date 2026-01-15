@@ -76,6 +76,7 @@ import me.bmax.apatch.ui.viewmodel.APModuleViewModel
 import me.bmax.apatch.util.DownloadListener
 import me.bmax.apatch.util.download
 import me.bmax.apatch.util.hasMagisk
+import me.bmax.apatch.util.reboot
 import me.bmax.apatch.util.toggleModule
 import me.bmax.apatch.util.undoUninstallModule
 import me.bmax.apatch.util.uninstallModule
@@ -91,6 +92,10 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.SearchBar
+import top.yukonga.miuix.kmp.basic.SnackbarDuration
+import top.yukonga.miuix.kmp.basic.SnackbarHost
+import top.yukonga.miuix.kmp.basic.SnackbarHostState
+import top.yukonga.miuix.kmp.basic.SnackbarResult
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.TopAppBar
@@ -110,6 +115,7 @@ fun APModuleScreen(
     navigator: DestinationsNavigator
 ) {
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehavior = MiuixScrollBehavior()
     var expanded by remember { mutableStateOf(false) }
 
@@ -192,7 +198,10 @@ fun APModuleScreen(
                     )
                 }
             }
-        }, popupHost = {}
+        },
+        snackbarHost = {
+            SnackbarHost(state = snackbarHostState)
+        }
         ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             Box(
@@ -256,6 +265,7 @@ fun APModuleScreen(
                             }
                         },
                         context = context,
+                        snackBarHost = snackbarHostState,
                         scrollBehavior = scrollBehavior
                     )
                 }
@@ -314,6 +324,7 @@ private fun ModuleList(
     onInstallModule: (Uri) -> Unit,
     onClickModule: (id: String, name: String, hasWebUi: Boolean) -> Unit,
     context: Context,
+    snackBarHost: SnackbarHostState,
     scrollBehavior: ScrollBehavior
 ) {
     val failedEnable = stringResource(R.string.apm_failed_to_enable)
@@ -322,6 +333,7 @@ private fun ModuleList(
     val failedUndoUninstall = stringResource(R.string.apm_module_undo_uninstall_failed)
     val successUninstall = stringResource(R.string.apm_uninstall_success)
     val successUndoUninstall = stringResource(R.string.apm_module_undo_uninstall_success)
+    val reboot = stringResource(id = R.string.reboot)
     val rebootToApply = stringResource(id = R.string.apm_reboot_to_apply)
     val moduleStr = stringResource(id = R.string.apm)
     val uninstall = stringResource(id = R.string.apm_remove)
@@ -420,7 +432,18 @@ private fun ModuleList(
             failedUninstall.format(module.name)
         }
 
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        val actionLabel = if (success) {
+            reboot
+        } else {
+            null
+        }
+
+        val result = snackBarHost.showSnackbar(
+            message = message, actionLabel = actionLabel, duration = SnackbarDuration.Short
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            reboot()
+        }
     }
 
     suspend fun onModuleUndoUninstall(module: APModuleViewModel.ModuleInfo) {
@@ -438,7 +461,18 @@ private fun ModuleList(
             failedUndoUninstall.format(module.name)
         }
 
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        val actionLabel = if (success) {
+            reboot
+        } else {
+            null
+        }
+
+        val result = snackBarHost.showSnackbar(
+            message = message, actionLabel = actionLabel, duration = SnackbarDuration.Short
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            reboot()
+        }
     }
 
 
@@ -505,19 +539,25 @@ private fun ModuleList(
                             },
                             onCheckChanged = {
                                 scope.launch {
-                                    val success = loadingDialog.withLoading {
-                                        withContext(Dispatchers.IO) {
-                                            toggleModule(module.id, !module.enabled)
-                                        }
+                                    val success = withContext(Dispatchers.IO) {
+                                        toggleModule(module.id, !module.enabled)
                                     }
+
                                     if (success) {
                                         viewModel.fetchModuleList()
 
-                                        Toast.makeText(context, rebootToApply, Toast.LENGTH_LONG).show()
+                                        val result = snackBarHost.showSnackbar(
+                                            message = rebootToApply,
+                                            actionLabel = reboot,
+                                            duration = SnackbarDuration.Short
+                                        )
 
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            reboot()
+                                        }
                                     } else {
                                         val message = if (module.enabled) failedDisable else failedEnable
-                                        Toast.makeText(context, message.format(module.name), Toast.LENGTH_LONG).show()
+                                        snackBarHost.showSnackbar(message.format(module.name))
                                     }
                                 }
                             },
