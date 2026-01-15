@@ -139,9 +139,6 @@
     <string name="setting_reset_su_path">Изменить путь к su</string>
     <string name="hide_apatch_manager_summary">Установите прокси-приложение со случайным ID пакета и польз. ярлыком приложения</string>
     <string name="setting_reset_su_new_path">Новый полный путь</string>
-    <string name="cyan_theme">Бирюзовая</string>
-    <string name="pink_theme">Розовая</string>
-    <string name="lime_theme">Лаймовая</string>
     <string name="mode_select_page_select_file">Выберите образ boot, который следует пропатчить</string>
     <string name="settings_donot_store_superkey">Не хранить СуперКлюч в памяти устройства</string>
     <string name="mode_select_page_install_inactive_slot_warning">Ваше устройство будет **ПРИНУДЕТЕЛЬНО** загружено в текущий неактивный слот после перезагрузки!\nИспользуйте эту опцию только после успешной установки OTA.\nПродолжить?</string>
@@ -153,7 +150,6 @@
     <string name="home_dialog_uninstall_ap_only">Удалить AndroidPatch</string>
     <string name="kpm_control_dialog_title">Управление KPModule</string>
     <string name="kpm_control_ok">Операция выполнена успешно!</string>
-    <string name="orange_theme">Оранжевая</string>
     <string name="settings_night_mode_follow_sys_summary">Автоматически переключаться на тёмную тему, соблюдая системные настройки</string>
     <string name="about_app_desc">Решение для получения прав суперпользователя, работающее на уровне ядра, предоставляющее возможность монтировать модули системы и модифицировать функции ядра.</string>
     <string name="about_telegram_channel">Канал в Telegram</string>
@@ -175,18 +171,6 @@
     <string name="settings_night_mode_follow_sys">Придерживаться тёмной темы системы</string>
     <string name="settings_use_system_color_theme">Системная цветовая тема</string>
     <string name="settings_use_system_color_theme_summary">Использовать цветовую тему, созданную системой на основе текущих обоев</string>
-    <string name="settings_custom_color_theme">Цветовая тема</string>
-    <string name="deep_orange_theme">Тёмно-оранжевая</string>
-    <string name="deep_purple_theme">Тёмно-фиолетовая</string>
-    <string name="light_blue_theme">Голубая</string>
-    <string name="light_green_theme">Салатовая</string>
-    <string name="purple_theme">Фиолетовая</string>
-    <string name="red_theme">Красная</string>
-    <string name="sakura_theme">Сакура</string>
-    <string name="teal_theme">Морская</string>
-    <string name="yellow_theme">Жёлтая</string>
-    <string name="green_theme">Зелёная</string>
-    <string name="indigo_theme">Индиго</string>
     <string name="patch_mode_install_to_next_slot">Режим: Установить в неактивный слот (После OTA)</string>
     <string name="about_app_version">Версия %1$s</string>
     <string name="apm_webui_open">Открыть</string>
@@ -196,10 +180,6 @@
     <string name="home_system_version">Версия системы</string>
     <string name="settings_night_theme_enabled">Включить темную тему</string>
     <string name="enable_web_debugging">Включить отладку WebView</string>
-    <string name="amber_theme">Янтарная</string>
-    <string name="brown_theme">Коричневая</string>
-    <string name="blue_grey_theme">Сине-серая</string>
-    <string name="blue_theme">Синяя</string>
     <string name="enable_web_debugging_summary">Используется для отладки WebUI. Пожалуйста, включайте только при необходимости.</string>
     <string name="save_log">Сохранить журналы</string>
     <string name="apm_action">Действие</string>
@@ -207,8 +187,4 @@
     <string name="crash_handle_copied">Журнал сбоев скопирован в буфер обмена.</string>
     <string name="log_saved">Логи сохранены</string>
     <string name="crash_handle_title">Сбой приложения…</string>
-    <string name="settings_lite_mode">Включить режим Lite</string>
-    <string name="settings_lite_mode_mode_summary">Функции APModule могут проявлять сбои после включения, но в некоторых случаях они все еще могут эффективно избегать обнаружения. Требуется перезагрузка.</string>
-    <string name="settings_force_overlayfs_mode">Принудительное использование OverlayFS</string>
-    <string name="settings_force_overlayfs_mode_summary">Используйте OverlayFS для монтирования APModules вместо Magic Mount, когда поддержка ядра доступна. Требуется перезагрузка.</string>
 </resources>

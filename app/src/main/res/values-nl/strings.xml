@@ -93,21 +93,6 @@
     <string name="failure">Mislukking</string>
     <string name="settings_check_update">Naar updates zoeken</string>
     <string name="settings_check_update_summary">Automatisch controleren op updates als je de app opent</string>
-    <string name="blue_theme">Blauw Theme</string>
-    <string name="brown_theme">Brown Theme</string>
-    <string name="cyan_theme">Cyan Theem</string>
-    <string name="indigo_theme">Indigo Theme</string>
-    <string name="deep_purple_theme">Diep Purple Theem</string>
-    <string name="light_blue_theme">Licht Theem</string>
-    <string name="green_theme">Groen Theem</string>
-    <string name="light_green_theme">Licht Theem</string>
-    <string name="purple_theme">Purple Theme</string>
-    <string name="red_theme">Red Theem</string>
-    <string name="sakura_theme">Sakura Theem</string>
-    <string name="deep_orange_theme">Diepe Orange Theem</string>
-    <string name="lime_theme">Lime Theme</string>
-    <string name="orange_theme">Orange Theme</string>
-    <string name="pink_theme">Pink Theem</string>
     <string name="save_log">Logboek opslaan</string>
     <string name="log_saved">Logboek opgeslagen</string>
     <string name="kpatch_version_update">Versie: %s -&gt; %s</string>
@@ -125,7 +110,6 @@
     <string name="patch_mode_patch_and_install">Modus: Patchen en installeren</string>
     <string name="patch_set_superkey">SuperKey instellen</string>
     <string name="mode_select_page_install_inactive_slot_warning">Uw apparaat zal **GEFORCEERD** worden om op te starten aan de huidige inactieve gleuf na een heropstarting!\nDeze optie enkel gebruiken nadat OTA gedaan is.\nDoorgaan?</string>
-    <string name="teal_theme">Blauwgroen Thema</string>
     <string name="crash_handle_title">Applicatie gecrasht…</string>
     <string name="crash_handle_copy">Kopieer crash logboek</string>
     <string name="crash_handle_copied">Crash logboek gekopieerd naar klembord.</string>
@@ -194,12 +178,8 @@
     <string name="settings_night_mode_follow_sys">Volg Systeems Donkere Thema</string>
     <string name="settings_night_mode_follow_sys_summary">Verander automatisch naar donkere thema met systeems instelling</string>
     <string name="home_dialog_uninstall_ap_only">Verwijder AndroidPatch</string>
-    <string name="amber_theme">Amber Thema</string>
     <string name="settings_night_theme_enabled">Donkere Thema Inschakelen</string>
-    <string name="blue_grey_theme">BlauwGrijs Thema</string>
-    <string name="settings_custom_color_theme">Kleur Thema</string>
     <string name="about_app_desc">Kernel Root-oplossing met alleen een gestripte kernel afbeelding, die de mogelijkheid biedt om een systeemmodule te mounten en een kernelfunctie te koppelen.</string>
-    <string name="yellow_theme">Geel Thema</string>
     <string name="about_app_version">Versie %1$s</string>
     <string name="about_telegram_group">Telegram Groep</string>
     <string name="about_powered_by">Aangedreven door %1$s</string>
@@ -207,8 +187,4 @@
     <string name="kpm_control">Controle</string>
     <string name="home_dialog_auth_fail_content">Niet in staat om de super sleutel te verifieren, daarom kan APatch niet correct werken.\nHier zijn een paar mogelijke redenen voor het falen van de verificatie:\n1. U heeft de opstart afbeelding niet opgelapt met KernLap.\n2. De opgelapte opstart afbeelding was niet geflashed.\n3. Super sleutel fout.\n4. Uw apparaat ondersteunt APatch en KernLap niet.\n\nGelieve te checken en opnieuwe te proberen. Indien er nog steeds problemen zijn, kan je steeds vragen stellen op de officiele respository\'s problemen pagina.</string>
     <string name="patch_start_unpatch_btn">Ontsnipperen</string>
-    <string name="settings_lite_mode">Lite-modus inschakelen</string>
-    <string name="settings_lite_mode_mode_summary">APModule-functies kunnen fouten vertonen nadat ze zijn ingeschakeld, maar in sommige gevallen kunnen ze detectie nog steeds effectief vermijden. Opnieuw opstarten is vereist.</string>
-    <string name="settings_force_overlayfs_mode">Forceer het gebruik van OverlayFS</string>
-    <string name="settings_force_overlayfs_mode_summary">Gebruik OverlayFS om APModules te mounten in plaats van Magic Mount wanneer kernelondersteuning beschikbaar is. Herstarten is vereist.</string>
 </resources>

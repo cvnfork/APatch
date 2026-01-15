@@ -178,26 +178,6 @@
     <string name="settings_night_theme_enabled">Abilita il Tema scuro</string>
     <string name="settings_use_system_color_theme">Colore del Tema di sistema</string>
     <string name="settings_use_system_color_theme_summary">Usa un colore generato dallo sfondo di sistema attuale</string>
-    <string name="settings_custom_color_theme">Colore</string>
-    <string name="amber_theme">Tema ambra</string>
-    <string name="blue_grey_theme">Tema grigio blu</string>
-    <string name="blue_theme">Tema blu</string>
-    <string name="brown_theme">Tema marrone</string>
-    <string name="cyan_theme">Tema ciano</string>
-    <string name="deep_orange_theme">Tema arancione scuro</string>
-    <string name="deep_purple_theme">Tema viola scuro</string>
-    <string name="green_theme">Tema verde</string>
-    <string name="indigo_theme">Tema indaco</string>
-    <string name="light_blue_theme">Tema azzurro</string>
-    <string name="light_green_theme">Tema verde chiaro</string>
-    <string name="lime_theme">Tema lime</string>
-    <string name="orange_theme">Tema arancione</string>
-    <string name="pink_theme">Tema rosa</string>
-    <string name="purple_theme">Tema viola</string>
-    <string name="red_theme">Tema rosso</string>
-    <string name="sakura_theme">Sakura</string>
-    <string name="teal_theme">Tema verde acqua</string>
-    <string name="yellow_theme">Tema giallo</string>
     <string name="about_app_version">Versione %1$s</string>
     <string name="about_app_desc">Soluzione Kernel Root con solo un\'immagine del kernel ridotta, che offre la possibilità di montare il modulo di sistema e agganciare la funzione kernel.</string>
     <string name="about_telegram_channel">Canale Telegram</string>
@@ -209,8 +189,4 @@
     <string name="crash_handle_title">App chiusa in modo anomalo..</string>
     <string name="crash_handle_copy">Copia registro di arresto anomalo</string>
     <string name="apm_action">Azione</string>
-    <string name="settings_lite_mode">Abilita la modalità Lite</string>
-    <string name="settings_lite_mode_mode_summary">Le funzioni APModule potrebbero presentare errori dopo essere state abilitate, ma in alcuni casi possono comunque eludere efficacemente il rilevamento. Riavvio richiesto.</string>
-    <string name="settings_force_overlayfs_mode">Forza l\'uso di OverlayFS</string>
-    <string name="settings_force_overlayfs_mode_summary">Utilizzare OverlayFS per montare gli APModuli invece di Magic Mount quando il supporto del kernel è disponibile. Riavviare il sistema.</string>
 </resources>

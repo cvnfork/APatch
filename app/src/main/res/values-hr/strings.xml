@@ -153,14 +153,6 @@
     <string name="home_dialog_auth_fail_content">Nije moguće autentificirati SuperKey, stoga APatch ne može pravilno funkcionirati.\nOvo su neki od mogućih uzroka neuspjeha autentifikacije:\n1.</string>
     <string name="home_more_menu_feedback_or_suggestion">Povratne informacije ili prijedlozi</string>
     <string name="settings_night_theme_enabled">Uključi tamni prikaz</string>
-    <string name="settings_custom_color_theme">Boje prikaza</string>
-    <string name="blue_grey_theme">Plavo-siva</string>
-    <string name="blue_theme">Plava</string>
-    <string name="orange_theme">Narančasta</string>
-    <string name="pink_theme">Ružičasta</string>
-    <string name="red_theme">Crvena</string>
-    <string name="green_theme">Zelena</string>
-    <string name="indigo_theme">Indigo</string>
     <string name="patch_select_bootimg_btn">Odaberite pokretanje</string>
     <string name="home_more_menu_about">Informacije</string>
     <string name="home_install_unknown_summary">Pritisnite za instalaciju</string>
@@ -182,22 +174,10 @@
     <string name="settings_night_mode_follow_sys">Prati tamni prikaz sistema</string>
     <string name="settings_use_system_color_theme">Boje prikaza sistema</string>
     <string name="settings_use_system_color_theme_summary">Koristi boje prikaza koje je sistem generirao bazirano na trenutačnoj pozadini.</string>
-    <string name="amber_theme">Jantar</string>
-    <string name="brown_theme">Smeđa</string>
-    <string name="deep_orange_theme">Tamno narančasta</string>
-    <string name="deep_purple_theme">Tamno ljubičasta</string>
-    <string name="light_blue_theme">Svijetlo plava</string>
-    <string name="light_green_theme">Svijetlo zelena</string>
-    <string name="lime_theme">Boja limete</string>
-    <string name="purple_theme">Ljubičasta</string>
-    <string name="sakura_theme">Boja sakure</string>
-    <string name="teal_theme">Tirkizna</string>
-    <string name="yellow_theme">Žuta</string>
     <string name="about_telegram_channel">Telegram kanal</string>
     <string name="about_telegram_group">Telegram grupa</string>
     <string name="crash_handle_title">Aplikacija se srušila…</string>
     <string name="crash_handle_copy">Kopiraj log rušenja</string>
     <string name="crash_handle_copied">Log rušenja kopiran u međuspremnik.</string>
-    <string name="cyan_theme">Cijan</string>
     <string name="about_app_version">Verzija %1$s</string>
 </resources>

@@ -172,28 +172,8 @@
     <string name="kpm_control_failed">Операцію не виконано!</string>
     <string name="settings_night_mode_follow_sys_summary">Автоматично переключатися на темну тему залежно від налаштувань системи</string>
     <string name="settings_use_system_color_theme_summary">Використовуйте колірну тему, згенеровану системою на основі поточних шпалер</string>
-    <string name="settings_custom_color_theme">Кольорова тема</string>
-    <string name="blue_grey_theme">Синій сірий</string>
-    <string name="green_theme">Зелена</string>
-    <string name="brown_theme">Коричневий</string>
-    <string name="indigo_theme">Синьо-фіолетова</string>
-    <string name="light_blue_theme">Світло-синя</string>
-    <string name="purple_theme">Фіолетова</string>
-    <string name="red_theme">Червона</string>
-    <string name="sakura_theme">Сакура</string>
-    <string name="teal_theme">Чирок</string>
-    <string name="yellow_theme">Жовта</string>
-    <string name="orange_theme">Оранжева</string>
     <string name="about_telegram_channel">Телеграм канал</string>
     <string name="settings_use_system_color_theme">Системна кольорова тема</string>
-    <string name="amber_theme">Бурштин</string>
-    <string name="blue_theme">Синій</string>
-    <string name="cyan_theme">Блакитна</string>
-    <string name="deep_orange_theme">Темно-оранджева</string>
-    <string name="deep_purple_theme">Темньо-фіолетова</string>
-    <string name="light_green_theme">Світло-зелена</string>
-    <string name="lime_theme">Лаймова</string>
-    <string name="pink_theme">Рожева</string>
     <string name="kpm_control">Керування</string>
     <string name="about_app_version">Версія %1$s</string>
     <string name="about_app_desc">Кореневе рішення ядра лише з очищеним образом ядра, що забезпечує можливість монтування системного модуля та підключення функції ядра.</string>
@@ -209,8 +189,4 @@
     <string name="crash_handle_title">Збій програми…</string>
     <string name="crash_handle_copied">Журнал збоїв скопійовано в буфер обміну.</string>
     <string name="crash_handle_copy">Копіювати журнал збоїв</string>
-    <string name="settings_lite_mode">Увімкнути спрощений режим</string>
-    <string name="settings_lite_mode_mode_summary">Функції APModule можуть демонструвати збої після ввімкнення, але в деяких випадках вони все ще можуть ефективно уникати виявлення. Потрібне перезавантаження.</string>
-    <string name="settings_force_overlayfs_mode">Примусове використання OverlayFS</string>
-    <string name="settings_force_overlayfs_mode_summary">Використовуйте OverlayFS для монтування APModules замість Magic Mount, коли доступна підтримка ядра. Потрібне перезавантаження.</string>
 </resources>

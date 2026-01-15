@@ -127,7 +127,6 @@
     <string name="patch_mode_bootimg_patch">Tryb: Łatka</string>
     <string name="patch_mode_patch_and_install">Tryb: Aktualizacja</string>
     <string name="patch_mode_uninstall_patch">Tryb: Odłatkowanie</string>
-    <string name="teal_theme">Morski</string>
     <string name="hide_apatch_dialog_new_manager_name">Nowa nazwa menedżera</string>
     <string name="hide_apatch_dialog_summary">Będzie używana jako nowa nazwa aplikacji pokazana w Launcherze</string>
     <string name="setting_reset_su_path">Zresetuj ścieżkę su</string>
@@ -148,11 +147,9 @@
     <string name="about_app_version">Wersja %1$s</string>
     <string name="about_telegram_group">Grupa na Telegramie</string>
     <string name="about_powered_by">Zasilany przez %1$s</string>
-    <string name="red_theme">Czerwony</string>
     <string name="setting_reset_su_new_path">Nowa pełna ścieżka</string>
     <string name="home_more_menu_about">O aplikacji</string>
     <string name="apm_webui_open">Otwórz</string>
-    <string name="green_theme">Zielony</string>
     <string name="home_dialog_uninstall_ap_only">Usuń AndroidPatch</string>
     <string name="home_dialog_uninstall_all">Odinstaluj wszystko</string>
     <string name="kpm_control_dialog_title">Kontroluj KPModule</string>
@@ -166,22 +163,6 @@
     <string name="settings_night_theme_enabled">Włącz ciemny motyw</string>
     <string name="settings_use_system_color_theme">Motyw kolorów systemu</string>
     <string name="settings_use_system_color_theme_summary">Używaj motywu kolorystycznego wygenerowanego przez system na podstawie bieżącej tapety</string>
-    <string name="settings_custom_color_theme">Motyw kolorystyczny</string>
-    <string name="blue_grey_theme">Niebiesko-szary</string>
-    <string name="blue_theme">Niebieski</string>
-    <string name="brown_theme">Brązowy</string>
-    <string name="cyan_theme">Cyjanowy</string>
-    <string name="deep_orange_theme">Ciemny pomarańczowy</string>
-    <string name="deep_purple_theme">Ciemny fiolet</string>
-    <string name="indigo_theme">Indygo</string>
-    <string name="light_blue_theme">Jasnoniebieski</string>
-    <string name="light_green_theme">Jasnozielony</string>
-    <string name="pink_theme">Różowy</string>
-    <string name="purple_theme">Fioletowy</string>
-    <string name="yellow_theme">Żółty</string>
-    <string name="amber_theme">Bursztynowy</string>
-    <string name="lime_theme">Limonkowy</string>
-    <string name="orange_theme">Pomarańczowy</string>
     <string name="hide_apatch_manager_failure">Nie udało się ukryć. Zgłoś błąd!</string>
     <string name="enable_web_debugging_summary">Może być używane do debugowania WebUI. Włącz tylko w razie potrzeby.</string>
     <string name="settings_donot_store_superkey">Nie przechowuj SuperKey lokalnie</string>
@@ -189,7 +170,6 @@
     <string name="home_new_apatch_found">Dostępna jest nowa wersja %s. Kliknij, aby uaktualnić.</string>
     <string name="mode_select_page_title">Zainstaluj</string>
     <string name="mode_select_page_install_inactive_slot">Zainstaluj do nieaktywnego slotu (po aktualizacji OTA)</string>
-    <string name="sakura_theme">Sakura</string>
     <string name="home_dialog_auth_fail_content">Nie można uwierzytelnić SuperKey, dlatego APatch nie może działać poprawnie.\nOto kilka możliwych przyczyn niepowodzenia uwierzytelniania:\n1. Nie zaktualizowano pliku boot.img za pomocą KernelPatch.\n2. Poprawiony plik boot.img nie został sflashowany.\n3. Klucz SuperKey jest nieprawidłowy lub zawiera znaki specjalne.\n4. Urządzenie nie obsługuje APatch i KernelPatch.\n\nSprawdź i spróbuj ponownie. Jeśli nadal występują problemy, zawsze możesz zadawać pytania na oficjalnej stronie repozytorium.</string>
     <string name="home_more_menu_feedback_or_suggestion">Opinie bądź sugestie</string>
     <string name="about_app_desc">Rozwiązanie rootowania jądra z jedynie okrojonym obrazem jądra, zapewniające możliwość montowania modułu systemowego i hakowania funkcji jądra.</string>
@@ -207,8 +187,4 @@
     <string name="crash_handle_title">Aplikacja się wysypała…</string>
     <string name="crash_handle_copy">Kopiuj logi awarii</string>
     <string name="crash_handle_copied">Logi awarii skopiowano do schowka.</string>
-    <string name="settings_lite_mode">Włącz tryb uproszczony</string>
-    <string name="settings_lite_mode_mode_summary">Moduły AP mogą wykazywać awarie po włączeniu tej funkcji, ale w niektórych przypadkach mogą nadal skutecznie unikać wykrycia. Wymagane ponowne uruchomienie.</string>
-    <string name="settings_force_overlayfs_mode">Wymuś użycie OverlayFS</string>
-    <string name="settings_force_overlayfs_mode_summary">Użyj OverlayFS zamiast Magic Mount do montowania modułów AP, gdy jądro to obsługuje. Wymagane jest ponowne uruchomienie.</string>
 </resources>
