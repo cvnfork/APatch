@@ -93,7 +93,7 @@
     <string name="su_pkg_excluded_setting_summary">Att aktivera det här alternativet kommer att tillåta APatch att återställa alla modifierade filer den här applikationens moduler.</string>
     <string name="su_refresh">Uppdatera</string>
     <string name="apm">AP-modul</string>
-    <string name="apm_remove">Ta bort</string>
+    <string name="apm_uinstall">Ta bort</string>
     <string name="apm_install">Installera</string>
     <string name="apm_not_installed">AndroidPatch är inte installerad</string>
     <string name="apm_empty">Ingen modul är installerad</string>

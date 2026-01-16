@@ -65,7 +65,7 @@
     <string name="android_patch">AndroidPatch</string>
     <string name="apm_uninstall_success">Se ha desinstalado %s</string>
     <string name="apm_install">Instalar</string>
-    <string name="apm_remove">Quitar</string>
+    <string name="apm_uinstall">Quitar</string>
     <string name="apm_uninstall_confirm">¿Desinstalar el módulo «%s»?</string>
     <string name="apm_version">Versión</string>
     <string name="apm_start_downloading">Descargar %s</string>

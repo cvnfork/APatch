@@ -148,7 +148,7 @@
     <string name="apm_changelog">Seznam změn</string>
     <string name="apm_update">Aktualizovat</string>
     <string name="apm_webui_open">Otevřít</string>
-    <string name="apm_remove">Odstranit</string>
+    <string name="apm_uinstall">Odstranit</string>
     <string name="apm_install">Instalovat</string>
     <string name="apm_author">Autor</string>
     <string name="apm_action">Akce</string>

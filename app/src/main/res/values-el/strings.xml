@@ -44,7 +44,7 @@
     <string name="apm_uninstall_confirm">Απεγκατάσταση ενότητας \"%s\"?</string>
     <string name="apm_failed_to_disable">Δεν ήταν δυνατή η απενεργοποίηση της ενότητας \"%s\"</string>
     <string name="apm_empty">Δεν υπάρχει εγκατεστημένη ενότητα</string>
-    <string name="apm_remove">Αφαίρεση</string>
+    <string name="apm_uinstall">Αφαίρεση</string>
     <string name="apm_desc">Περιγραφή</string>
     <string name="apm_reboot_to_apply">Επανεκκίνηση για να τεθεί σε ισχύ</string>
     <string name="apm_changelog">Καταγραφή αλλαγών</string>

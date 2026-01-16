@@ -124,7 +124,7 @@
     <string name="apm_failed_to_enable">\"%s\" தொகுதியை இயக்க முடியவில்லை</string>
     <string name="apm_failed_to_disable">\"%s\" தொகுதியை அணைக்க முடியவில்லை</string>
     <string name="apm_empty">எந்த தொகுதி நிறுவப்படவில்லை</string>
-    <string name="apm_remove">அகற்று</string>
+    <string name="apm_uinstall">அகற்று</string>
     <string name="apm_install">நிறுவவும்</string>
     <string name="apm_uninstall_confirm">\"%s\" தொகுதியை நிறுவல் நீக்கவா?</string>
     <string name="apm_uninstall_success">%s நிறுவல் நீக்கப்பட்டது</string>

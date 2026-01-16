@@ -55,7 +55,7 @@
     <string name="apm">APModule</string>
     <string name="apm_failed_to_disable">\"%s\" 모듈을 끌 수 없습니다</string>
     <string name="apm_empty">설치된 모듈이 없습니다</string>
-    <string name="apm_remove">제거</string>
+    <string name="apm_uinstall">제거</string>
     <string name="apm_install">설치</string>
     <string name="apm_uninstall_confirm">\"%s\" 모듈을 제거하시겠습니까?</string>
     <string name="apm_uninstall_success">%s이 제거되었습니다</string>

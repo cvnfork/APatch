@@ -36,7 +36,7 @@
     <string name="apm_reboot_to_apply">รีบูตเพื่อให้มีผล</string>
     <string name="apm_uninstall_success">กำลังดาวน์โหลดโมดูล: %s…</string>
     <string name="apm_install">APModule</string>
-    <string name="apm_remove">ถอนการติดตั้ง</string>
+    <string name="apm_uinstall">ถอนการติดตั้ง</string>
     <string name="apm_uninstall_confirm">กำลังดาวน์โหลดโมดูล: %s…</string>
     <string name="apm_version">APModule</string>
     <string name="su_pkg_excluded_setting_summary">การเปิดใช้งานตัวเลือกนี้จะช่วยให้ APatch กู้คืนไฟล์ที่ถูกปรับเปลี่ยนโดยโมดูลสำหรับแอปพลิเคชันนี้</string>

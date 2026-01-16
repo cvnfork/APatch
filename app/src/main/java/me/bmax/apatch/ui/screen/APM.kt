@@ -336,7 +336,7 @@ private fun ModuleList(
     val reboot = stringResource(id = R.string.reboot)
     val rebootToApply = stringResource(id = R.string.apm_reboot_to_apply)
     val moduleStr = stringResource(id = R.string.apm)
-    val uninstall = stringResource(id = R.string.apm_remove)
+    val uninstall = stringResource(id = R.string.apm_uinstall)
     val cancel = stringResource(id = android.R.string.cancel)
     val moduleUninstallConfirm = stringResource(id = R.string.apm_uninstall_confirm)
     val metaModuleUninstallConfirm = stringResource(R.string.metamodule_uninstall_confirm)
@@ -758,7 +758,7 @@ private fun ModuleItem(
 
                     if (!module.remove) {
                         IconTextButton(
-                            textRes = R.string.apm_remove,
+                            textRes = R.string.apm_uinstall,
                             iconRes = MiuixIcons.Delete,
                             onClick = { onUninstall(module) }
                         )

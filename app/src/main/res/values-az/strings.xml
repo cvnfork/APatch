@@ -69,7 +69,7 @@
     <string name="apm_failed_to_enable">\"%s\" modulunu yandırmaq mümkün olmadı</string>
     <string name="apm_failed_to_disable">\"%s\" modulunu söndürmək mümkün olmadı</string>
     <string name="apm_empty">Heç bir modul quraşdırılmayıb</string>
-    <string name="apm_remove">Sil</string>
+    <string name="apm_uinstall">Sil</string>
     <string name="apm_uninstall_confirm">\"%s\" modulunu silmək istəyirsiniz mi?</string>
     <string name="apm_uninstall_success">%s silindi</string>
     <string name="apm_uninstall_failed">%s modulunu silmək mümkün olmadı</string>

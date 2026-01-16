@@ -146,7 +146,7 @@
     <string name="apm_install">نصب</string>
     <string name="apm_uninstall_confirm">ماژول \"%s\" حذف نصب شود؟</string>
     <string name="apm_uninstall_success">\"%s\" حذف نصب شد</string>
-    <string name="apm_remove">حذف</string>
+    <string name="apm_uinstall">حذف</string>
     <string name="apm_uninstall_failed">حذف نصب \"%s\" ناموفق بود</string>
     <string name="apm_magisk_conflict">ماژول ها به علت درگیری با Msgisk در دسترس نیستند!</string>
     <string name="apm_changelog">گزارش تغییرات</string>

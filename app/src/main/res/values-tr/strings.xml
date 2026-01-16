@@ -9,7 +9,7 @@
     <string name="apm_install">Kur</string>
     <string name="home_auth_key_desc">Sertifikasyondan sonra başlar</string>
     <string name="kpatch_version">Sürüm: %s</string>
-    <string name="apm_remove">Kaldır</string>
+    <string name="apm_uinstall">Kaldır</string>
     <string name="patch_warnning">Kurulum işlemi risklidir. Lütfen verilerinizi yedeklediğinizden emin olun.</string>
     <string name="kpm_kp_not_installed">KernelPatch kurulu değil</string>
     <string name="home_patch_set_key_desc">KernelPatch için tek gerekli veri</string>

@@ -17,7 +17,7 @@
     <string name="apm_uninstall_success">已解除安裝 %s</string>
     <string name="apm_install">安裝</string>
     <string name="kpatch_version">版本：%s</string>
-    <string name="apm_remove">解除安裝</string>
+    <string name="apm_uinstall">解除安裝</string>
     <string name="kpm_kp_not_installed">KernelPatch 尚未安裝</string>
     <string name="home_install_unknown">未安裝或未鑒權</string>
     <string name="apm_uninstall_confirm">確定要解除安裝「%s」模組？</string>

@@ -66,7 +66,7 @@
     <string name="apm_not_installed">AndroidPatch nu este instalat</string>
     <string name="apm_failed_to_enable">Nu se poate porni modulul \"%s\"</string>
     <string name="apm_empty">Niciun modul instalat</string>
-    <string name="apm_remove">Elimină</string>
+    <string name="apm_uinstall">Elimină</string>
     <string name="apm_install">Instalează</string>
     <string name="apm_uninstall_confirm">Dezinstalezi modulul \"%s\"?</string>
     <string name="apm_uninstall_success">%s dezinstalat</string>

@@ -137,7 +137,7 @@
     <string name="apm_failed_to_disable">Moduulia \"%s\" ei voitu kytkeä pois päältä</string>
     <string name="apm_failed_to_enable">Moduulia \"%s\" ei voitu kytkeä päälle</string>
     <string name="apm_empty">Ei moduulia asennettu</string>
-    <string name="apm_remove">Poista</string>
+    <string name="apm_uinstall">Poista</string>
     <string name="apm_install">Asenna</string>
     <string name="apm_uninstall_confirm">Poistetaanko \"%s\"-moduulin asennus?</string>
     <string name="apm_uninstall_success">%s:n asennus poistettu</string>

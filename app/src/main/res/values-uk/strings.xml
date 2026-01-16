@@ -47,7 +47,7 @@
     <string name="apm">Модулі</string>
     <string name="apm_not_installed">AndroidPatch не встановлено</string>
     <string name="apm_failed_to_enable">Не вдалося ввімкнути модуль \"%s\"</string>
-    <string name="apm_remove">Видалити</string>
+    <string name="apm_uinstall">Видалити</string>
     <string name="apm_author">Автор</string>
     <string name="apm_desc">Опис</string>
     <string name="apm_reboot_to_apply">Перезавантажте, щоб зміни вступити в силу</string>

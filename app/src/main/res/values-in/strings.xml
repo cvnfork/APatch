@@ -44,7 +44,7 @@
     <string name="patch_title">Patch</string>
     <string name="apm_uninstall_success">%s berhasil dihapus</string>
     <string name="apm_install">Instal</string>
-    <string name="apm_remove">Hapus</string>
+    <string name="apm_uinstall">Hapus</string>
     <string name="apm_uninstall_confirm">Hapus modul \"%s\"?</string>
     <string name="apm_version">Versi</string>
     <string name="apm_overlay_fs_not_available">Modul tidak tersedia karena OverlayFS dinonaktifkan oleh kernel!</string>

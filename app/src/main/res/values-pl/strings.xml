@@ -44,7 +44,7 @@
     <string name="kpm_load_toast_succ">Pomyślnie załadowano</string>
     <string name="apm_uninstall_success">Moduł %s odinstalowany</string>
     <string name="apm_install">Instaluj</string>
-    <string name="apm_remove">Usuń</string>
+    <string name="apm_uinstall">Usuń</string>
     <string name="apm_uninstall_confirm">Odinstalować moduł \"%s\"?</string>
     <string name="apm_version">Wersja</string>
     <string name="apm_overlay_fs_not_available">Moduły są niedostępne, ponieważ OverlayFS jest wyłączony przez jądro!</string>

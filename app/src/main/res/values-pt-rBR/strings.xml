@@ -72,7 +72,7 @@
     <string name="apm_failed_to_enable">Não foi possível ativar o módulo %s</string>
     <string name="apm_failed_to_disable">Não foi possível desativar o módulo %s</string>
     <string name="apm_empty">Nenhum módulo instalado</string>
-    <string name="apm_remove">Desinstalar</string>
+    <string name="apm_uinstall">Desinstalar</string>
     <string name="apm_install">Instalar</string>
     <string name="apm_uninstall_confirm">Desinstalar o módulo %s?</string>
     <string name="apm_uninstall_success">%s desinstalado</string>
