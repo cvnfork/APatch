@@ -7,7 +7,6 @@ import java.net.URI
 
 plugins {
     alias(libs.plugins.agp.app)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlin.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.lsplugin.apksign)
@@ -30,9 +29,6 @@ apksign {
 
 android {
     namespace = "me.bmax.apatch"
-        defaultConfig {
-        applicationId = "me.bmax.apatch"
-    }
 
     buildTypes {
         debug {
@@ -59,11 +55,6 @@ android {
 
     dependenciesInfo.includeInApk = false
 
-    // https://stackoverflow.com/a/77745844
-    tasks.withType<PackageAndroidArtifact> {
-        doFirst { appMetadata.asFile.orNull?.writeText("") }
-    }
-
     buildFeatures {
         aidl = true
         buildConfig = true
@@ -72,9 +63,21 @@ android {
     }
 
     defaultConfig {
+        applicationId = "me.bmax.apatch"
         buildConfigField("String", "buildKPV", "\"$kernelPatchVersion\"")
-
         base.archivesName = "APatch_${managerVersionCode}_${managerVersionName}_${branchName}"
+
+        externalNativeBuild {
+            cmake {
+                arguments += listOf(
+                    "-DANDROID_STL=none",
+                    "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+                )
+                abiFilters("arm64-v8a")
+                cppFlags += "-std=c++2b"
+                cFlags += "-std=c2x"
+            }
+        }
     }
 
     compileOptions {
@@ -103,15 +106,12 @@ android {
         generateLocaleConfig = true
     }
 
-    sourceSets["main"].jniLibs.srcDir("libs")
+    sourceSets["main"].jniLibs.directories.add("libs")
+}
 
-    applicationVariants.all {
-        kotlin.sourceSets {
-            getByName(name) {
-                kotlin.srcDir("build/generated/ksp/$name/kotlin")
-            }
-        }
-    }
+// https://stackoverflow.com/a/77745844
+tasks.withType<PackageAndroidArtifact> {
+    doFirst { appMetadata.asFile.orNull?.writeText("") }
 }
 
 java {
@@ -211,9 +211,9 @@ tasks.register<Exec>("cargoBuild") {
     val useWSL = isWSLAvailable()
 
     if (useWSL) {
-    val apdPath = System.getenv("APATCH_APD_PATH")
-        ?: error("Please set APATCH_APD_PATH environment variable pointing to the apd folder")
-        
+        val apdPath = System.getenv("APATCH_APD_PATH")
+            ?: error("Please set APATCH_APD_PATH environment variable pointing to the apd folder")
+
         println("Using WSL for Rust build")
         executable("wsl")
         args("bash", "-lc", "cd $apdPath && cargo ndk -t arm64-v8a build --release")
@@ -310,14 +310,4 @@ dependencies {
     implementation(libs.ini4j)
 
     compileOnly(libs.cxx)
-}
-
-cmaker {
-    default {
-        arguments += "-DANDROID_STL=none"
-        arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-        abiFilters("arm64-v8a")
-        cppFlags += "-std=c++2b"
-        cFlags += "-std=c2x"
-    }
 }
