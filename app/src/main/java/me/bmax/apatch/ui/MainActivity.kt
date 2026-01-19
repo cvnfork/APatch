@@ -49,7 +49,10 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import androidx.navigation.NavBackStackEntry
+import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -86,7 +89,6 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
             }
-
 
             val darkMode = when (colorMode) {
                 2, 5 -> true
@@ -217,6 +219,11 @@ fun MainScreen(
             onReset = { installUri = null }
         )
     }
+
+    ShortcutIntentHandler(
+        intentState = intentState,
+        navigator = navigator
+    )
 
     val availablePages = remember(kPatchReady, aPatchReady) {
         BottomBarDestination.entries.filter { d ->
@@ -369,6 +376,46 @@ private fun UriInstallHandler(
 
         uri?.let {
             onInstall(it)
+        }
+    }
+}
+
+
+@Composable
+private fun ShortcutIntentHandler(
+    intentState: MutableStateFlow<Int>,
+    navigator: DestinationsNavigator
+) {
+    val activity = LocalActivity.current ?: return
+    val context = LocalContext.current
+    val intentStateValue by intentState.collectAsState()
+    LaunchedEffect(intentStateValue) {
+        val intent = activity.intent
+        val type = intent?.getStringExtra("shortcut_type") ?: return@LaunchedEffect
+        when (type) {
+            "module_action" -> {
+                val moduleId = intent.getStringExtra("module_id") ?: return@LaunchedEffect
+                navigator.navigate(ExecuteAPMActionScreenDestination(moduleId = moduleId)) {
+                    launchSingleTop = true
+                }
+            }
+
+            "module_webui" -> {
+                val moduleId = intent.getStringExtra("module_id") ?: return@LaunchedEffect
+                val moduleName = intent.getStringExtra("module_name") ?: moduleId
+                val webIntent = android.content.Intent(context, WebUIActivity::class.java)
+                    .setData("kernelsu://webui/$moduleId".toUri())
+                    .putExtra("id", moduleId)
+                    .putExtra("name", moduleName)
+                    .putExtra("from_webui_shortcut", true)
+                    .addFlags(
+                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                                android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    )
+                context.startActivity(webIntent)
+            }
+
+            else -> return@LaunchedEffect
         }
     }
 }

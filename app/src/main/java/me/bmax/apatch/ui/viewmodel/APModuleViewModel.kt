@@ -39,6 +39,8 @@ class APModuleViewModel : ViewModel() {
         val hasWebUi: Boolean,
         val hasActionScript: Boolean,
         val metamodule: Boolean,
+        val actionIconPath: String?,
+        val webUiIconPath: String?,
     )
 
     data class ModuleUpdateInfo(
@@ -104,7 +106,9 @@ class APModuleViewModel : ViewModel() {
                             obj.optString("updateJson"),
                             obj.getBooleanCompat("web"),
                             obj.getBooleanCompat("action"),
-                            obj.getBooleanCompat("metamodule")
+                            obj.getBooleanCompat("metamodule"),
+                            obj.optString("actionIcon").takeIf { it.isNotBlank() },
+                            obj.optString("webuiIcon").takeIf { it.isNotBlank() }
                         )
                     }.toList()
                 isNeedRefresh = false

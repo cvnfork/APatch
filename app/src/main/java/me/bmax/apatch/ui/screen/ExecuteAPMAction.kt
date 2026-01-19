@@ -1,6 +1,7 @@
 package me.bmax.apatch.ui.screen
 
 import android.os.Environment
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -49,9 +51,16 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
     var text by rememberSaveable { mutableStateOf("") }
     var tempText: String
     val logContent = rememberSaveable { StringBuilder() }
+    val activity = LocalActivity.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     var actionResult: Boolean
+
+
+    val fromShortcut = remember(activity) {
+        val intent = activity?.intent
+        intent?.getStringExtra("shortcut_type") == "module_action"
+    }
 
     LaunchedEffect(Unit) {
         if (text.isNotEmpty()) {
@@ -77,7 +86,11 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
             }
         }
         if (actionResult) {
-            navigator.popBackStack()
+            if (fromShortcut && activity != null) {
+                activity.finish()
+            } else {
+                navigator.popBackStack()
+            }
         }
     }
 
