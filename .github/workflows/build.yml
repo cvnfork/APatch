@@ -103,15 +103,6 @@ jobs:
           name: "mappings"
           path: "app/build/outputs/mapping/release/"
 
-      - name: Upload build artifact
-        env:
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-        if: ${{ env.SIGNING_KEY != '' }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: APatch
-          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
-
       - name: Post to channel
         if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/miuix' && github.ref_type != 'tag' }}
         env:
@@ -121,24 +112,8 @@ jobs:
           COMMIT_ID: ${{ github.event.head_commit.id }}
           CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
         run: |
-          if [ -n "${BOT_TOKEN}" ]; then
-            RELEASE_APK="${{ steps.sign_app.outputs.signedReleaseFile }}"
-            URL=$(python3 .github/scripts/telegram_url.py "${CHANNEL_ID}")
-            if [ -f "$RELEASE_APK" ]; then
-              curl -v "$URL" -F "Release=@$RELEASE_APK"
-            fi
+          RELEASE_APK="${{ steps.sign_app.outputs.signedReleaseFile }}"
+          URL=$(python3 .github/scripts/telegram_url.py "${CHANNEL_ID}")
+          if [[ -n "$BOT_TOKEN" && -f "$RELEASE_APK" ]]; then
+              curl -v "$URL" -F "document=@$RELEASE_APK"
           fi
-
-      - name: Release apk
-        env:
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-        if: ${{ env.SIGNING_KEY != '' && github.ref_type == 'tag' }}
-        continue-on-error: true
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ github.token }}
-          tag: ${{ steps.parse_version.outputs.VERSION }}
-          artifacts: ${{steps.sign_app.outputs.signedReleaseFile}}
-          generateReleaseNotes: true
-          makeLatest: true
-          replacesArtifacts: true
