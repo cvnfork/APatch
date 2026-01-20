@@ -38,8 +38,8 @@ import me.bmax.apatch.util.runAPModuleAction
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TopAppBar
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -138,7 +138,7 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
 
 @Composable
 private fun TopBar(onBack: () -> Unit = {}, onSave: () -> Unit = {}) {
-    TopAppBar(
+    SmallTopAppBar(
         title = stringResource(R.string.apm_action),
         navigationIcon = {
             IconButton(
