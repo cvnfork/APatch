@@ -5,7 +5,8 @@ import urllib.parse
 
 
 url = f'https://api.telegram.org/bot{os.environ["BOT_TOKEN"]}'
-url += f'/sendMediaGroup?chat_id={urllib.parse.quote(sys.argv[1])}&media='
+url += f'/sendMediaGroup?disable_notification=true'
+url += f'&chat_id={urllib.parse.quote(sys.argv[1])}&media='
 
 # https://core.telegram.org/bots/api#markdownv2-style
 msg = os.environ["COMMIT_MESSAGE"]
