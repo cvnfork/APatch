@@ -8,8 +8,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -18,44 +23,34 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.PatchesDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import me.bmax.apatch.APApplication
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
 import me.bmax.apatch.util.isABDevice
 import me.bmax.apatch.util.rootAvailable
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
-import top.yukonga.miuix.kmp.extra.SuperArrow
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.extra.SuperCheckbox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 
 var selectedBootImage: Uri? = null
 
-enum class ActionType {
-    INSTALL, UNINSTALL
-}
-
 @Destination<RootGraph>
 @Composable
 fun ModeSelectScreen(
-    navigator: DestinationsNavigator,
-    type: ActionType
+    navigator: DestinationsNavigator
 ) {
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
-            val titleRes = if (type == ActionType.INSTALL)
-                R.string.mode_select_page_title
-            else
-                R.string.home_dialog_uninstall_title
-
             TopBar(
-                title = stringResource(titleRes),
+                title = stringResource(R.string.mode_select_page_title),
                 onBack = dropUnlessResumed { navigator.popBackStack() }
             )
         }
@@ -65,13 +60,7 @@ fun ModeSelectScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Card {
-                if (type == ActionType.INSTALL) {
-                    SelectInstallMethod(navigator = navigator)
-                } else {
-                    SelectUninstallMethod(navigator = navigator)
-                }
-            }
+            SelectInstallMethod(navigator = navigator)
         }
     }
 }
@@ -81,79 +70,85 @@ private fun SelectInstallMethod(navigator: DestinationsNavigator) {
     val rootAvailable = rootAvailable()
     val isAbDevice = isABDevice()
 
-    val radioOptions = mutableListOf<InstallMethod>(InstallMethod.SelectFile())
-    if (rootAvailable) {
-        radioOptions.add(InstallMethod.DirectInstall)
-        if (isAbDevice) {
-            radioOptions.add(InstallMethod.DirectInstallToInactiveSlot)
+    val alertTitle = stringResource(android.R.string.dialog_alert_title)
+    val inactiveSlotWarning = stringResource(R.string.mode_select_page_install_inactive_slot_warning)
+
+    var selectedOption by remember { mutableStateOf<InstallMethod?>(null) }
+
+    val radioOptions = remember(rootAvailable, isAbDevice) {
+        buildList {
+            add(InstallMethod.SelectFile())
+            if (rootAvailable) {
+                add(InstallMethod.DirectInstall)
+                if (isAbDevice) add(InstallMethod.DirectInstallToInactiveSlot)
+            }
         }
     }
 
     val selectImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { uri ->
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
                 selectedBootImage = uri
                 navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.PATCH_ONLY))
             }
         }
     }
 
-    val confirmDialog = rememberConfirmDialog(onConfirm = {
-        navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.INSTALL_TO_NEXT_SLOT))
-    }, onDismiss = null)
-
-    val dialogTitle = stringResource(id = android.R.string.dialog_alert_title)
-    val dialogContent = stringResource(id = R.string.mode_select_page_install_inactive_slot_warning)
+    val confirmDialog = rememberConfirmDialog(
+        onConfirm = {
+            navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.INSTALL_TO_NEXT_SLOT))
+        },
+        onDismiss = null
+    )
 
     Column {
-        radioOptions.forEach { option ->
-            SuperArrow(
-                title = stringResource(id = option.label),
-                onClick = {
-                    when (option) {
-                        is InstallMethod.SelectFile -> {
-                            selectedBootImage = null
-                            selectImageLauncher.launch(
-                                Intent(Intent.ACTION_GET_CONTENT).apply {
-                                    type = "application/octet-stream"
-                                }
-                            )
-                        }
-                        is InstallMethod.DirectInstall -> {
-                            navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.PATCH_AND_INSTALL))
-                        }
-                        is InstallMethod.DirectInstallToInactiveSlot -> {
-                            confirmDialog.showConfirm(dialogTitle, dialogContent, true)
-                        }
-                    }
+        Card {
+            Column {
+                radioOptions.forEach { option ->
+                    SuperCheckbox(
+                        title = stringResource(id = option.label),
+                        summary = when (option) {
+                            is InstallMethod.SelectFile -> stringResource(R.string.mode_install_method_select_file_summary)
+                            is InstallMethod.DirectInstall -> stringResource(R.string.mode_install_method_direct_install_summary)
+                            is InstallMethod.DirectInstallToInactiveSlot -> stringResource(R.string.mode_install_method_inactive_slot_summary)
+                        },
+                        checked = selectedOption?.javaClass == option.javaClass,
+                        onCheckedChange = { selectedOption = option }
+                    )
                 }
-            )
+            }
         }
-    }
-}
 
-@Composable
-private fun SelectUninstallMethod(navigator: DestinationsNavigator) {
-    Column {
-        SuperArrow(
-            title = stringResource(R.string.home_dialog_uninstall_all),
+        TextButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
+            text = if (selectedOption is InstallMethod.SelectFile)
+                stringResource(R.string.action_select_file)
+            else
+                stringResource(R.string.action_start_install),
+            enabled = selectedOption != null,
+            colors = ButtonDefaults.textButtonColorsPrimary(),
             onClick = {
-                APApplication.uninstallApatch()
-                navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.UNPATCH))
-            }
-        )
-        SuperArrow(
-            title = stringResource(R.string.home_dialog_restore_image),
-            onClick = {
-                navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.UNPATCH))
-            }
-        )
-        SuperArrow(
-            title = stringResource(R.string.home_dialog_uninstall_ap_only),
-            onClick = {
-                APApplication.uninstallApatch()
+                when (selectedOption) {
+                    is InstallMethod.SelectFile -> {
+                        selectedBootImage = null
+                        selectImageLauncher.launch(
+                            Intent(Intent.ACTION_GET_CONTENT).apply {
+                                type = "application/octet-stream"
+                            }
+                        )
+                    }
+                    is InstallMethod.DirectInstall -> {
+                        navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.PATCH_AND_INSTALL))
+                    }
+                    is InstallMethod.DirectInstallToInactiveSlot -> {
+                        confirmDialog.showConfirm(alertTitle, inactiveSlotWarning, true)
+                    }
+                    null -> {}
+                }
             }
         )
     }
@@ -172,7 +167,8 @@ private fun TopBar(title: String, onBack: () -> Unit) {
         title = title,
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(MiuixIcons.Back,
+                Icon(
+                    MiuixIcons.Back,
                     contentDescription = null,
                     modifier = Modifier.padding(start = 20.dp)
                 )

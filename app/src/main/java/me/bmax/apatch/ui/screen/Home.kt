@@ -271,7 +271,7 @@ private fun TopBar(
         title = stringResource(R.string.app_name),
         actions = {
             IconButton(onClick = dropUnlessResumed {
-                navigator.navigate(ModeSelectScreenDestination(ActionType.INSTALL))
+                navigator.navigate(ModeSelectScreenDestination())
             }) {
                 Icon(
                     imageVector = Icons.Filled.InstallMobile,

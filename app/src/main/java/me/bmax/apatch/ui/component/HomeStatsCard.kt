@@ -29,7 +29,6 @@ import com.ramcosta.composedestinations.generated.destinations.PatchesDestinatio
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.R
-import me.bmax.apatch.ui.screen.ActionType
 import me.bmax.apatch.ui.screen.AuthFailedTipDialog
 import me.bmax.apatch.ui.screen.AuthSuperKey
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
@@ -221,7 +220,9 @@ fun KStatusCard(
 
     val showAuthFailedTipDialog = remember { mutableStateOf(false) }
     val showAuthKeyDialog = remember { mutableStateOf(false) }
+    val showUninstallDialog = remember { mutableStateOf(false) }
 
+    UninstallDialog(showUninstallDialog, navigator)
     AuthFailedTipDialog(showAuthFailedTipDialog)
     AuthSuperKey(showAuthKeyDialog, showAuthFailedTipDialog)
 
@@ -232,7 +233,7 @@ fun KStatusCard(
         ),
         onClick = {
             if (kpState != APApplication.State.KERNELPATCH_INSTALLED) {
-                navigator.navigate(ModeSelectScreenDestination(ActionType.INSTALL))
+                navigator.navigate(ModeSelectScreenDestination())
             }
         }
     ) {
@@ -296,14 +297,14 @@ fun KStatusCard(
                                     if (Version.installedKPVUInt() < 0x900u) {
                                         navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.PATCH_ONLY))
                                     } else {
-                                        navigator.navigate(ModeSelectScreenDestination(ActionType.INSTALL))
+                                        navigator.navigate(ModeSelectScreenDestination())
                                     }
                                 }
                                 KPatchAction.REBOOT -> reboot()
                                 KPatchAction.UNINSTALL -> {
                                     if (apState == APApplication.State.ANDROIDPATCH_INSTALLED ||
                                         apState == APApplication.State.ANDROIDPATCH_NEED_UPDATE) {
-                                        navigator.navigate(ModeSelectScreenDestination(ActionType.UNINSTALL))
+                                        showUninstallDialog.value = true
                                     } else {
                                         navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.UNPATCH))
                                     }

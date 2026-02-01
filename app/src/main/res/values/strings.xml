@@ -234,6 +234,16 @@
     <string name="mode_select_page_install_inactive_slot">Install to inactive slot (After OTA)</string>
     <string name="mode_select_page_install_inactive_slot_warning">Your device will be **FORCED** to boot to the current inactive slot after a reboot!\nOnly use this option after OTA is done.\nContinue?</string>
 
+    <string name="mode_install_method_select_file_summary">Manually select a boot image file to patch</string>
+    <string name="mode_install_method_direct_install_summary">Patch the current boot partition and install directly</string>
+    <string name="mode_install_method_inactive_slot_summary">Install to the inactive slot after an OTA update</string>
+    <string name="action_start_install">Start</string>
+    <string name="action_select_file">Select File</string>
+
+    <string name="mode_uninstall_method_all_summary">Restore stock images and remove all related files</string>
+    <string name="mode_uninstall_method_restore_summary">Restore the partition to stock and remove system patches</string>
+    <string name="mode_uninstall_method_ap_only_summary">Remove system patches without modifying the partition</string>
+
     <string name="home_dialog_auth_fail_title">Authentication failed</string>
     <string name="home_dialog_auth_fail_content">Unable to authenticate the SuperKey, therefore APatch cannot work properly.\nHere are some possible reasons for authentication failure:\n1. You didn\'t patch the boot.img with KernelPatch.\n2. The patched boot.img wasn\'t flashed.\n3. The SuperKey is wrong or contains special characters.\n4. Your device doesn\'t support APatch and KernelPatch.\n\nPlease check and try again. If there are still issues, you can always ask questions on the official repository\'s issues page.</string>
 

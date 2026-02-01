@@ -192,6 +192,14 @@
     <string name="mode_select_page_install_inactive_slot_warning">将在重启后强制切换到另一个槽位！
 \n注意只能在 OTA 更新完成后的重启之前使用。
 \n确定要继续吗？</string>
+    <string name="mode_install_method_select_file_summary">手动选择一个 Boot 镜像文件进行修补</string>
+    <string name="mode_install_method_direct_install_summary">直接修补当前系统的 Boot 分区并安装</string>
+    <string name="mode_install_method_inactive_slot_summary">用于系统 OTA 更新后，安装到另一个槽位</string>
+    <string name="action_start_install">开始执行</string>
+    <string name="action_select_file">选择文件</string>
+    <string name="mode_uninstall_method_all_summary">还原原厂镜像并移除所有相关文件</string>
+    <string name="mode_uninstall_method_restore_summary">还原分区至原厂状态并移除系统补丁</string>
+    <string name="mode_uninstall_method_ap_only_summary">仅移除系统补丁而不修改分区</string>
     <string name="home_dialog_auth_fail_title">超级密钥鉴权失败</string>
     <string name="home_dialog_auth_fail_content">超级密钥验证失败，因此 APatch 不能正常工作。\n下面是一些可能的原因： \n⒈ 未使用 KernelPatch 修补内核镜像 \n⒉ KernelPatch 修补后的内核镜像未刷入 \n⒊超级密钥输入错误或包含特殊字符\n⒋设备不支持 APatch 以及 KernelPatch \n\n请检查后重试，如果问题仍然存在，可随时前往 GitHub 仓库的 issues 页面提问。</string>
     <string name="home_more_menu_feedback_or_suggestion">反馈或建议</string>
