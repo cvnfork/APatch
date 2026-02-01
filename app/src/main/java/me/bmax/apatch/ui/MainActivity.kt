@@ -29,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.Coil
@@ -58,14 +57,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.ui.component.ModuleInstallHandler
+import me.bmax.apatch.ui.screen.APModuleScreen
 import me.bmax.apatch.ui.screen.BottomBarDestination
 import me.bmax.apatch.ui.theme.APatchTheme
+import me.bmax.apatch.ui.screen.BottomBar
+import me.bmax.apatch.ui.screen.HomeScreen
+import me.bmax.apatch.ui.screen.KPModuleScreen
+import me.bmax.apatch.ui.screen.SettingScreen
+import me.bmax.apatch.ui.screen.SuperUserScreen
 import me.bmax.apatch.ui.viewmodel.APModuleViewModel
 import me.bmax.apatch.ui.viewmodel.SuperUserViewModel
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 
 class MainActivity : AppCompatActivity() {
@@ -85,10 +88,6 @@ class MainActivity : AppCompatActivity() {
             var colorMode by remember { mutableIntStateOf(prefs.getInt("color_mode", 0)) }
             var keyColorInt by remember { mutableIntStateOf(prefs.getInt("key_color", 0)) }
             val keyColor = remember(keyColorInt) { if (keyColorInt == 0) null else Color(keyColorInt) }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
 
             val darkMode = when (colorMode) {
                 2, 5 -> true
@@ -187,7 +186,6 @@ class MainActivity : AppCompatActivity() {
 }
 
 // CompositionLocal for sharing state
-val LocalPagerState = compositionLocalOf<PagerState> { error("No pager state") }
 val LocalHandlePageChange = compositionLocalOf<(Int) -> Unit> { error("No handle page change") }
 val LocalSelectedPage = compositionLocalOf<Int> { error("No selected page") }
 
@@ -204,6 +202,7 @@ fun MainScreen(
     val aPatchReady = state == APApplication.State.ANDROIDPATCH_INSTALLED
 
     val viewModel = viewModel<APModuleViewModel>()
+    val superUserViewModel = viewModel<SuperUserViewModel>()
 
     var installUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -241,36 +240,33 @@ fun MainScreen(
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope, aPatchReady) {
         { page ->
             uiSelectedPage = page
+
+            // If already at target page, cancel any ongoing animation and reset state
             if (page == pagerState.currentPage) {
-                if (animateJob != null && lastRequestedPage != page) {
-                    animateJob?.cancel()
-                    animateJob = null
-                    animating = false
-                    userScrollEnabled = aPatchReady
-                }
+                animateJob?.cancel()
+                animateJob = null
+                animating = false
+                userScrollEnabled = aPatchReady
                 lastRequestedPage = page
-            } else {
-                if (animateJob != null && lastRequestedPage == page) {
-                    // Already animating to the requested page
-                } else {
-                    animateJob?.cancel()
-                    animating = true
-                    userScrollEnabled = false
-                    val job = coroutineScope.launch {
-                        try {
-                            pagerState.animateScrollToPage(page)
-                        } finally {
-                            if (animateJob === this) {
-                                userScrollEnabled = aPatchReady
-                                animating = false
-                                animateJob = null
-                            }
-                        }
+            }
+            // If this is a new target page (not currently animating to it), start new animation
+            else if (lastRequestedPage != page) {
+                animateJob?.cancel()
+                animating = true
+                userScrollEnabled = false
+                lastRequestedPage = page
+
+                animateJob = coroutineScope.launch {
+                    try {
+                        pagerState.animateScrollToPage(page)
+                    } finally {
+                        userScrollEnabled = aPatchReady
+                        animating = false
+                        animateJob = null
                     }
-                    animateJob = job
-                    lastRequestedPage = page
                 }
             }
+            // Otherwise, already animating to target page, do nothing
         }
     }
 
@@ -281,9 +277,7 @@ fun MainScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (SuperUserViewModel.apps.isEmpty()) {
-            SuperUserViewModel().fetchAppList()
-        }
+        SuperUserViewModel.fetchAppListIfEmpty(superUserViewModel)
     }
 
     BackHandler {
@@ -295,65 +289,31 @@ fun MainScreen(
     }
 
     CompositionLocalProvider(
-        LocalPagerState provides pagerState,
         LocalHandlePageChange provides handlePageChange,
         LocalSelectedPage provides uiSelectedPage
     ) {
         Scaffold(
             bottomBar = {
-                BottomBar(availablePages)
+                BottomBar()
             },
         ) { innerPadding ->
             HorizontalPager(
-                modifier = Modifier,
                 state = pagerState,
                 beyondViewportPageCount = availablePages.size,
                 userScrollEnabled = userScrollEnabled,
             ) { pageIndex ->
-                val destination = availablePages[pageIndex]
                 val bottomPadding = innerPadding.calculateBottomPadding()
 
-                when (destination) {
-                    BottomBarDestination.Home -> {
-                        me.bmax.apatch.ui.screen.HomeScreen(bottomPadding, navigator)
-                    }
-                    BottomBarDestination.KModule -> {
-                        me.bmax.apatch.ui.screen.KPModuleScreen(bottomPadding, navigator)
-                    }
-                    BottomBarDestination.SuperUser -> {
-                        me.bmax.apatch.ui.screen.SuperUserScreen(bottomPadding)
-                    }
-                    BottomBarDestination.AModule -> {
-                        me.bmax.apatch.ui.screen.APModuleScreen(bottomPadding, navigator)
-                    }
-                    BottomBarDestination.Settings -> {
-                        me.bmax.apatch.ui.screen.SettingScreen(bottomPadding)
-                    }
+                when (availablePages[pageIndex]) {
+                    BottomBarDestination.Home -> HomeScreen(bottomPadding, navigator)
+                    BottomBarDestination.KModule -> KPModuleScreen(bottomPadding, navigator)
+                    BottomBarDestination.SuperUser -> SuperUserScreen(bottomPadding)
+                    BottomBarDestination.AModule -> APModuleScreen(bottomPadding, navigator)
+                    BottomBarDestination.Settings -> SettingScreen(bottomPadding)
                 }
             }
         }
     }
-}
-
-@Composable
-private fun BottomBar(availablePages: List<BottomBarDestination>) {
-    val selectedPage = LocalSelectedPage.current
-    val handlePageChange = LocalHandlePageChange.current
-
-    val navItems = availablePages.map { d ->
-        NavigationItem(
-            label = stringResource(d.label),
-            icon = if (selectedPage == availablePages.indexOf(d)) d.iconSelected else d.iconNotSelected
-        )
-    }
-
-    NavigationBar(
-        items = navItems,
-        selected = selectedPage,
-        onClick = { index ->
-            handlePageChange(index)
-        }
-    )
 }
 
 @Composable
@@ -365,18 +325,14 @@ private fun UriInstallHandler(
     val intentStateValue by intentState.collectAsState()
 
     LaunchedEffect(intentStateValue) {
-        val uri: Uri? = intent?.data ?: run {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent?.getParcelableArrayListExtra("uris", Uri::class.java)?.firstOrNull()
-            } else {
-                @Suppress("DEPRECATION")
-                intent?.getParcelableArrayListExtra<Uri>("uris")?.firstOrNull()
-            }
+        val uri = intent?.data ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent?.getParcelableArrayListExtra("uris", Uri::class.java)?.firstOrNull()
+        } else {
+            @Suppress("DEPRECATION")
+            intent?.getParcelableArrayListExtra<Uri>("uris")?.firstOrNull()
         }
 
-        uri?.let {
-            onInstall(it)
-        }
+        uri?.let(onInstall)
     }
 }
 

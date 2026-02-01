@@ -40,6 +40,11 @@ class SuperUserViewModel : ViewModel() {
         private val appsLock = Any()
         var apps by mutableStateOf<List<AppInfo>>(emptyList())
 
+        suspend fun fetchAppListIfEmpty(viewModel: SuperUserViewModel) {
+            if (apps.isEmpty()) {
+                viewModel.fetchAppList()
+            }
+        }
         fun getAppIconDrawable(context: Context, packageName: String): Drawable? {
             val appList = synchronized(appsLock) { apps }
             val appDetail = appList.find { it.packageName == packageName }
