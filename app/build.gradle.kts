@@ -58,6 +58,7 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix = ".debug"
             isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
