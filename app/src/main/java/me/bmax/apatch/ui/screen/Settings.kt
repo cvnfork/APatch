@@ -76,6 +76,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
@@ -320,7 +321,7 @@ fun SettingScreen(bottomPadding: Dp) {
 
                     var selectedIndex by remember { mutableIntStateOf(initialIndex) }
 
-                    SuperDropdown(
+                    WindowDropdown(
                         title = stringResource(R.string.settings_app_language),
                         items = languages.toList(),
                         selectedIndex = selectedIndex,

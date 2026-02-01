@@ -54,7 +54,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.InputField
-import top.yukonga.miuix.kmp.extra.SuperListPopup
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PullToRefresh
@@ -165,7 +165,7 @@ fun SuperTopBar(
                     contentDescription = stringResource(id = R.string.settings)
                 )
 
-                SuperListPopup(
+                WindowListPopup(
                     show = showDropdown,
                     onDismissRequest = { showDropdown.value = false }
                 ) {

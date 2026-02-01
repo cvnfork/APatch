@@ -82,7 +82,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.extra.SuperListPopup
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
@@ -296,7 +296,7 @@ private fun TopBar(
                         contentDescription = stringResource(id = R.string.reboot)
                     )
 
-                    SuperListPopup(
+                    WindowListPopup(
                         show = howDropdownReboot,
                         alignment = PopupPositionProvider.Align.BottomStart,
                         onDismissRequest = { howDropdownReboot.value = false }
@@ -331,7 +331,7 @@ private fun TopBar(
                         contentDescription = stringResource(id = R.string.settings)
                     )
 
-                    SuperListPopup(
+                    WindowListPopup(
                         show = showDropdownMoreOptions,
                         alignment = PopupPositionProvider.Align.BottomEnd,
                         onDismissRequest = { showDropdownMoreOptions.value = false }

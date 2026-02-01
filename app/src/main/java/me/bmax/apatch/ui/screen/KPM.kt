@@ -73,7 +73,7 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.extra.SuperListPopup
+import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.PullToRefresh
@@ -192,7 +192,7 @@ fun KPModuleScreen(
                         )
                     }
 
-                    SuperListPopup(
+                    WindowListPopup(
                         show = expanded,
                         alignment = PopupPositionProvider.Align.TopEnd,
                         onDismissRequest = { expanded.value = false }
