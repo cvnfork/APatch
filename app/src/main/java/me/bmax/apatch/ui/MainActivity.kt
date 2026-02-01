@@ -12,7 +12,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -28,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.Coil
@@ -58,9 +56,9 @@ import kotlinx.coroutines.launch
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.ui.component.ModuleInstallHandler
 import me.bmax.apatch.ui.screen.APModuleScreen
-import me.bmax.apatch.ui.screen.BottomBarDestination
+import me.bmax.apatch.ui.component.BottomBarDestination
 import me.bmax.apatch.ui.theme.APatchTheme
-import me.bmax.apatch.ui.screen.BottomBar
+import me.bmax.apatch.ui.component.BottomBar
 import me.bmax.apatch.ui.screen.HomeScreen
 import me.bmax.apatch.ui.screen.KPModuleScreen
 import me.bmax.apatch.ui.screen.SettingScreen

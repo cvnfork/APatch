@@ -1,4 +1,4 @@
-package me.bmax.apatch.ui.screen
+package me.bmax.apatch.ui.component
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
