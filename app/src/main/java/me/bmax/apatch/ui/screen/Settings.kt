@@ -21,8 +21,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Commit
+import androidx.compose.material.icons.filled.DeveloperMode
+import androidx.compose.material.icons.filled.Engineering
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.rounded.Colorize
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -55,6 +66,8 @@ import me.bmax.apatch.APApplication
 import me.bmax.apatch.BuildConfig
 import me.bmax.apatch.Natives
 import me.bmax.apatch.R
+import me.bmax.apatch.ui.component.ArrowItem
+import me.bmax.apatch.ui.component.SwitchItem
 import me.bmax.apatch.ui.component.rememberLoadingDialog
 import me.bmax.apatch.util.APatchKeyHelper
 import me.bmax.apatch.util.getBugreportFile
@@ -68,13 +81,11 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -128,15 +139,32 @@ fun SettingScreen(
             item {
                 val prefs = APApplication.sharedPreferences
                 Card {
+                    // su path
+                    if (kPatchReady) {
+                        ArrowItem(
+                            title = stringResource(R.string.setting_reset_su_path),
+                            summary = stringResource(R.string.setting_reset_su_path_summary),
+                            icon = Icons.Filled.Commit,
+                            contentDescription = stringResource(R.string.setting_reset_su_path),
+                            onClick = {
+                                showResetSuPathDialog.value = true
+                            }
+                        )
+                    }
+
                     // clear key
                     if (kPatchReady) {
-                        val clearKeyDialogTitle = stringResource(id = R.string.clear_super_key)
-                        val clearKeyDialogContent =
-                            stringResource(id = R.string.settings_clear_super_key_dialog)
-                        SuperArrow(
+                        val clearKeyDialogTitle = stringResource(R.string.clear_super_key)
+                        val clearKeyDialogContent = stringResource(R.string.settings_clear_super_key_dialog)
+
+                        ArrowItem(
                             title = stringResource(R.string.clear_super_key),
-                            onClick = { showClearKeyDialog.value = true }
+                            summary = stringResource(R.string.clear_super_key_summary),
+                            icon = Icons.Default.Key,
+                            contentDescription = stringResource(R.string.clear_super_key),
+                            onClick = { showClearKeyDialog.value = true },
                         )
+
                         if (showClearKeyDialog.value) {
                             WindowDialog(
                                 show = showClearKeyDialog,
@@ -149,7 +177,7 @@ fun SettingScreen(
                                 ) {
 
                                     TextButton(
-                                        stringResource(id = android.R.string.cancel),
+                                        stringResource(android.R.string.cancel),
                                         onClick = { showClearKeyDialog.value = false },
                                         modifier = Modifier.weight(1f),
                                     )
@@ -157,7 +185,7 @@ fun SettingScreen(
                                     Spacer(Modifier.width(20.dp))
 
                                     TextButton(
-                                        stringResource(id = android.R.string.ok),
+                                        stringResource(android.R.string.ok),
                                         onClick = {
                                             APatchKeyHelper.clearConfigKey()
                                             APApplication.superKey = ""
@@ -172,27 +200,31 @@ fun SettingScreen(
                     }
 
                     // store key local?
-                    SuperSwitch(
-                        title = stringResource(id = R.string.settings_donot_store_superkey),
-                        summary = stringResource(id = R.string.settings_donot_store_superkey_summary),
+                    SwitchItem(
+                        title = stringResource(R.string.settings_donot_store_superkey),
+                        summary = stringResource(R.string.settings_donot_store_superkey_summary),
+                        icon = Icons.Default.KeyOff,
                         checked = bSkipStoreSuperKey,
                         onCheckedChange = {
                             bSkipStoreSuperKey = it
                             APatchKeyHelper.setShouldSkipStoreSuperKey(bSkipStoreSuperKey)
-                        })
+                        }
+                    )
 
                     // Global mount
                     if (kPatchReady && aPatchReady) {
-                        SuperSwitch(
-                            title = stringResource(id = R.string.settings_global_namespace_mode),
-                            summary = stringResource(id = R.string.settings_global_namespace_mode_summary),
+                        SwitchItem(
+                            title = stringResource(R.string.settings_global_namespace_mode),
+                            summary = stringResource(R.string.settings_global_namespace_mode_summary),
+                            icon = Icons.Filled.Engineering,
                             checked = isGlobalNamespaceEnabled,
                             onCheckedChange = {
                                 setGlobalNamespaceEnabled(
                                     if (isGlobalNamespaceEnabled) "0" else "1"
                                 )
                                 isGlobalNamespaceEnabled = it
-                            })
+                            }
+                        )
                     }
 
                     // WebView Debug
@@ -201,9 +233,10 @@ fun SettingScreen(
                             mutableStateOf(prefs.getBoolean("enable_web_debugging", false))
                         }
 
-                        SuperSwitch(
-                            title = stringResource(id = R.string.enable_web_debugging),
-                            summary = stringResource(id = R.string.enable_web_debugging_summary),
+                        SwitchItem(
+                            title = stringResource(R.string.enable_web_debugging),
+                            summary = stringResource(R.string.enable_web_debugging_summary),
+                            icon = Icons.Filled.DeveloperMode,
                             checked = enableWebDebugging,
                             onCheckedChange = { isChecked ->
                                 enableWebDebugging = isChecked
@@ -221,34 +254,43 @@ fun SettingScreen(
                         )
                     }
 
-                    SuperSwitch(
-                        title = stringResource(id = R.string.settings_check_update),
-                        summary = stringResource(id = R.string.settings_check_update_summary),
+                    SwitchItem(
+                        title = stringResource(R.string.settings_check_update),
+                        summary = stringResource(R.string.settings_check_update_summary),
+                        icon = Icons.Filled.Update,
                         checked = checkUpdate,
                         onCheckedChange = { isChecked ->
                             checkUpdate = isChecked
                             prefs.edit { putBoolean("check_update", isChecked) }
-                        })
+                        }
+                    )
 
                     // Theme System
                     val themeItems = listOf(
-                        stringResource(id = R.string.settings_theme_mode_system),
-                        stringResource(id = R.string.settings_theme_mode_light),
-                        stringResource(id = R.string.settings_theme_mode_dark),
-                        stringResource(id = R.string.settings_theme_mode_monet_system),
-                        stringResource(id = R.string.settings_theme_mode_monet_light),
-                        stringResource(id = R.string.settings_theme_mode_monet_dark),
+                        stringResource(R.string.settings_theme_mode_system),
+                        stringResource(R.string.settings_theme_mode_light),
+                        stringResource(R.string.settings_theme_mode_dark),
+                        stringResource(R.string.settings_theme_mode_monet_system),
+                        stringResource(R.string.settings_theme_mode_monet_light),
+                        stringResource(R.string.settings_theme_mode_monet_dark),
                     )
                     var themeMode by rememberSaveable {
                         mutableIntStateOf(prefs.getInt("color_mode", 0))
                     }
                     SuperDropdown(
-                        title = stringResource(id = R.string.settings_theme),
+                        title = stringResource(R.string.settings_theme),
+                        summary = stringResource(R.string.settings_theme_summary),
                         items = themeItems,
                         selectedIndex = themeMode,
                         onSelectedIndexChange = { index ->
                             prefs.edit { putInt("color_mode", index) }
                             themeMode = index
+                        },
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Rounded.Palette,
+                                contentDescription = stringResource(R.string.settings_theme)
+                            )
                         }
                     )
 
@@ -284,28 +326,26 @@ fun SettingScreen(
                             )
                         }
                         SuperDropdown(
-                            title = stringResource(id = R.string.settings_key_color),
-                            summary = stringResource(id = R.string.settings_key_color_summary),
+                            title = stringResource(R.string.settings_key_color),
+                            summary = stringResource(R.string.settings_key_color_summary),
                             items = colorItems,
                             selectedIndex = keyColorIndex,
                             onSelectedIndexChange = { index ->
                                 prefs.edit { putInt("key_color", colorValues[index]) }
                                 keyColorIndex = index
+                            },
+                            startAction = {
+                                Icon(
+                                    imageVector = Icons.Rounded.Colorize,
+                                    contentDescription = stringResource(R.string.settings_key_color)
+                                )
                             }
                         )
                     }
 
-                    // su path
-                    if (kPatchReady) {
-                        SuperArrow(
-                            title = stringResource(R.string.setting_reset_su_path),
-                            onClick = { showResetSuPathDialog.value = true }
-                        )
-                    }
-
                     // language
-                    val languages = stringArrayResource(id = R.array.languages)
-                    val languagesValues = stringArrayResource(id = R.array.languages_values)
+                    val languages = stringArrayResource(R.array.languages)
+                    val languagesValues = stringArrayResource(R.array.languages_values)
 
                     val currentLocales = AppCompatDelegate.getApplicationLocales()
                     val currentLanguageTag = if (currentLocales.isEmpty) {
@@ -325,6 +365,7 @@ fun SettingScreen(
 
                     WindowDropdown(
                         title = stringResource(R.string.settings_app_language),
+                        summary = stringResource(R.string.settings_app_language_summary),
                         items = languages.toList(),
                         selectedIndex = selectedIndex,
                         onSelectedIndexChange = { newIndex ->
@@ -340,18 +381,32 @@ fun SettingScreen(
                                     )
                                 )
                             }
+                        },
+                        startAction = {
+                            Icon(
+                                imageVector = Icons.Filled.Translate,
+                                contentDescription = stringResource(R.string.settings_app_language)
+                            )
                         }
                     )
 
                     // log
-                    SuperArrow(
+                    ArrowItem(
                         title = stringResource(R.string.send_log),
+                        summary = stringResource(R.string.send_log_summary),
+                        icon = Icons.Filled.BugReport,
+                        contentDescription = stringResource(R.string.send_log),
                         onClick = {
                             showLogDialog.value = true
                         }
                     )
-                    SuperArrow(
+
+                    // about
+                    ArrowItem(
                         title = stringResource(R.string.home_more_menu_about),
+                        summary = stringResource(R.string.about_summary),
+                        icon = Icons.Filled.Info,
+                        contentDescription = stringResource(R.string.home_more_menu_about),
                         onClick = {
                             navigator.navigate(AboutScreenDestination)
                         }
@@ -488,7 +543,7 @@ fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
         ) {
 
             TextButton(
-                stringResource(id = android.R.string.cancel),
+                stringResource(android.R.string.cancel),
                 onClick = { showDialog.value = false },
                 modifier = Modifier.weight(1f),
             )
@@ -496,7 +551,7 @@ fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
             Spacer(Modifier.width(20.dp))
 
             TextButton(
-                stringResource(id = android.R.string.ok),
+                stringResource(android.R.string.ok),
                 onClick = {
                     showDialog.value = false
                     val success = Natives.resetSuPath(suPath)

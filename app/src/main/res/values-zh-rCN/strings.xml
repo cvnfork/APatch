@@ -10,6 +10,7 @@
     <string name="save_log">保存日志</string>
     <string name="log_saved">日志已保存</string>
     <string name="send_log">发送日志</string>
+    <string name="send_log_summary">保存日志或分享给开发者</string>
     <string name="patch_warnning">安装过程存在风险，请确保您的数据已备份。</string>
     <string name="home_patch_set_key_desc">内核补丁的唯一授权凭证</string>
     <string name="home_install_unknown">未安装或未鉴权</string>
@@ -25,6 +26,7 @@
     <string name="kernel_patch">内核补丁</string>
     <string name="home_click_to_install">点此安装</string>
     <string name="about">关于</string>
+    <string name="about_summary">版本信息与开发支持</string>
     <string name="reboot">重启</string>
     <string name="home_need_update">新版本可升级</string>
     <string name="home">主页</string>
@@ -134,9 +136,11 @@
     <string name="module_error_missing_id">module.prop 缺少字段 \'id\'</string>
     <string name="module_error_invalid_id">模块 ID \'%s\' 无效</string>
     <string name="clear_super_key">清除超级密钥</string>
+    <string name="clear_super_key_summary">清除后下次使用需重新输入凭证</string>
     <string name="apm_not_installed">尚未注入系统补丁</string>
     <string name="system_default">系统默认</string>
     <string name="settings_app_language">语言</string>
+    <string name="settings_app_language_summary">更改应用界面所使用的语言</string>
     <string name="patch">修补内核镜像</string>
     <string name="settings_global_namespace_mode_summary">所有 Root 会话均使用全局挂载命名空间</string>
     <string name="settings_global_namespace_mode">全局命名空间模式</string>
@@ -182,6 +186,7 @@
     <string name="kpm_add_kpm">添加内核模块</string>
     <string name="kpm_install">安装</string>
     <string name="setting_reset_su_path">重设 SU 路径</string>
+    <string name="setting_reset_su_path_summary">自定义超级用户二进制文件的路径</string>
     <string name="setting_reset_su_new_path">新的完整路径</string>
     <string name="success">成功</string>
     <string name="failure">失败</string>
@@ -227,6 +232,7 @@
     <string name="kpm_control_ok">操作成功！</string>
     <string name="kpm_control_failed">操作失败！</string>
     <string name="settings_theme">主题</string>
+    <string name="settings_theme_summary">选择应用的主题模式</string>
     <string name="settings_theme_mode_system">跟随系统</string>
     <string name="settings_theme_mode_light">浅色</string>
     <string name="settings_theme_mode_dark">深色</string>

@@ -25,6 +25,7 @@
     <string name="reboot_edl">Reboot to EDL</string>
     <string name="about">About</string>
     <string name="settings_app_language">Language</string>
+    <string name="settings_app_language_summary">Configure the display language</string>
     <string name="system_default">System default</string>
     <string name="settings_global_namespace_mode">Global namespace mode</string>
     <string name="settings_global_namespace_mode_summary">All root sessions use the global mount namespace</string>
@@ -38,6 +39,7 @@
 
     <string name="about_source_code"><![CDATA[<p>View source code at %1$s<p/>Join our %2$s channel<p/>Join our %3$s group]]></string>
     <string name="send_log">Send logs</string>
+    <string name="send_log_summary">Save logs or share them with developers</string>
     <string name="save_log">Save logs</string>
     <string name="log_saved">Logs saved</string>
     <string name="safe_mode">Safe mode</string>
@@ -45,6 +47,7 @@
 
     <string name="super_key">SuperKey</string>
     <string name="clear_super_key">Clear SuperKey</string>
+    <string name="clear_super_key_summary">Credentials must be re-entered upon next use</string>
     <string name="patch_set_superkey">Set SuperKey</string>
     <string name="home_patch_set_key_desc">Only credential for KernelPatch</string>
     <string name="home_patch_next_step">Next step</string>
@@ -203,6 +206,7 @@
     <string name="hide_apatch_manager_failure">Failed to hide. Please report the bug!</string>
 
     <string name="setting_reset_su_path">Reset su path</string>
+    <string name="setting_reset_su_path_summary">Customize the path for the SuperUser binary</string>
     <string name="setting_reset_su_new_path">New full path</string>
 
     <string name="apm_webui_open">Open</string>
@@ -249,6 +253,7 @@
 
     <string name="home_more_menu_feedback_or_suggestion">Feedback or suggestion</string>
     <string name="home_more_menu_about">About</string>
+    <string name="about_summary">Version and support</string>
 
     <string name="home_dialog_uninstall_title">Uninstall</string>
 
@@ -264,6 +269,7 @@
     <string name="kpm_control_failed">Operation failed!</string>
 
     <string name="settings_theme">Theme</string>
+    <string name="settings_theme_summary">Choose the app theme mode</string>
     <string name="settings_theme_mode_system">Follow system</string>
     <string name="settings_theme_mode_light">Light</string>
     <string name="settings_theme_mode_dark">Dark</string>
