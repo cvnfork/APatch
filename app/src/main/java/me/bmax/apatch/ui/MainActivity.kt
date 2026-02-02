@@ -307,7 +307,7 @@ fun MainScreen(
                     BottomBarDestination.KModule -> KPModuleScreen(bottomPadding, navigator)
                     BottomBarDestination.SuperUser -> SuperUserScreen(bottomPadding)
                     BottomBarDestination.AModule -> APModuleScreen(bottomPadding, navigator)
-                    BottomBarDestination.Settings -> SettingScreen(bottomPadding)
+                    BottomBarDestination.Settings -> SettingScreen(bottomPadding, navigator)
                 }
             }
         }

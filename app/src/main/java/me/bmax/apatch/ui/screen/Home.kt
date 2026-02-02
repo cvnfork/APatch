@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.InstallMobile
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -50,7 +49,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
-import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ModeSelectScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +68,7 @@ import me.bmax.apatch.util.Version.getManagerVersion
 import me.bmax.apatch.util.checkNewVersion
 import me.bmax.apatch.util.getSELinuxStatus
 import me.bmax.apatch.util.reboot
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
@@ -87,6 +86,9 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Link
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 private val managerVersion = getManagerVersion()
@@ -250,8 +252,6 @@ private fun TopBar(
     kpState: APApplication.State,
     scrollBehavior: ScrollBehavior
 ) {
-    val uriHandler = LocalUriHandler.current
-    val showDropdownMoreOptions = remember { mutableStateOf(false) }
     val howDropdownReboot = remember { mutableStateOf(false) }
 
     val rebootItems = listOf(
@@ -260,11 +260,6 @@ private fun TopBar(
         stringResource(R.string.reboot_bootloader),
         stringResource(R.string.reboot_download),
         stringResource(R.string.reboot_edl),
-    )
-
-    val moreItems = listOf(
-        stringResource(R.string.home_more_menu_feedback_or_suggestion),
-        stringResource(R.string.home_more_menu_about)
     )
 
     TopAppBar(
@@ -280,8 +275,10 @@ private fun TopBar(
             }
 
             if (kpState != APApplication.State.UNKNOWN_STATE) {
-                IconButton(onClick = {
-                    howDropdownReboot.value = true
+                IconButton(
+                    modifier = Modifier.padding(end = 16.dp),
+                    onClick = {
+                        howDropdownReboot.value = true
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
@@ -315,38 +312,6 @@ private fun TopBar(
                     }
                 }
             }
-
-            Box {
-                IconButton(onClick = { showDropdownMoreOptions.value = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(id = R.string.settings)
-                    )
-
-                    WindowListPopup(
-                        show = showDropdownMoreOptions,
-                        alignment = PopupPositionProvider.Align.BottomEnd,
-                        onDismissRequest = { showDropdownMoreOptions.value = false }
-                    ) {
-                        ListPopupColumn {
-                            moreItems.forEachIndexed { index, string ->
-                                DropdownItem(
-                                    text = string,
-                                    optionSize = moreItems.size,
-                                    onSelectedIndexChange = {
-                                        when (index) {
-                                            0 -> uriHandler.openUri("https://github.com/bmax121/APatch/issues/new/choose")
-                                            1 -> navigator.navigate(AboutScreenDestination)
-                                        }
-                                        showDropdownMoreOptions.value = false
-                                    },
-                                    index = index
-                                )
-                            }
-                        }
-                    }
-                }
-            }
         }, scrollBehavior = scrollBehavior
     )
 }
@@ -359,7 +324,7 @@ fun BackupWarningCard() {
     if (show.value) {
         Card(
             colors = CardDefaults.defaultColors(run {
-                MiuixTheme.colorScheme.error
+                colorScheme.error
             })
         ) {
             Row(
@@ -420,56 +385,75 @@ private fun getDeviceInfo(): String {
     return manufacturer
 }
 
+
 @Composable
-private fun InfoCard(kpState: APApplication.State, apState: APApplication.State) {
+private fun InfoCard(
+    kpState: APApplication.State,
+    apState: APApplication.State
+) {
+    @Composable
+    fun InfoText(
+        title: String,
+        content: String,
+        bottomPadding: Dp = 24.dp
+    ) {
+        Text(
+            text = title,
+            fontSize = MiuixTheme.textStyles.headline1.fontSize,
+            fontWeight = FontWeight.Medium,
+            color = colorScheme.onSurface
+        )
+        Text(
+            text = content,
+            fontSize = MiuixTheme.textStyles.body2.fontSize,
+            color = colorScheme.onSurfaceVariantSummary,
+            modifier = Modifier.padding(top = 2.dp, bottom = bottomPadding)
+        )
+    }
     Card {
+        val uname = Os.uname()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 16.dp)
+                .padding(16.dp)
         ) {
-            val contents = StringBuilder()
-            val uname = Os.uname()
-
-            @Composable
-            fun InfoCardItem(label: String, content: String) {
-                contents.appendLine(label).appendLine(content).appendLine()
-                Text(text = label, style = MiuixTheme.textStyles.body1)
-                Text(text = content, style = MiuixTheme.textStyles.body2)
-            }
-
             if (kpState != APApplication.State.UNKNOWN_STATE) {
-                InfoCardItem(
-                    stringResource(R.string.home_kpatch_version), Version.installedKPVString()
+                InfoText(
+                    title = stringResource(R.string.home_kpatch_version),
+                    content = Version.installedKPVString()
                 )
-
-                Spacer(Modifier.height(16.dp))
-                InfoCardItem(stringResource(R.string.home_su_path), Natives.suPath())
-
-                Spacer(Modifier.height(16.dp))
+                InfoText(
+                    title = stringResource(R.string.home_su_path),
+                    content = Natives.suPath()
+                )
             }
-
             if (apState != APApplication.State.UNKNOWN_STATE && apState != APApplication.State.ANDROIDPATCH_NOT_INSTALLED) {
-                InfoCardItem(
-                    stringResource(R.string.home_apatch_version), managerVersion.second.toString()
+                InfoText(
+                    title = stringResource(R.string.home_apatch_version),
+                    content = managerVersion.second.toString()
                 )
-                Spacer(Modifier.height(16.dp))
             }
-
-            InfoCardItem(stringResource(R.string.home_device_info), getDeviceInfo())
-
-            Spacer(Modifier.height(16.dp))
-            InfoCardItem(stringResource(R.string.home_kernel), uname.release)
-
-            Spacer(Modifier.height(16.dp))
-            InfoCardItem(stringResource(R.string.home_system_version), getSystemVersion())
-
-            Spacer(Modifier.height(16.dp))
-            InfoCardItem(stringResource(R.string.home_fingerprint), Build.FINGERPRINT)
-
-            Spacer(Modifier.height(16.dp))
-            InfoCardItem(stringResource(R.string.home_selinux_status), getSELinuxStatus())
-
+            InfoText(
+                title = stringResource(R.string.home_device_info),
+                content = getDeviceInfo(),
+            )
+            InfoText(
+                title = stringResource(R.string.home_kernel),
+                content = uname.release
+            )
+            InfoText(
+                title = stringResource(R.string.home_system_version),
+                content = getSystemVersion()
+            )
+            InfoText(
+                title = stringResource(R.string.home_fingerprint),
+                content =  Build.FINGERPRINT
+            )
+            InfoText(
+                title = stringResource(R.string.home_selinux_status),
+                content = getSELinuxStatus(),
+                bottomPadding = 0.dp
+            )
         }
     }
 }
@@ -499,7 +483,7 @@ fun UpdateCard() {
         val updateDialog = rememberConfirmDialog(onConfirm = { uriHandler.openUri(newVersionUrl) })
         WarningCard(
             message = stringResource(id = R.string.home_new_apatch_found).format(newVersionCode),
-            MiuixTheme.colorScheme.outline
+            colorScheme.outline
         ) {
             if (changelog.isEmpty()) {
                 uriHandler.openUri(newVersionUrl)
@@ -515,27 +499,24 @@ fun UpdateCard() {
 @Composable
 fun LearnMoreCard() {
     val uriHandler = LocalUriHandler.current
+    val url = "https://apatch.dev"
 
-    Card {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    uriHandler.openUri("https://apatch.dev")
-                }
-                .padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column {
-                Text(
-                    text = stringResource(R.string.home_learn_apatch),
-                    style = MiuixTheme.textStyles.body1,
-                    fontWeight = FontWeight.SemiBold
+    Card (
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        BasicComponent(
+            title =  stringResource(R.string.home_learn_apatch),
+            summary = stringResource(R.string.home_click_to_learn_apatch),
+            endActions = {
+                Icon(
+                    imageVector = MiuixIcons.Link,
+                    tint = colorScheme.onSurface,
+                    contentDescription = null
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.home_click_to_learn_apatch),
-                    style = MiuixTheme.textStyles.body2
-                )
-            }
-        }
+            },
+            onClick = {
+                uriHandler.openUri(url)
+            },
+        )
     }
 }

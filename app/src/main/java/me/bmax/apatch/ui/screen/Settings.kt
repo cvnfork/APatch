@@ -23,8 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.rounded.Colorize
-import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -48,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
+import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -77,11 +77,13 @@ import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.extra.WindowDropdown
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Composable
-fun SettingScreen(bottomPadding: Dp) {
+fun SettingScreen(
+    bottomPadding: Dp,
+    navigator: DestinationsNavigator
+) {
     val scrollBehavior = MiuixScrollBehavior()
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
@@ -346,6 +348,12 @@ fun SettingScreen(bottomPadding: Dp) {
                         title = stringResource(R.string.send_log),
                         onClick = {
                             showLogDialog.value = true
+                        }
+                    )
+                    SuperArrow(
+                        title = stringResource(R.string.home_more_menu_about),
+                        onClick = {
+                            navigator.navigate(AboutScreenDestination)
                         }
                     )
                 }
