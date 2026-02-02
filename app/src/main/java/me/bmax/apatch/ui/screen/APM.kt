@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
@@ -129,6 +130,7 @@ import top.yukonga.miuix.kmp.icon.extended.HorizontalSplit
 import top.yukonga.miuix.kmp.icon.extended.Play
 import top.yukonga.miuix.kmp.icon.extended.Undo
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Composable
@@ -498,7 +500,7 @@ private fun ModuleList(
 
 
         val confirmResult = confirmDialog.awaitConfirm(
-            changelogText,
+            title =changelogText,
             content = changelog.ifEmpty { changelogFailed },
             markdown = true,
             confirm = updateText,
@@ -562,25 +564,22 @@ private fun ModuleList(
                         .padding(vertical = 16.dp)
                         .size(100.dp)
                         .clip(RoundedCornerShape(25.dp))
+                        .background(Color.Black)
                 ) {
                     val preview = shortcutPreviewIcon.value
                     if (preview != null) {
                         Image(
                             bitmap = preview,
-                            modifier = Modifier.size(100.dp),
+                            modifier = Modifier.fillMaxSize(),
                             contentDescription = null,
+                            contentScale = ContentScale.Crop
                         )
                     } else {
-                        Box(
-                            modifier = Modifier
-                                .size(100.dp)
-                                .background(Color.White)
-                        )
                         Image(
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),
                             contentDescription = null,
-                            contentScale = FixedScale(1.5f),
-                            modifier = Modifier.background(Color.Black)
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
@@ -895,8 +894,11 @@ private fun ModuleItem(
     val moduleVersion = stringResource(id = R.string.apm_version)
     val moduleAuthor = stringResource(id = R.string.apm_author)
     val viewModel = viewModel<APModuleViewModel>()
-    Card(modifier = modifier)
-    {
+    Card(
+        modifier = modifier,
+        pressFeedbackType = PressFeedbackType.Sink,
+        showIndication = true
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
