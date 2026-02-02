@@ -292,10 +292,14 @@
     <string name="color_brown">Brown</string>
     <string name="about_app_version">Version %1$s</string>
     <string name="about_app_desc">Kernel root solution with only a stripped kernel image, providing the ability of mounting system module and hooking kernel function.</string>
-    <string name="about_github" translatable="false">GitHub</string>
-    <string name="about_weblate" translatable="false">Weblate</string>
+    <string name="about_github">Source code</string>
+    <string name="about_github_summary">View the source code on GitHub</string>
+    <string name="about_weblate">Translations</string>
+    <string name="about_weblate_summary">Help us translate the app on Weblate</string>
     <string name="about_telegram_channel">Telegram channel</string>
+    <string name="about_telegram_channel_summary">Subscribe for the latest updates and news</string>
     <string name="about_telegram_group">Telegram group</string>
+    <string name="about_telegram_group_summary">Join our community for discussions</string>
     <string name="about_powered_by">Powered by %1$s</string>
     <string name="crash_handle_title">App crashed…</string>
     <string name="crash_handle_copy">Copy crash log</string>

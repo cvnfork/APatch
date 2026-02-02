@@ -251,10 +251,14 @@
     <string name="color_brown">棕色</string>
     <string name="about_app_version">版本 %1$s</string>
     <string name="about_app_desc">内核级 ROOT 解决方案且无需重新编译内核，同时提供挂载系统模块和 Hook 内核函数的能力。</string>
-    <string name="about_github" translatable="false">GitHub</string>
-    <string name="about_weblate" translatable="false">Weblate</string>
-    <string name="about_telegram_channel">Telegram 频道</string>
-    <string name="about_telegram_group">Telegram 群组</string>
+    <string name="about_github">查看源代码</string>
+    <string name="about_github_summary">在 GitHub 查看项目源码</string>
+    <string name="about_weblate">参与翻译</string>
+    <string name="about_weblate_summary">通过 Weblate 平台完善多语言支持</string>
+    <string name="about_telegram_channel">公告频道</string>
+    <string name="about_telegram_channel_summary">获取最新的发布信息与动态</string>
+    <string name="about_telegram_group">讨论群组</string>
+    <string name="about_telegram_group_summary">加入 Telegram 群组参与技术交流</string>
     <string name="about_powered_by">由 %1$s 强力驱动</string>
     <string name="apm_action">执行</string>
     <string name="crash_handle_title">应用崩溃了…</string>

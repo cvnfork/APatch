@@ -1,22 +1,21 @@
 package me.bmax.apatch.ui.screen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -29,174 +28,184 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import me.bmax.apatch.BuildConfig
 import me.bmax.apatch.R
 import me.bmax.apatch.util.Version
-import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 @Destination<RootGraph>
 @Composable
 fun AboutScreen(navigator: DestinationsNavigator) {
+
+    val scrollBehavior = MiuixScrollBehavior()
     val uriHandler = LocalUriHandler.current
 
     Scaffold(
         topBar = {
-            TopBar(onBack = dropUnlessResumed { navigator.popBackStack() })
+            TopBar(
+                onBack = dropUnlessResumed { navigator.popBackStack() },
+                scrollBehavior = scrollBehavior
+            )
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(innerPadding)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
+                .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
 
-            Surface(
-                modifier = Modifier.size(95.dp),
-                color = colorResource(id = R.color.ic_launcher_background),
-                shape = CircleShape
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "icon",
-                    modifier = Modifier.scale(1.4f)
+            item {
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Surface(
+                    modifier = Modifier.size(95.dp),
+                    color = colorResource(id = R.color.ic_launcher_background),
+                    shape = RoundedCornerShape(30.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = "icon",
+                        modifier = Modifier.scale(1.4f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    style = MiuixTheme.textStyles.title4
                 )
-            }
+                Text(
+                    text = stringResource(
+                        id = R.string.about_app_version,
+                        if (BuildConfig.VERSION_NAME.contains(BuildConfig.VERSION_CODE.toString())) "${BuildConfig.VERSION_CODE}" else "${BuildConfig.VERSION_CODE} (${BuildConfig.VERSION_NAME})"
+                    ),
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                    modifier = Modifier.padding(top = 5.dp)
+                )
+                Text(
+                    text = stringResource(
+                        id = R.string.about_powered_by,
+                        "KernelPatch (${Version.buildKPVString()})"
+                    ),
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                    modifier = Modifier.padding(top = 5.dp)
+                )
 
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = stringResource(id = R.string.app_name),
-                style = MiuixTheme.textStyles.title4
-            )
-            Text(
-                text = stringResource(
-                    id = R.string.about_app_version,
-                    if (BuildConfig.VERSION_NAME.contains(BuildConfig.VERSION_CODE.toString())) "${BuildConfig.VERSION_CODE}" else "${BuildConfig.VERSION_CODE} (${BuildConfig.VERSION_NAME})"
-                ),
-                style = MiuixTheme.textStyles.body2,
-                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                modifier = Modifier.padding(top = 5.dp)
-            )
-            Text(
-                text = stringResource(
-                    id = R.string.about_powered_by,
-                    "KernelPatch (${Version.buildKPVString()})"
-                ),
-                style = MiuixTheme.textStyles.body2,
-                color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                modifier = Modifier.padding(top = 5.dp)
-            )
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { uriHandler.openUri("https://github.com/bmax121/APatch") },
-                    modifier = Modifier
-                        .weight(1f)
+                Card(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.github),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = stringResource(id = R.string.about_github))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(all = 12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.about_app_desc),
+                            style = MiuixTheme.textStyles.body2,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        )
+                    }
                 }
 
-                Button(
-                    onClick = { uriHandler.openUri("https://t.me/APatchChannel") },
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.telegram),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = stringResource(id = R.string.about_telegram_channel))
-                }
-            }
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { uriHandler.openUri("https://hosted.weblate.org/engage/APatch") },
-                    modifier = Modifier
-                        .weight(1f)
+                Card(
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.weblate),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = stringResource(id = R.string.about_weblate))
-                }
+                    LinkItem(
+                        title = stringResource(R.string.about_github),
+                        summary = stringResource(R.string.about_github_summary),
+                        icon = painterResource(R.drawable.github)
+                    ) {
+                        uriHandler.openUri("https://github.com/bmax121/APatch")
+                    }
 
-                Button(
-                    onClick = { uriHandler.openUri("https://t.me/apatch_discuss") },
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.telegram),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(text = stringResource(id = R.string.about_telegram_group))
-                }
-            }
+                    LinkItem(
+                        title = stringResource(R.string.about_telegram_channel),
+                        summary = stringResource(R.string.about_telegram_channel_summary),
+                        icon = painterResource(R.drawable.channel)
+                    ) {
+                        uriHandler.openUri("https://t.me/APatchChannel")
+                    }
 
-            Card(
-                modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(all = 12.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.about_app_desc),
-                        style = MiuixTheme.textStyles.body2,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                    )
+                    LinkItem(
+                        title = stringResource(R.string.about_weblate),
+                        summary = stringResource(R.string.about_weblate_summary),
+                        icon = painterResource(R.drawable.weblate)
+                    ) {
+                        uriHandler.openUri("https://hosted.weblate.org/engage/APatch")
+                    }
+
+                    LinkItem(
+                        title = stringResource(R.string.about_telegram_group),
+                        summary = stringResource(R.string.about_telegram_group_summary),
+                        icon = painterResource(R.drawable.telegram)
+                    ) {
+                        uriHandler.openUri("https://t.me/apatch_discuss")
+                    }
                 }
             }
         }
     }
 }
 
+
 @Composable
-private fun TopBar(onBack: () -> Unit = {}) {
+fun LinkItem(
+    title: String,
+    summary: String,
+    icon: Painter,
+    onClick: () -> Unit
+) {
+    SuperArrow(
+        title = title,
+        summary = summary,
+        onClick = onClick,
+        startAction = {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    )
+}
+
+@Composable
+private fun TopBar(
+    onBack: () -> Unit = {},
+    scrollBehavior: ScrollBehavior
+) {
     TopAppBar(
         title = stringResource(R.string.about),
+        scrollBehavior = scrollBehavior,
         navigationIcon = {
             IconButton(
+                modifier = Modifier.padding(start = 16.dp),
                 onClick = onBack
-            ) { Icon(MiuixIcons.Back, contentDescription = null) }
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Back,
+                    contentDescription = null
+                )
+            }
         },
     )
 }
