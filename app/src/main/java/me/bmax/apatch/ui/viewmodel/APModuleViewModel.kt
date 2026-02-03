@@ -63,9 +63,6 @@ class APModuleViewModel : ViewModel() {
             it.id.contains(search, true) || it.name.contains(search, true) || HanziToPinyin.getInstance()
                 .toPinyinString(it.name).contains(search, true)
         }.sortedWith(comparator)
-            .also {
-                isRefreshing = false
-            }
     }
 
     var isNeedRefresh by mutableStateOf(false)
@@ -78,18 +75,18 @@ class APModuleViewModel : ViewModel() {
     fun fetchModuleList() {
         viewModelScope.launch(Dispatchers.IO) {
             isRefreshing = true
-            val oldModuleList = modules
+
+            // Artificial delay to prevent state coalescing in Compose
+            delay(50)
 
             val start = SystemClock.elapsedRealtime()
 
-            kotlin.runCatching {
-
+            try {
                 val result = listModules()
-
                 Log.i(TAG, "result: $result")
 
                 val array = JSONArray(result)
-                modules = (0 until array.length())
+                val newList = (0 until array.length())
                     .asSequence()
                     .map { array.getJSONObject(it) }
                     .map { obj ->
@@ -111,19 +108,16 @@ class APModuleViewModel : ViewModel() {
                             obj.optString("webuiIcon").takeIf { it.isNotBlank() }
                         )
                     }.toList()
+
+                modules = newList
                 isNeedRefresh = false
-            }.onFailure { e ->
-                Log.e(TAG, "fetchModuleList: ", e)
+            } catch (e: Exception) {
+                Log.e(TAG, "fetchModuleList failed: ", e)
+            } finally {
+                // Always reset refreshing state here
                 isRefreshing = false
+                Log.i(TAG, "load cost: ${SystemClock.elapsedRealtime() - start}")
             }
-
-            // when both old and new is kotlin.collections.EmptyList
-            // moduleList update will don't trigger
-            if (oldModuleList === modules) {
-                isRefreshing = false
-            }
-
-            Log.i(TAG, "load cost: ${SystemClock.elapsedRealtime() - start}, modules: $modules")
         }
     }
 
