@@ -20,7 +20,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -68,7 +70,7 @@ fun AboutScreen(navigator: DestinationsNavigator) {
         ) {
 
             item {
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
                 Surface(
                     modifier = Modifier.size(95.dp),
@@ -85,7 +87,8 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = stringResource(id = R.string.app_name),
-                    style = MiuixTheme.textStyles.title4
+                    style = MiuixTheme.textStyles.title2,
+                    fontWeight = FontWeight(550)
                 )
                 Text(
                     text = stringResource(
@@ -105,24 +108,6 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     modifier = Modifier.padding(top = 5.dp)
                 )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Card(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(all = 12.dp)
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.about_app_desc),
-                            style = MiuixTheme.textStyles.body2,
-                            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
-                        )
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -161,6 +146,24 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                         uriHandler.openUri("https://t.me/apatch_discuss")
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Card(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp)
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.about_app_desc),
+                            style = MiuixTheme.textStyles.body2,
+                            color = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                        )
+                    }
+                }
             }
         }
     }
@@ -182,7 +185,7 @@ fun LinkItem(
             Icon(
                 painter = icon,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     )
