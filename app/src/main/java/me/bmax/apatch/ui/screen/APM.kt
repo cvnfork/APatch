@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
@@ -185,7 +186,7 @@ fun APModuleScreen(
                         blurRadius = 30.dp
                         noiseFactor = 0f
                     }
-                    .background(colorScheme.surface.copy(alpha = 0.1f))
+                    .zIndex(1f)
             ) {
                 Column {
                     TopAppBar(
@@ -243,11 +244,16 @@ fun APModuleScreen(
     ) { innerPadding ->
 
         PullToRefresh(
-            modifier = Modifier
-                .fillMaxSize()
-                .hazeSource(state = hazeState),
+            modifier = Modifier.fillMaxSize(),
             isRefreshing = viewModel.isRefreshing,
-            onRefresh = { viewModel.fetchModuleList() }
+            refreshTexts = listOf(
+                stringResource(R.string.refresh_pulling),
+                stringResource(R.string.refresh_release),
+                stringResource(R.string.refresh_refresh),
+                stringResource(R.string.refresh_complete)
+            ),
+            onRefresh = { viewModel.fetchModuleList() },
+            contentPadding = innerPadding
         ) {
             when {
                 hasMagisk -> {
@@ -260,6 +266,7 @@ fun APModuleScreen(
                         navigator = navigator,
                         viewModel = viewModel,
                         state = moduleListState,
+                        hazeState = hazeState,
                         contentPadding = innerPadding,
                         onInstallModule = { navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM)) },
                         onClickModule = { id, name, hasWebUi ->
@@ -332,6 +339,7 @@ private fun ModuleList(
     navigator: DestinationsNavigator,
     viewModel: APModuleViewModel,
     state: LazyListState,
+    hazeState: HazeState,
     contentPadding: PaddingValues,
     onInstallModule: (Uri) -> Unit,
     onClickModule: (id: String, name: String, hasWebUi: Boolean) -> Unit,
@@ -753,6 +761,7 @@ private fun ModuleList(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .hazeSource(state = hazeState)
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             state = state,

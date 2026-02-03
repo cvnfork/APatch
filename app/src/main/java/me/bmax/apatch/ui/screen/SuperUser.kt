@@ -103,6 +103,7 @@ fun SuperUserScreen(bottomPadding: Dp) {
                         style = hazeStyle
                         blurRadius = 30.dp
                     }
+                    .zIndex(1f)
             ) {
                 Column {
                     SuperTopBar(viewModel, scrollBehavior)
@@ -134,11 +135,16 @@ fun SuperUserScreen(bottomPadding: Dp) {
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             PullToRefresh(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .hazeSource(state = hazeState),
+                modifier = Modifier.fillMaxSize(),
                 isRefreshing = viewModel.isRefreshing,
-                onRefresh = { scope.launch { viewModel.fetchAppList() } }
+                refreshTexts = listOf(
+                    stringResource(R.string.refresh_pulling),
+                    stringResource(R.string.refresh_release),
+                    stringResource(R.string.refresh_refresh),
+                    stringResource(R.string.refresh_complete)
+                ),
+                onRefresh = { scope.launch { viewModel.fetchAppList() } },
+                contentPadding = innerPadding
             ) {
                 if (viewModel.isRefreshing && viewModel.appList.isEmpty()) {
                     LoadingIndicator()
@@ -146,6 +152,7 @@ fun SuperUserScreen(bottomPadding: Dp) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
+                            .hazeSource(state = hazeState)
                             .overScrollVertical()
                             .nestedScroll(scrollBehavior.nestedScrollConnection),
                         contentPadding = PaddingValues(

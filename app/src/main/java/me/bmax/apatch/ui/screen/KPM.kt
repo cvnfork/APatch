@@ -421,9 +421,7 @@ private fun KPModuleList(
                 stringResource(R.string.refresh_refresh),
                 stringResource(R.string.refresh_complete)
             ),
-            onRefresh = {
-                viewModel.fetchModuleList()
-            }
+            onRefresh = { viewModel.fetchModuleList() }
         ) {
             LazyColumn(
                 modifier = Modifier
