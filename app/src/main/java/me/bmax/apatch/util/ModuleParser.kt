@@ -8,16 +8,30 @@ import me.bmax.apatch.R
 import me.bmax.apatch.ui.viewmodel.APModuleViewModel
 import java.io.ByteArrayOutputStream
 import java.util.Properties
-import java.util.zip.ZipException
 import java.util.zip.ZipInputStream
 
+@Suppress("ArrayInDataClass")
 data class ParsedModuleInfo(
     val id: String,
-    val name: String?,
-    val version: String?,
-    val versionCode: Int?,
-    val author: String?,
-    val description: String?
+    val name: String,
+    val version: String,
+    val versionCode: Int,
+    val author: String,
+    val description: String,
+    val icon: ByteArray? = null
+)
+
+@Suppress("ArrayInDataClass")
+data class InstallPreview(
+    val id: String = "",
+    val name: String = "",
+    val version: String = "",
+    val versionCode: Int = 0,
+    val author: String = "",
+    val description: String = "",
+    val icon: ByteArray? = null,
+    val fileName: String = "",
+    val errorMessage: String? = null
 )
 
 object ModuleParser {
@@ -33,30 +47,69 @@ object ModuleParser {
 
     fun parse(context: Context, uri: Uri): Result<ParsedModuleInfo> {
         return try {
+            val properties = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val zipInputStream = ZipInputStream(inputStream)
+                var props: Properties? = null
+                while (true) {
+                    val entry = zipInputStream.nextEntry ?: break
+                    if (entry.name == "module.prop") {
+                        val bytes = readEntry(zipInputStream)
+                        props = Properties().apply { load(bytes.inputStream().reader(Charsets.UTF_8)) }
+                        break
+                    }
+                    zipInputStream.closeEntry()
+                }
+                props
+            } ?: return Result.failure(ModuleParseException(R.string.module_error_no_prop))
+
+            val actionIconPath = properties.getProperty("actionIcon")?.trim()
+            val webuiIconPath = properties.getProperty("webuiIcon")?.trim()
+            val targetPaths = listOfNotNull(actionIconPath, webuiIconPath, "icon.png")
+
+            var iconBytes: ByteArray? = null
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val zipInputStream = ZipInputStream(inputStream)
-                val entry = zipInputStream.nextEntry ?: return@use Result.failure(
-                    ModuleParseException(R.string.module_error_invalid_zip)
-                )
-                val entriesSequence = sequence {
-                    yield(entry)
-                    yieldAll(generateSequence { zipInputStream.nextEntry })
+                val foundIcons = mutableMapOf<String, ByteArray>()
+                while (true) {
+                    val entry = zipInputStream.nextEntry ?: break
+                    if (targetPaths.contains(entry.name)) {
+                        foundIcons[entry.name] = readEntry(zipInputStream)
+                    }
+                    zipInputStream.closeEntry()
+                    if (foundIcons.size == targetPaths.size) break
                 }
-
-                val modulePropEntry = entriesSequence.firstOrNull { it.name == "module.prop" }
-
-                if (modulePropEntry != null) {
-                    val propertiesContentBytes = readEntry(zipInputStream)
-                    parseProperties(propertiesContentBytes)
-                } else {
-                    Result.failure(ModuleParseException(R.string.module_error_no_prop))
+                for (path in targetPaths) {
+                    if (foundIcons.containsKey(path)) {
+                        iconBytes = foundIcons[path]
+                        break
+                    }
                 }
-            } ?: Result.failure(ModuleParseException(R.string.module_error_open_zip))
-        } catch (e: ZipException) {
-            Result.failure(ModuleParseException(R.string.module_error_invalid_zip))
+            }
+
+            finalizeParsedInfo(properties, iconBytes)
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun finalizeParsedInfo(properties: Properties, iconBytes: ByteArray?): Result<ParsedModuleInfo> {
+        val id = properties.getProperty("id")?.trim()
+        if (id.isNullOrEmpty()) return Result.failure(ModuleParseException(R.string.module_error_missing_id))
+        if (!id.matches("^[a-zA-Z][a-zA-Z0-9._-]+$".toRegex())) {
+            return Result.failure(ModuleParseException(R.string.module_error_invalid_id, id))
+        }
+
+        return Result.success(
+            ParsedModuleInfo(
+                id = id,
+                name = properties.getProperty("name").trim(),
+                version = properties.getProperty("version").trim(),
+                versionCode = properties.getProperty("versionCode").trim().toInt(),
+                author = properties.getProperty("author").trim(),
+                description = properties.getProperty("description").trim(),
+                icon = iconBytes
+            )
+        )
     }
 
     private fun readEntry(zipInputStream: ZipInputStream): ByteArray {
@@ -74,134 +127,22 @@ object ModuleParser {
         return baos.toByteArray()
     }
 
-    private fun parseProperties(propBytes: ByteArray): Result<ParsedModuleInfo> {
-        val properties = Properties()
-        properties.load(propBytes.inputStream().reader(Charsets.UTF_8))
-
-        val id = properties.getProperty("id")?.trim()
-
-        if (id.isNullOrEmpty()) {
-            return Result.failure(ModuleParseException(R.string.module_error_missing_id))
-        }
-
-        if (!id.matches("^[a-zA-Z][a-zA-Z0-9._-]+$".toRegex())) {
-            return Result.failure(ModuleParseException(R.string.module_error_invalid_id, id))
-        }
-
-        val name = properties.getProperty("name")?.trim()
-        val version = properties.getProperty("version")?.trim()
-        val versionCodeStr = properties.getProperty("versionCode")?.trim()
-        val author = properties.getProperty("author")?.trim()
-        val description = properties.getProperty("description")?.trim()
-
-        val versionCode = versionCodeStr?.toIntOrNull()
-
-        return Result.success(
-            ParsedModuleInfo(
-                id = id,
-                name = name,
-                version = version,
-                versionCode = versionCode,
-                author = author,
-                description = description
-            )
-        )
-    }
-
     @SuppressLint("StringFormatInvalid")
-    fun getModuleInstallDesc(
-        context: Context, uri: Uri, moduleList: List<APModuleViewModel.ModuleInfo>?
-    ): String {
+    fun getModuleInstallPreview(context: Context, uri: Uri): InstallPreview {
         val fileName = getFileNameFromUri(context, uri) ?: uri.lastPathSegment ?: "Unknown"
 
         return parse(context, uri).fold(
-            onSuccess = { newModuleInfo ->
-                val oldModuleInfo = moduleList?.find { it.id == newModuleInfo.id }
-                if (oldModuleInfo == null) {
-                    // fresh install
-                    buildString {
-                        appendLine(
-                            context.getString(
-                                R.string.module_install_prompt_with_name, fileName
-                            )
-                        )
-                        appendLine()
-                        val details = listOfNotNull(
-                            context.getString(R.string.module_info_id, newModuleInfo.id),
-                            newModuleInfo.name?.let {
-                                context.getString(
-                                    R.string.module_info_name, it
-                                )
-                            },
-                            newModuleInfo.version?.let {
-                                context.getString(
-                                    R.string.module_info_version, it
-                                )
-                            },
-                            newModuleInfo.versionCode?.let {
-                                context.getString(
-                                    R.string.module_info_version_code, it.toString()
-                                )
-                            },
-                            newModuleInfo.author?.let {
-                                context.getString(
-                                    R.string.module_info_author, it
-                                )
-                            },
-                            newModuleInfo.description?.let {
-                                context.getString(R.string.module_info_description, it)
-                            })
-                        append(details.joinToString("\n"))
-                    }
-                } else {
-                    buildString {
-                        appendLine(
-                            context.getString(
-                                R.string.module_update_prompt_with_name, fileName
-                            )
-                        )
-                        appendLine()
-
-                        fun compare(old: String, new: String?): String? {
-                            val newTrimmed = new?.trim()
-                            if ((newTrimmed.isNullOrEmpty() && old.isEmpty())) return null
-                            if (old == newTrimmed) return newTrimmed
-                            return when {
-                                old.isEmpty() -> "+++$newTrimmed"
-                                newTrimmed.isNullOrEmpty() -> "---$old"
-                                else -> "$old -> $newTrimmed"
-                            }
-                        }
-
-                        fun compareInt(old: Int, new: Int?): String? {
-                            if (new == null) return "---$old"
-                            if (old == new) return "$new"
-                            return "$old -> $new"
-                        }
-
-                        val changes = listOfNotNull(
-                            compare(oldModuleInfo.name, newModuleInfo.name)?.let {
-                                context.getString(R.string.module_info_name, it)
-                            },
-                            compare(oldModuleInfo.version, newModuleInfo.version)?.let {
-                                context.getString(R.string.module_info_version, it)
-                            },
-                            compareInt(oldModuleInfo.versionCode, newModuleInfo.versionCode)?.let {
-                                context.getString(R.string.module_info_version_code, it)
-                            },
-                            compare(oldModuleInfo.author, newModuleInfo.author)?.let {
-                                context.getString(R.string.module_info_author, it)
-                            })
-
-                        if (changes.isNotEmpty()) {
-                            appendLine(changes.joinToString("\n"))
-                        }
-
-                        newModuleInfo.description?.takeIf { it.isNotBlank() }?.let {
-                            appendLine(context.getString(R.string.module_info_description, it))
-                        }
-                    }
-                }
+            onSuccess = { info ->
+                InstallPreview(
+                    id = info.id,
+                    name = info.name,
+                    version = info.version,
+                    versionCode = info.versionCode,
+                    author = info.author,
+                    description = info.description,
+                    icon = info.icon,
+                    fileName = fileName
+                )
             },
             onFailure = { exception ->
                 val reason = if (exception is ModuleParseException) {
@@ -209,14 +150,8 @@ object ModuleParser {
                 } else {
                     exception.message ?: "unknown error"
                 }
-                buildString {
-                    appendLine(context.getString(R.string.module_parse_failed, fileName))
-                    appendLine()
-                    appendLine(context.getString(R.string.module_parse_reason, reason))
-                    appendLine()
-                    append(context.getString(R.string.module_install_confirm_extra))
-                }
-            },
+                InstallPreview(fileName = fileName, errorMessage = reason)
+            }
         )
     }
 }

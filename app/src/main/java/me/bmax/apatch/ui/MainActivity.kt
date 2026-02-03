@@ -74,7 +74,6 @@ import me.bmax.apatch.ui.viewmodel.SuperUserViewModel
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 class MainActivity : AppCompatActivity() {
@@ -134,7 +133,10 @@ class MainActivity : AppCompatActivity() {
                             {
                                 slideInHorizontally(
                                     initialOffsetX = { it },
-                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    animationSpec = tween(
+                                        durationMillis = 500,
+                                        easing = FastOutSlowInEasing
+                                    )
                                 )
                             }
 
@@ -142,7 +144,10 @@ class MainActivity : AppCompatActivity() {
                             {
                                 slideOutHorizontally(
                                     targetOffsetX = { -it / 5 },
-                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    animationSpec = tween(
+                                        durationMillis = 500,
+                                        easing = FastOutSlowInEasing
+                                    )
                                 )
                             }
 
@@ -150,7 +155,10 @@ class MainActivity : AppCompatActivity() {
                             {
                                 slideInHorizontally(
                                     initialOffsetX = { -it / 5 },
-                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    animationSpec = tween(
+                                        durationMillis = 500,
+                                        easing = FastOutSlowInEasing
+                                    )
                                 )
                             }
 
@@ -158,7 +166,10 @@ class MainActivity : AppCompatActivity() {
                             {
                                 slideOutHorizontally(
                                     targetOffsetX = { it },
-                                    animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+                                    animationSpec = tween(
+                                        durationMillis = 500,
+                                        easing = FastOutSlowInEasing
+                                    )
                                 )
                             }
                     },
@@ -187,7 +198,9 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        intentState.value += 1
+        if (intent.data != null || intent.hasExtra("uris") || intent.hasExtra("shortcut_type")) {
+            intentState.value += 1
+        }
     }
 }
 
@@ -202,6 +215,12 @@ fun MainScreen(
     activity: MainActivity,
     navigator: DestinationsNavigator
 ) {
+    val isExternalIntent = remember {
+        activity.intent?.data != null ||
+                activity.intent?.hasExtra("uris") == true ||
+                activity.intent?.hasExtra("shortcut_type") == true
+    }
+
     val coroutineScope = rememberCoroutineScope()
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     val kPatchReady = state != APApplication.State.UNKNOWN_STATE
@@ -296,7 +315,11 @@ fun MainScreen(
         if (pagerState.currentPage != 0) {
             handlePageChange(0)
         } else {
-            activity.moveTaskToBack(true)
+            if (isExternalIntent) {
+                activity.finish()
+            } else {
+                activity.moveTaskToBack(true)
+            }
         }
     }
 
@@ -347,7 +370,12 @@ private fun UriInstallHandler(
             intent?.getParcelableArrayListExtra<Uri>("uris")?.firstOrNull()
         }
 
-        uri?.let(onInstall)
+        uri?.let {
+            onInstall(it)
+            intent?.data = null
+            intent?.removeExtra("uris")
+            intent?.removeExtra("shortcut_type")
+        }
     }
 }
 

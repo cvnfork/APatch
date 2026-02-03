@@ -553,9 +553,9 @@ private fun ModuleList(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .padding(vertical = 16.dp)
-                        .size(100.dp)
-                        .clip(RoundedCornerShape(25.dp))
-                        .background(Color.Black)
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Color.Black),
                 ) {
                     val preview = shortcutPreviewIcon.value
                     if (preview != null) {
