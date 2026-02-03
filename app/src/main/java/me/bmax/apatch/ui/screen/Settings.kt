@@ -410,9 +410,9 @@ fun SettingScreen(
                         }
                     )
                 }
+                Spacer(Modifier.height(bottomPadding))
             }
         }
-        Spacer(Modifier.height(bottomPadding))
     }
 }
 
