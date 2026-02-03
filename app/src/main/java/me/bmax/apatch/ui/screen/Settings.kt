@@ -85,7 +85,6 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.extra.WindowDialog
 import top.yukonga.miuix.kmp.extra.WindowDropdown
 import top.yukonga.miuix.kmp.utils.overScrollVertical
@@ -277,7 +276,7 @@ fun SettingScreen(
                     var themeMode by rememberSaveable {
                         mutableIntStateOf(prefs.getInt("color_mode", 0))
                     }
-                    SuperDropdown(
+                    WindowDropdown(
                         title = stringResource(R.string.settings_theme),
                         summary = stringResource(R.string.settings_theme_summary),
                         items = themeItems,
@@ -325,7 +324,7 @@ fun SettingScreen(
                                     ?: 0
                             )
                         }
-                        SuperDropdown(
+                        WindowDropdown(
                             title = stringResource(R.string.settings_key_color),
                             summary = stringResource(R.string.settings_key_color_summary),
                             items = colorItems,
