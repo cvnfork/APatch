@@ -286,64 +286,59 @@ private fun BottomButtons(
     selectFileLauncher: androidx.activity.result.ActivityResultLauncher<Intent>,
 ) {
     val scope = rememberCoroutineScope()
-    if (!viewModel.patching) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(colorScheme.surface.copy(alpha = 0.95f))
-                .padding(horizontal = 16.dp, vertical = 20.dp)
-        ) {
-            when {
-                viewModel.needReboot -> {
-                    TextButton(
-                        text = stringResource(R.string.reboot),
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        colors = ButtonDefaults.textButtonColorsPrimary(),
-                        onClick = { scope.launch { withContext(Dispatchers.IO) { reboot() } } }
-                    )
-                }
 
-                viewModel.patchdone -> {
-                    TextButton(
-                        text = stringResource(android.R.string.ok),
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        colors = ButtonDefaults.textButtonColorsPrimary(),
-                        onClick = { navigator.popBackStack() }
-                    )
-                }
+    if (viewModel.running || viewModel.patching) return
 
-                mode == PatchesViewModel.PatchMode.PATCH_ONLY && viewModel.kimgInfo.banner.isEmpty() -> {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colorScheme.surface.copy(alpha = 0.95f))
+            .padding(horizontal = 16.dp, vertical = 20.dp)
+    ) {
+        when {
+            viewModel.needReboot -> {
+                TextButton(
+                    text = stringResource(R.string.reboot),
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    onClick = { scope.launch { withContext(Dispatchers.IO) { reboot() } } }
+                )
+            }
+
+            viewModel.patchdone -> {
+                TextButton(
+                    text = stringResource(android.R.string.ok),
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    onClick = { navigator.popBackStack() }
+                )
+            }
+
+            mode == PatchesViewModel.PatchMode.PATCH_ONLY && viewModel.kimgInfo.banner.isEmpty() -> {
+                TextButton(
+                    text = stringResource(R.string.patch_select_bootimg_btn),
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    colors = ButtonDefaults.textButtonColorsPrimary(),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "*/*" }
+                        selectFileLauncher.launch(intent)
+                    }
+                )
+            }
+
+            else -> {
+                val canPatch = mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.superkey.isNotEmpty()
+                val canUnpatch = mode == PatchesViewModel.PatchMode.UNPATCH && viewModel.kimgInfo.banner.isNotEmpty()
+
+                if (canPatch || canUnpatch) {
                     TextButton(
-                        text = stringResource(R.string.patch_select_bootimg_btn),
+                        text = stringResource(if (canUnpatch) R.string.patch_start_unpatch_btn else R.string.patch_start_patch_btn),
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         colors = ButtonDefaults.textButtonColorsPrimary(),
                         onClick = {
-                            val intent =
-                                Intent(Intent.ACTION_GET_CONTENT).apply { type = "*/*" }
-                            selectFileLauncher.launch(intent)
+                            if (canUnpatch) viewModel.doUnpatch() else viewModel.doPatch(mode)
                         }
                     )
-                }
-
-                else -> {
-                    val canPatch =
-                        mode != PatchesViewModel.PatchMode.UNPATCH && viewModel.superkey.isNotEmpty()
-                    val canUnpatch =
-                        mode == PatchesViewModel.PatchMode.UNPATCH && viewModel.kimgInfo.banner.isNotEmpty()
-                    if (canPatch || canUnpatch) {
-                        TextButton(
-                            text = stringResource(if (canUnpatch) R.string.patch_start_unpatch_btn else R.string.patch_start_patch_btn),
-                            modifier = Modifier.fillMaxWidth().height(52.dp),
-                            enabled = !viewModel.running,
-                            colors = ButtonDefaults.textButtonColorsPrimary(),
-                            onClick = {
-                                if (canUnpatch)
-                                    viewModel.doUnpatch()
-                                else
-                                    viewModel.doPatch(mode)
-                            }
-                        )
-                    }
                 }
             }
         }
