@@ -22,6 +22,7 @@ import com.topjohnwu.superuser.nio.ExtendedFile
 import com.topjohnwu.superuser.nio.FileSystemManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.BuildConfig
 import me.bmax.apatch.R
@@ -194,19 +195,22 @@ class PatchesViewModel : ViewModel() {
 
     fun copyAndParseBootimg(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
-            if (running) return@launch
+            while (running) { yield() }
             running = true
+            error = ""
+            kimgInfo = KPModel.KImgInfo("", false)
             try {
                 uri.inputStream().buffered().use { src ->
                     srcBoot.also {
                         src.copyAndCloseOut(it.newOutputStream())
                     }
                 }
-            } catch (e: IOException) {
-                Log.e(TAG, "copy boot image error: $e")
+                parseBootimg(srcBoot.path)
+            } catch (e: Exception) {
+                error = "Copy error: ${e.message}"
+            } finally {
+                running = false
             }
-            parseBootimg(srcBoot.path)
-            running = false
         }
     }
 
@@ -245,17 +249,24 @@ class PatchesViewModel : ViewModel() {
     fun prepare(mode: PatchMode) {
         viewModelScope.launch(Dispatchers.IO) {
             if (prepared) return@launch
-            prepared = true
-
-            running = true
-            prepare()
-            if (mode != PatchMode.UNPATCH) {
-                parseKpimg()
+            try {
+                running = true
+                prepared = true
+                prepare()
+                if (mode != PatchMode.UNPATCH) {
+                    parseKpimg()
+                }
+                if (mode == PatchMode.PATCH_AND_INSTALL ||
+                    mode == PatchMode.UNPATCH ||
+                    mode == PatchMode.INSTALL_TO_NEXT_SLOT) {
+                    extractAndParseBootimg(mode)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Prepare failed", e)
+                error = "Initialization failed: ${e.message}"
+            } finally {
+                running = false
             }
-            if (mode == PatchMode.PATCH_AND_INSTALL || mode == PatchMode.UNPATCH || mode == PatchMode.INSTALL_TO_NEXT_SLOT) {
-                extractAndParseBootimg(mode)
-            }
-            running = false
         }
     }
 

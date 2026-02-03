@@ -35,12 +35,12 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,6 +63,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.R
@@ -109,19 +111,19 @@ fun Patches(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                viewModel.error = ""
                 Log.d(TAG, "select boot.img, data: $result.data, uri: $uri")
                 viewModel.copyAndParseBootimg(uri)
             }
         }
     }
 
-    LaunchedEffect(selectedBootImage) {
-        if (mode == PatchesViewModel.PatchMode.PATCH_ONLY &&
-            selectedBootImage != null &&
-            viewModel.kimgInfo.banner.isEmpty()
-        ) {
-            viewModel.error = ""
+    LaunchedEffect(key1 = mode) {
+        viewModel.prepare(mode)
+        snapshotFlow { viewModel.running }
+            .filter { !it }
+            .first()
+        if (mode == PatchesViewModel.PatchMode.PATCH_ONLY && selectedBootImage != null) {
+            Log.d(TAG, "Environment ready, auto-parsing: $selectedBootImage")
             viewModel.copyAndParseBootimg(selectedBootImage!!)
         }
     }
@@ -152,10 +154,6 @@ fun Patches(
         if (toRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(context as Activity, toRequest.toTypedArray(), 1001)
         }
-    }
-
-    SideEffect {
-        viewModel.prepare(mode)
     }
 
     Scaffold(
