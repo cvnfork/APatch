@@ -667,7 +667,8 @@ private fun ModuleList(
     }
 
     suspend fun onModuleUninstall(module: APModuleViewModel.ModuleInfo) {
-        val formatter = if (module.metamodule) metaModuleUninstallConfirm else moduleUninstallConfirm
+        val formatter =
+            if (module.metamodule) metaModuleUninstallConfirm else moduleUninstallConfirm
         val confirmResult = confirmDialog.awaitConfirm(
             moduleStr,
             content = formatter.format(module.name),
@@ -678,10 +679,12 @@ private fun ModuleList(
             return
         }
 
-        val success = withContext(Dispatchers.IO) {
-            Shortcut.deleteModuleActionShortcut(context, module.id)
-            Shortcut.deleteModuleWebUiShortcut(context, module.id)
-            uninstallModule(module.id)
+        val success = loadingDialog.withLoading {
+            withContext(Dispatchers.IO) {
+                Shortcut.deleteModuleActionShortcut(context, module.id)
+                Shortcut.deleteModuleWebUiShortcut(context, module.id)
+                uninstallModule(module.id)
+            }
         }
 
         if (success) {
@@ -709,8 +712,10 @@ private fun ModuleList(
     }
 
     suspend fun onModuleUndoUninstall(module: APModuleViewModel.ModuleInfo) {
-        val success = withContext(Dispatchers.IO) {
+        val success = loadingDialog.withLoading {
+            withContext(Dispatchers.IO) {
                 undoUninstallModule(module.id)
+            }
         }
 
         if (success) {
@@ -825,8 +830,10 @@ private fun ModuleList(
                             },
                             onCheckChanged = {
                                 scope.launch {
-                                    val success = withContext(Dispatchers.IO) {
-                                        toggleModule(module.id, !module.enabled)
+                                    val success = loadingDialog.withLoading {
+                                        withContext(Dispatchers.IO) {
+                                            toggleModule(module.id, !module.enabled)
+                                        }
                                     }
 
                                     if (success) {
