@@ -768,9 +768,16 @@ private fun ModuleList(
     }
 
     PullToRefresh(
-        modifier = modifier,
         isRefreshing = viewModel.isRefreshing,
-        onRefresh = { viewModel.fetchModuleList() },
+        refreshTexts = listOf(
+            stringResource(R.string.refresh_pulling),
+            stringResource(R.string.refresh_release),
+            stringResource(R.string.refresh_refresh),
+            stringResource(R.string.refresh_complete)
+        ),
+        onRefresh = {
+            viewModel.fetchModuleList()
+        }
     ) {
         LazyColumn(
             modifier = Modifier

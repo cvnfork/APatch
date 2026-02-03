@@ -108,8 +108,16 @@ fun SuperUserScreen(bottomPadding: Dp) {
                 )
             }
             PullToRefresh(
-                onRefresh = { scope.launch { viewModel.fetchAppList() } },
-                isRefreshing = viewModel.isRefreshing
+                isRefreshing = viewModel.isRefreshing,
+                refreshTexts = listOf(
+                    stringResource(R.string.refresh_pulling),
+                    stringResource(R.string.refresh_release),
+                    stringResource(R.string.refresh_refresh),
+                    stringResource(R.string.refresh_complete)
+                ),
+                onRefresh = {
+                    scope.launch { viewModel.fetchAppList() }
+                }
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     when {
