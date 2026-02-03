@@ -357,6 +357,7 @@ dependencies {
 
     implementation(libs.miuix)
     implementation(libs.miuix.icons)
+    implementation(libs.haze)
 
     implementation(libs.com.github.topjohnwu.libsu.core)
     implementation(libs.com.github.topjohnwu.libsu.service)

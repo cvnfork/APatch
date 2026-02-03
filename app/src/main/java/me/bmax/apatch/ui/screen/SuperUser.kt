@@ -6,7 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,8 +29,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -37,6 +42,11 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.Natives
@@ -72,6 +82,12 @@ fun SuperUserScreen(bottomPadding: Dp) {
     val scrollBehavior = MiuixScrollBehavior()
     var expanded by remember { mutableStateOf(false) }
 
+    val hazeState = remember { HazeState() }
+    val hazeStyle = HazeStyle(
+        backgroundColor = colorScheme.surface,
+        tint = HazeTint(colorScheme.surface.copy(0.6f))
+    )
+
     LaunchedEffect(Unit) {
         if (viewModel.appList.isEmpty()) {
             viewModel.fetchAppList()
@@ -79,68 +95,71 @@ fun SuperUserScreen(bottomPadding: Dp) {
     }
 
     Scaffold(
-        modifier = Modifier.padding(bottom = bottomPadding),
-        topBar = { SuperTopBar(viewModel, scrollBehavior) }
-    ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp, bottom = 16.dp)
-                    .zIndex(10f)
+                    .hazeEffect(hazeState) {
+                        style = hazeStyle
+                        blurRadius = 30.dp
+                    }
             ) {
-                SearchBar(
-                    inputField = {
-                        InputField(
-                            query = viewModel.search,
-                            onQueryChange = { viewModel.search = it },
-                            onSearch = { expanded = false },
-                            expanded = expanded,
-                            onExpandedChange = {
-                                expanded = it
-                                if (!it) viewModel.search = ""
-                            }
-                        )
-                    },
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it },
-                    content = {}
-                )
-            }
-            PullToRefresh(
-                isRefreshing = viewModel.isRefreshing,
-                refreshTexts = listOf(
-                    stringResource(R.string.refresh_pulling),
-                    stringResource(R.string.refresh_release),
-                    stringResource(R.string.refresh_refresh),
-                    stringResource(R.string.refresh_complete)
-                ),
-                onRefresh = {
-                    scope.launch { viewModel.fetchAppList() }
-                }
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when {
-                        viewModel.isRefreshing && viewModel.appList.isEmpty() -> {
-                            LoadingIndicator()
-                        }
+                Column {
+                    SuperTopBar(viewModel, scrollBehavior)
 
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .overScrollVertical()
-                                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-                            ) {
-                                items(
-                                    viewModel.appList.filter {
-                                        it.packageName != apApp.packageName
-                                    },
-                                    key = { it.packageName + it.uid }
-                                ) { app ->
-                                    AppItem(app)
+                    SearchBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 4.dp),
+                        inputField = {
+                            InputField(
+                                query = viewModel.search,
+                                onQueryChange = { viewModel.search = it },
+                                onSearch = { expanded = false },
+                                expanded = expanded,
+                                onExpandedChange = {
+                                    expanded = it
+                                    if (!it) viewModel.search = ""
                                 }
-                            }
+                            )
+                        },
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                        content = {
+                        }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            PullToRefresh(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .hazeSource(state = hazeState),
+                isRefreshing = viewModel.isRefreshing,
+                onRefresh = { scope.launch { viewModel.fetchAppList() } }
+            ) {
+                if (viewModel.isRefreshing && viewModel.appList.isEmpty()) {
+                    LoadingIndicator()
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .overScrollVertical()
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        contentPadding = PaddingValues(
+                            top = innerPadding.calculateTopPadding() + 8.dp,
+                            bottom = bottomPadding + 16.dp,
+                            start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
+                            end = innerPadding.calculateEndPadding(LocalLayoutDirection.current)
+                        )
+                    ) {
+                        items(
+                            viewModel.appList.filter { it.packageName != apApp.packageName },
+                            key = { it.packageName + it.uid }
+                        ) { app ->
+                            AppItem(app)
                         }
                     }
                 }
@@ -160,6 +179,7 @@ fun SuperTopBar(
 
     TopAppBar(
         title = stringResource(R.string.su_title),
+        color = Color.Transparent,
         actions = {
             val showDropdown = remember { mutableStateOf(false) }
 

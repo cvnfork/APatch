@@ -16,8 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.hazeEffect
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.LocalHandlePageChange
@@ -26,7 +32,10 @@ import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationItem
 
 @Composable
-fun BottomBar() {
+fun BottomBar(
+    hazeState: HazeState,
+    hazeStyle: HazeStyle
+) {
     val apState by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     val kPatchReady = apState != APApplication.State.UNKNOWN_STATE
     val aPatchReady = apState == APApplication.State.ANDROIDPATCH_INSTALLED
@@ -48,6 +57,13 @@ fun BottomBar() {
     }
 
     NavigationBar(
+        modifier = Modifier
+            .hazeEffect(hazeState) {
+                style = hazeStyle
+                blurRadius = 30.dp
+                noiseFactor = 0f
+            },
+        color = Color.Transparent,
         items = navItems,
         selected = selectedPage,
         onClick = handlePageChange

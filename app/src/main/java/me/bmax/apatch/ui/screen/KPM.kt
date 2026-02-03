@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -75,9 +76,11 @@ import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.extra.WindowListPopup
 import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.PullToRefresh
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -90,6 +93,7 @@ import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import java.io.IOException
 
 private const val TAG = "KernelPatchModule"
@@ -120,6 +124,7 @@ fun KPModuleScreen(
         return
     }
 
+    val scrollBehavior = MiuixScrollBehavior()
     val viewModel = viewModel<KPModuleViewModel>()
     val controlDialogState = remember { mutableStateOf(false) }
 
@@ -133,9 +138,11 @@ fun KPModuleScreen(
 
     Box {
         Scaffold(
-            modifier = Modifier.padding(bottom = bottomPadding),
             topBar = {
-                TopAppBar(title = stringResource(R.string.kpm))
+                TopAppBar(
+                    title = stringResource(R.string.kpm),
+                    scrollBehavior = scrollBehavior
+                )
             },
             floatingActionButton = {
                 val scope = rememberCoroutineScope()
@@ -183,7 +190,7 @@ fun KPModuleScreen(
                     FloatingActionButton(
                         onClick = { expanded.value = !expanded.value },
                         containerColor = colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 30.dp)
+                        modifier = Modifier.padding(bottom = bottomPadding + 16.dp)
                     ) {
                         Icon(
                             imageVector = MiuixIcons.Add,
@@ -239,6 +246,7 @@ fun KPModuleScreen(
             KPModuleList(
                 viewModel = viewModel,
                 state = kpModuleListState,
+                scrollBehavior = scrollBehavior,
                 scaffoldPadding = PaddingValues(
                     start = 16.dp,
                     top = innerPadding.calculateTopPadding() + 16.dp,
@@ -247,6 +255,7 @@ fun KPModuleScreen(
                 ),
                 onShowControlDialog = { controlDialogState.value = true }
             )
+            Spacer(Modifier.height(bottomPadding))
         }
         if (controlDialogState.value) {
             KPMControlDialog(controlDialog = controlDialogState)
@@ -367,6 +376,7 @@ fun KPMControlDialog(
 private fun KPModuleList(
     viewModel: KPModuleViewModel,
     state: LazyListState,
+    scrollBehavior: ScrollBehavior,
     scaffoldPadding: PaddingValues = PaddingValues(),
     onShowControlDialog: () -> Unit = {}
 ) {
@@ -416,7 +426,10 @@ private fun KPModuleList(
             }
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .overScrollVertical()
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
                 state = state,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {

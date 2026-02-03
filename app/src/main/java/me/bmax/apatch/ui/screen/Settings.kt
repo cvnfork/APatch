@@ -111,7 +111,6 @@ fun SettingScreen(
     val showClearKeyDialog = rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier.padding(bottom = bottomPadding),
         topBar = {
             TopAppBar(
                 title = stringResource(R.string.settings),
@@ -413,6 +412,7 @@ fun SettingScreen(
                 }
             }
         }
+        Spacer(Modifier.height(bottomPadding))
     }
 }
 

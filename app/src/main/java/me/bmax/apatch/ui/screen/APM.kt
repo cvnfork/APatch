@@ -4,7 +4,6 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -66,13 +65,17 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.InstallScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.topjohnwu.superuser.io.SuFile
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -142,21 +145,17 @@ fun APModuleScreen(
     val scrollBehavior = MiuixScrollBehavior()
     var expanded by remember { mutableStateOf(false) }
 
+    val hazeState = remember { HazeState() }
+    val hazeStyle = HazeStyle(
+        backgroundColor = colorScheme.surface,
+        tint = HazeTint(colorScheme.surface.copy(0.6f))
+    )
+
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
+
     if (state != APApplication.State.ANDROIDPATCH_INSTALLED && state != APApplication.State.ANDROIDPATCH_NEED_UPDATE) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row {
-                Text(
-                    text = stringResource(id = R.string.apm_not_installed),
-                    style = MiuixTheme.textStyles.body2
-                )
-            }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = stringResource(id = R.string.apm_not_installed), style = MiuixTheme.textStyles.body2)
         }
         return
     }
@@ -168,122 +167,107 @@ fun APModuleScreen(
             viewModel.fetchModuleList()
         }
     }
-    val webUILauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { viewModel.fetchModuleList() }
-    //TODO: FIXME -> val isSafeMode = Natives.getSafeMode()
-    val isSafeMode = false
-    val hasMagisk = hasMagisk()
-    val hideInstallButton = isSafeMode || hasMagisk
 
+    val webUILauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        viewModel.fetchModuleList()
+    }
+
+    val hasMagisk = hasMagisk()
+    val hideInstallButton = hasMagisk
     val moduleListState = rememberLazyListState()
 
     Scaffold(
-        modifier = Modifier.padding(bottom = bottomPadding),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = stringResource(R.string.apm),
-                scrollBehavior = scrollBehavior
-            )
-        }, floatingActionButton = if (hideInstallButton) {
-            { /* Empty */ }
-        } else {
-            {
-                val selectZipLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartActivityForResult()
-                ) {
-                    if (it.resultCode != RESULT_OK) {
-                        return@rememberLauncherForActivityResult
+            Box(
+                modifier = Modifier
+                    .hazeEffect(hazeState, style = hazeStyle) {
+                        blurRadius = 30.dp
+                        noiseFactor = 0f
                     }
-                    val data = it.data ?: return@rememberLauncherForActivityResult
-                    val uri = data.data ?: return@rememberLauncherForActivityResult
+                    .background(colorScheme.surface.copy(alpha = 0.1f))
+            ) {
+                Column {
+                    TopAppBar(
+                        title = stringResource(R.string.apm),
+                        scrollBehavior = scrollBehavior,
+                        color = Color.Transparent
+                    )
 
-                    Log.i("ModuleScreen", "select zip result: $uri")
-
-                    navigator.navigate(InstallScreenDestination(uri, MODULE_TYPE.APM))
-
-                    viewModel.markNeedRefresh()
-                }
-
-                FloatingActionButton(
-                    containerColor = colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 30.dp),
-                    onClick = {
-                        // select the zip file to install
-                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-                        intent.type = "application/zip"
-                        selectZipLauncher.launch(intent)
-                    }) {
-                    Icon(
-                        imageVector = MiuixIcons.Add,
-                        contentDescription = null,
-                        tint = colorScheme.onPrimary
+                    SearchBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 4.dp),
+                        inputField = {
+                            InputField(
+                                query = viewModel.search,
+                                onQueryChange = { viewModel.search = it },
+                                onSearch = { expanded = false },
+                                expanded = expanded,
+                                onExpandedChange = {
+                                    expanded = it
+                                    if (!it) viewModel.search = ""
+                                }
+                            )
+                        },
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                        content = {}
                     )
                 }
             }
         },
-        snackbarHost = {
-            SnackbarHost(state = snackbarHostState)
-        }
-        ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp, bottom = 16.dp)
-                    .zIndex(10f)
-            ) {
-                SearchBar(
-                    inputField = {
-                        InputField(
-                            query = viewModel.search,
-                            onQueryChange = { viewModel.search = it },
-                            onSearch = { expanded = false },
-                            expanded = expanded,
-                            onExpandedChange = {
-                                expanded = it
-                                if (!it) viewModel.search = ""
-                            }
-                        )
-                    },
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it },
-                    content = {}
-                )
-            }
-            when {
-                hasMagisk -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            stringResource(R.string.apm_magisk_conflict),
-                            textAlign = TextAlign.Center,
-                        )
+        floatingActionButton = {
+            if (!hideInstallButton) {
+                val selectZipLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                    if (it.resultCode == RESULT_OK) {
+                        it.data?.data?.let { uri ->
+                            navigator.navigate(InstallScreenDestination(uri, MODULE_TYPE.APM))
+                            viewModel.markNeedRefresh()
+                        }
                     }
                 }
+                FloatingActionButton(
+                    containerColor = colorScheme.primary,
+                    modifier = Modifier.padding(bottom = bottomPadding + 16.dp),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/zip" }
+                        selectZipLauncher.launch(intent)
+                    }
+                ) {
+                    Icon(imageVector = MiuixIcons.Add, contentDescription = null, tint = colorScheme.onPrimary)
+                }
+            }
+        },
+        snackbarHost = { SnackbarHost(state = snackbarHostState) }
+    ) { innerPadding ->
 
+        PullToRefresh(
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(state = hazeState),
+            isRefreshing = viewModel.isRefreshing,
+            onRefresh = { viewModel.fetchModuleList() }
+        ) {
+            when {
+                hasMagisk -> {
+                    Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                        Text(stringResource(R.string.apm_magisk_conflict), textAlign = TextAlign.Center)
+                    }
+                }
                 else -> {
                     ModuleList(
-                        navigator,
+                        navigator = navigator,
                         viewModel = viewModel,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
                         state = moduleListState,
-                        onInstallModule = {
-                            navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM))
-                        },
+                        contentPadding = innerPadding,
+                        onInstallModule = { navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM)) },
                         onClickModule = { id, name, hasWebUi ->
                             if (hasWebUi) {
                                 webUILauncher.launch(
-                                    Intent(
-                                        context, WebUIActivity::class.java
-                                    ).setData("apatch://webui/$id".toUri()).putExtra("id", id)
-                                        .putExtra("name", name)
+                                    Intent(context, WebUIActivity::class.java)
+                                        .setData("apatch://webui/$id".toUri())
+                                        .putExtra("id", id).putExtra("name", name)
                                 )
                             }
                         },
@@ -347,8 +331,8 @@ private enum class ShortcutType {
 private fun ModuleList(
     navigator: DestinationsNavigator,
     viewModel: APModuleViewModel,
-    modifier: Modifier = Modifier,
     state: LazyListState,
+    contentPadding: PaddingValues,
     onInstallModule: (Uri) -> Unit,
     onClickModule: (id: String, name: String, hasWebUi: Boolean) -> Unit,
     context: Context,
@@ -766,19 +750,6 @@ private fun ModuleList(
             openShortcutDialogForType(ShortcutType.WebUI)
         }
     }
-
-    PullToRefresh(
-        isRefreshing = viewModel.isRefreshing,
-        refreshTexts = listOf(
-            stringResource(R.string.refresh_pulling),
-            stringResource(R.string.refresh_release),
-            stringResource(R.string.refresh_refresh),
-            stringResource(R.string.refresh_complete)
-        ),
-        onRefresh = {
-            viewModel.fetchModuleList()
-        }
-    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -786,13 +757,12 @@ private fun ModuleList(
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             state = state,
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = remember {
-                PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 16.dp /*  Scaffold Fab Spacing + Fab container height */
-                )
-            },
+            contentPadding = PaddingValues(
+                top = contentPadding.calculateTopPadding(),
+                bottom = contentPadding.calculateBottomPadding() + 80.dp,   /*  Scaffold Fab Spacing + Fab container height */
+                start = 16.dp,
+                end = 16.dp
+            )
         ) {
             item {
                 MetaModuleWarningCard(viewModel)
@@ -856,7 +826,8 @@ private fun ModuleList(
                                             reboot()
                                         }
                                     } else {
-                                        val message = if (module.enabled) failedDisable else failedEnable
+                                        val message =
+                                            if (module.enabled) failedDisable else failedEnable
                                         snackBarHost.showSnackbar(message.format(module.name))
                                     }
                                 }
@@ -884,9 +855,7 @@ private fun ModuleList(
                 }
             }
         }
-
-        DownloadListener(context, onInstallModule)
-    }
+    DownloadListener(context, onInstallModule)
 }
 
 @Composable

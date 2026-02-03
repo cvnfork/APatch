@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -104,7 +105,7 @@ fun HomeScreen(
     val apState by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
 
     Scaffold(
-        modifier = Modifier.padding(bottom = bottomPadding),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopBar(
                 navigator,
@@ -115,10 +116,11 @@ fun HomeScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .padding(innerPadding)
+                .fillMaxSize()
                 .padding(horizontal = 16.dp)
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = innerPadding
         ) {
             item {
                 Column(
@@ -141,8 +143,8 @@ fun HomeScreen(
                     }
                     InfoCard(kpState, apState)
                     LearnMoreCard()
-                    Spacer(Modifier)
                 }
+                Spacer(Modifier.height(bottomPadding))
             }
         }
     }

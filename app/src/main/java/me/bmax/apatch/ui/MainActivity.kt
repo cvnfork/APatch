@@ -45,11 +45,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.navigation.NavBackStackEntry
 import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -68,6 +74,8 @@ import me.bmax.apatch.ui.viewmodel.SuperUserViewModel
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 class MainActivity : AppCompatActivity() {
 
@@ -235,6 +243,12 @@ fun MainScreen(
     var animateJob by remember { mutableStateOf<Job?>(null) }
     var lastRequestedPage by remember { mutableIntStateOf(pagerState.currentPage) }
 
+    val hazeState = remember { HazeState() }
+    val hazeStyle = HazeStyle(
+        backgroundColor = colorScheme.surface,
+        tint = HazeTint(colorScheme.surface.copy(0.6f))
+    )
+
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope, aPatchReady) {
         { page ->
             uiSelectedPage = page
@@ -292,10 +306,13 @@ fun MainScreen(
     ) {
         Scaffold(
             bottomBar = {
-                BottomBar()
+                BottomBar(hazeState, hazeStyle)
             },
         ) { innerPadding ->
             HorizontalPager(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .hazeSource(state = hazeState),
                 state = pagerState,
                 beyondViewportPageCount = availablePages.size,
                 userScrollEnabled = userScrollEnabled,
