@@ -177,7 +177,7 @@ fun ModuleInstallHandler(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 TextButton(
-                    text = stringResource(id = android.R.string.cancel),
+                    text = stringResource(android.R.string.cancel),
                     onClick = { showDialog.value = false; onReset() },
                     modifier = Modifier.weight(1f)
                 )
@@ -185,7 +185,7 @@ fun ModuleInstallHandler(
                 Spacer(Modifier.width(20.dp))
 
                 TextButton(
-                    text = stringResource(id = android.R.string.ok),
+                    text = stringResource(R.string.apm_install),
                     onClick = {
                         showDialog.value = false
                         uri?.let { navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM)) }
