@@ -149,7 +149,7 @@ fun APModuleScreen(
     val hazeState = remember { HazeState() }
     val hazeStyle = HazeStyle(
         backgroundColor = colorScheme.surface,
-        tint = HazeTint(colorScheme.surface.copy(0.6f))
+        tint = HazeTint(colorScheme.surface.copy(0.8f))
     )
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)

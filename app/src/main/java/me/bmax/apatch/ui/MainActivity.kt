@@ -265,7 +265,7 @@ fun MainScreen(
     val hazeState = remember { HazeState() }
     val hazeStyle = HazeStyle(
         backgroundColor = colorScheme.surface,
-        tint = HazeTint(colorScheme.surface.copy(0.6f))
+        tint = HazeTint(colorScheme.surface.copy(0.8f))
     )
 
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope, aPatchReady) {
