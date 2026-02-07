@@ -303,7 +303,10 @@ fun MainScreen(
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
-            if (!animating) uiSelectedPage = page
+            if (!animating) {
+                uiSelectedPage = page
+                lastRequestedPage = page
+            }
         }
     }
 
