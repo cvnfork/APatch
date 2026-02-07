@@ -111,7 +111,7 @@ fun SuperUserScreen(bottomPadding: Dp) {
                     SearchBar(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 4.dp),
+                            .padding(top = 8.dp, bottom = 8.dp),
                         inputField = {
                             InputField(
                                 query = viewModel.search,

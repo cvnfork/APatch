@@ -7,6 +7,15 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -128,13 +138,31 @@ fun KPModuleScreen(
     val viewModel = viewModel<KPModuleViewModel>()
     val controlDialogState = remember { mutableStateOf(false) }
 
+    val kpModuleListState = rememberLazyListState()
+    var fabVisible by remember { mutableStateOf(true) }
+
     LaunchedEffect(Unit) {
         if (viewModel.moduleList.isEmpty() || viewModel.isNeedRefresh) {
             viewModel.fetchModuleList()
         }
     }
 
-    val kpModuleListState = rememberLazyListState()
+    LaunchedEffect(kpModuleListState) {
+        var lastIndex = 0
+        var lastOffset = 0
+
+        snapshotFlow {
+            kpModuleListState.firstVisibleItemIndex to
+                    kpModuleListState.firstVisibleItemScrollOffset
+        }.collect { (index, offset) ->
+            val scrollingDown = index > lastIndex || (index == lastIndex && offset > lastOffset)
+
+            fabVisible = !scrollingDown
+
+            lastIndex = index
+            lastOffset = offset
+        }
+    }
 
     Box {
         Scaffold(
@@ -187,16 +215,43 @@ fun KPModuleScreen(
                 val options = listOf(moduleEmbed, moduleInstall, moduleLoad)
 
                 Column {
-                    FloatingActionButton(
-                        onClick = { expanded.value = !expanded.value },
-                        containerColor = colorScheme.primary,
-                        modifier = Modifier.padding(bottom = bottomPadding + 16.dp)
+                    AnimatedVisibility(
+                        visible = fabVisible,
+                        enter = scaleIn(
+                            initialScale = 0f,
+                            animationSpec = spring(
+                                dampingRatio = 0.6f,
+                                stiffness = 380f
+                            )
+                        ) + fadeIn(
+                            animationSpec = tween(120)
+                        ),
+                        exit =
+                            scaleOut(
+                                targetScale = 0.85f,
+                                animationSpec = tween(
+                                    durationMillis = 220,
+                                    easing = FastOutLinearInEasing
+                                )
+                            ) +
+                            fadeOut(
+                                animationSpec = tween(
+                                    durationMillis = 180,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            )
                     ) {
-                        Icon(
-                            imageVector = MiuixIcons.Add,
-                            contentDescription = null,
-                            tint = colorScheme.onPrimary
-                        )
+                        FloatingActionButton(
+                            onClick = { expanded.value = !expanded.value },
+                            containerColor = colorScheme.primary,
+                            modifier = Modifier.padding(bottom = bottomPadding + 16.dp)
+                        ) {
+                            Icon(
+                                imageVector = MiuixIcons.Add,
+                                contentDescription = null,
+                                tint = colorScheme.onPrimary
+                            )
+                        }
                     }
 
                     WindowListPopup(
@@ -247,15 +302,10 @@ fun KPModuleScreen(
                 viewModel = viewModel,
                 state = kpModuleListState,
                 scrollBehavior = scrollBehavior,
-                scaffoldPadding = PaddingValues(
-                    start = 16.dp,
-                    top = innerPadding.calculateTopPadding() + 16.dp,
-                    end = 16.dp,
-                    bottom = innerPadding.calculateBottomPadding() + 16.dp
-                ),
+                contentPadding = innerPadding,
+                bottomPadding = bottomPadding,
                 onShowControlDialog = { controlDialogState.value = true }
             )
-            Spacer(Modifier.height(bottomPadding))
         }
         if (controlDialogState.value) {
             KPMControlDialog(controlDialog = controlDialogState)
@@ -377,7 +427,8 @@ private fun KPModuleList(
     viewModel: KPModuleViewModel,
     state: LazyListState,
     scrollBehavior: ScrollBehavior,
-    scaffoldPadding: PaddingValues = PaddingValues(),
+    contentPadding: PaddingValues,
+    bottomPadding: Dp,
     onShowControlDialog: () -> Unit = {}
 ) {
     val moduleStr = stringResource(id = R.string.kpm)
@@ -411,10 +462,12 @@ private fun KPModuleList(
             viewModel.fetchModuleList()
         }
     }
-    Box(modifier = Modifier.padding(scaffoldPadding)) {
+    Box {
         PullToRefresh(
+            modifier = Modifier.fillMaxSize(),
             isRefreshing = viewModel.isRefreshing,
             pullToRefreshState = pullToRefreshState,
+            contentPadding = contentPadding,
             refreshTexts = listOf(
                 stringResource(R.string.refresh_pulling),
                 stringResource(R.string.refresh_release),
@@ -429,7 +482,13 @@ private fun KPModuleList(
                     .overScrollVertical()
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
                 state = state,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(
+                    top = contentPadding.calculateTopPadding() + 12.dp,
+                    bottom = bottomPadding + 16.dp,   /*  Scaffold Fab Spacing + Fab container height */
+                    start = 16.dp,
+                    end = 16.dp,
+                )
             ) {
                 when {
                     viewModel.moduleList.isEmpty() -> {
@@ -463,9 +522,6 @@ private fun KPModuleList(
                                     onShowControlDialog()
                                 },
                             )
-
-                            // fix last item shadow incomplete in LazyColumn
-                            Spacer(Modifier.height(1.dp))
                         }
                     }
                 }
