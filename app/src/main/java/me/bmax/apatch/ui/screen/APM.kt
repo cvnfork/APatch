@@ -299,7 +299,14 @@ fun APModuleScreen(
             }
             }
         },
-        snackbarHost = { SnackbarHost(state = snackbarHostState) }
+        snackbarHost = {
+            SnackbarHost(
+                state = snackbarHostState,
+                modifier = Modifier.padding(
+                    bottom = if (fabVisible) 0.dp else bottomPadding
+                ),
+            )
+        }
     ) { innerPadding ->
         PullToRefresh(
             modifier = Modifier.fillMaxSize(),
