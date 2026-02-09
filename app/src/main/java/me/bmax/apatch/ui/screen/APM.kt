@@ -9,15 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -51,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -171,15 +162,6 @@ fun APModuleScreen(
     }
 
     val viewModel = viewModel<APModuleViewModel>()
-    val webUILauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        viewModel.fetchModuleList()
-    }
-
-    val hasMagisk = hasMagisk()
-    val hideInstallButton = hasMagisk
-
-    val moduleListState = rememberLazyListState()
-    var fabVisible by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         if (viewModel.moduleList.isEmpty() || viewModel.isNeedRefresh) {
@@ -187,22 +169,13 @@ fun APModuleScreen(
         }
     }
 
-    LaunchedEffect(moduleListState) {
-        var lastIndex = 0
-        var lastOffset = 0
-
-        snapshotFlow {
-            moduleListState.firstVisibleItemIndex to
-                    moduleListState.firstVisibleItemScrollOffset
-        }.collect { (index, offset) ->
-            val scrollingDown = index > lastIndex || (index == lastIndex && offset > lastOffset)
-
-            fabVisible = !scrollingDown
-
-            lastIndex = index
-            lastOffset = offset
-        }
+    val webUILauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        viewModel.fetchModuleList()
     }
+
+    val hasMagisk = hasMagisk()
+    val hideInstallButton = hasMagisk
+    val moduleListState = rememberLazyListState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -225,7 +198,7 @@ fun APModuleScreen(
                     SearchBar(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 8.dp),
+                            .padding(top = 8.dp, bottom = 4.dp),
                         inputField = {
                             InputField(
                                 query = viewModel.search,
@@ -245,66 +218,34 @@ fun APModuleScreen(
                 }
             }
         },
-
         floatingActionButton = {
             if (!hideInstallButton) {
-                val selectZipLauncher =
-                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                        if (it.resultCode == RESULT_OK) {
-                            it.data?.data?.let { uri ->
-                                navigator.navigate(InstallScreenDestination(uri, MODULE_TYPE.APM))
-                                viewModel.markNeedRefresh()
-                            }
+                val selectZipLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                    if (it.resultCode == RESULT_OK) {
+                        it.data?.data?.let { uri ->
+                            navigator.navigate(InstallScreenDestination(uri, MODULE_TYPE.APM))
+                            viewModel.markNeedRefresh()
                         }
                     }
-                AnimatedVisibility(
-                    visible = fabVisible,
-                    enter = scaleIn(
-                            initialScale = 0.6f,
-                            animationSpec = spring(
-                                dampingRatio = 0.75f,
-                                stiffness = 420f
-                            )
-                        ) + fadeIn(
-                            animationSpec = tween(120)
-                        ),
-                    exit = scaleOut(
-                            targetScale = 0.9f,
-                            animationSpec = tween(
-                                durationMillis = 180,
-                                easing = FastOutSlowInEasing
-                            )
-                        ) + fadeOut(
-                            animationSpec = tween(
-                                durationMillis = 280,
-                                easing = LinearOutSlowInEasing
-                            )
-                        )
-                ) {
+                }
                 FloatingActionButton(
                     containerColor = colorScheme.primary,
                     modifier = Modifier.padding(bottom = bottomPadding + 16.dp),
                     onClick = {
-                        val intent =
-                            Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/zip" }
+                        val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "application/zip" }
                         selectZipLauncher.launch(intent)
                     }
                 ) {
-                    Icon(
-                        imageVector = MiuixIcons.Add,
-                        contentDescription = null,
-                        tint = colorScheme.onPrimary
-                    )
+                    Icon(imageVector = MiuixIcons.Add, contentDescription = null, tint = colorScheme.onPrimary)
                 }
-            }
             }
         },
         snackbarHost = { SnackbarHost(state = snackbarHostState) }
     ) { innerPadding ->
+
         PullToRefresh(
             modifier = Modifier.fillMaxSize(),
             isRefreshing = viewModel.isRefreshing,
-            contentPadding = innerPadding,
             refreshTexts = listOf(
                 stringResource(R.string.refresh_pulling),
                 stringResource(R.string.refresh_release),
@@ -312,15 +253,11 @@ fun APModuleScreen(
                 stringResource(R.string.refresh_complete)
             ),
             onRefresh = { viewModel.fetchModuleList() },
+            contentPadding = innerPadding
         ) {
             when {
                 hasMagisk -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
                         Text(stringResource(R.string.apm_magisk_conflict), textAlign = TextAlign.Center)
                     }
                 }
@@ -331,7 +268,6 @@ fun APModuleScreen(
                         state = moduleListState,
                         hazeState = hazeState,
                         contentPadding = innerPadding,
-                        bottomPadding = bottomPadding,
                         onInstallModule = { navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM)) },
                         onClickModule = { id, name, hasWebUi ->
                             if (hasWebUi) {
@@ -405,7 +341,6 @@ private fun ModuleList(
     state: LazyListState,
     hazeState: HazeState,
     contentPadding: PaddingValues,
-    bottomPadding: Dp,
     onInstallModule: (Uri) -> Unit,
     onClickModule: (id: String, name: String, hasWebUi: Boolean) -> Unit,
     context: Context,
@@ -833,9 +768,9 @@ private fun ModuleList(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(
                 top = contentPadding.calculateTopPadding(),
-                bottom = bottomPadding + 16.dp,   /*  Scaffold Fab Spacing + Fab container height */
+                bottom = contentPadding.calculateBottomPadding() + 80.dp,   /*  Scaffold Fab Spacing + Fab container height */
                 start = 16.dp,
-                end = 16.dp,
+                end = 16.dp
             )
         ) {
             item {
