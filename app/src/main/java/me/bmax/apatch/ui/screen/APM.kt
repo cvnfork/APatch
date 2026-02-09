@@ -268,6 +268,7 @@ fun APModuleScreen(
                         state = moduleListState,
                         hazeState = hazeState,
                         contentPadding = innerPadding,
+                        bottomPadding = bottomPadding,
                         onInstallModule = { navigator.navigate(InstallScreenDestination(it, MODULE_TYPE.APM)) },
                         onClickModule = { id, name, hasWebUi ->
                             if (hasWebUi) {
@@ -341,6 +342,7 @@ private fun ModuleList(
     state: LazyListState,
     hazeState: HazeState,
     contentPadding: PaddingValues,
+    bottomPadding: Dp,
     onInstallModule: (Uri) -> Unit,
     onClickModule: (id: String, name: String, hasWebUi: Boolean) -> Unit,
     context: Context,
@@ -768,7 +770,7 @@ private fun ModuleList(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(
                 top = contentPadding.calculateTopPadding(),
-                bottom = contentPadding.calculateBottomPadding() + 80.dp,   /*  Scaffold Fab Spacing + Fab container height */
+                bottom = bottomPadding + 16.dp + 60.dp,   /*  Scaffold Fab Spacing + Fab container height */
                 start = 16.dp,
                 end = 16.dp
             )

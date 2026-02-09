@@ -247,15 +247,10 @@ fun KPModuleScreen(
                 viewModel = viewModel,
                 state = kpModuleListState,
                 scrollBehavior = scrollBehavior,
-                scaffoldPadding = PaddingValues(
-                    start = 16.dp,
-                    top = innerPadding.calculateTopPadding() + 16.dp,
-                    end = 16.dp,
-                    bottom = innerPadding.calculateBottomPadding() + 16.dp
-                ),
+                contentPadding = innerPadding,
+                bottomPadding = bottomPadding,
                 onShowControlDialog = { controlDialogState.value = true }
             )
-            Spacer(Modifier.height(bottomPadding))
         }
         if (controlDialogState.value) {
             KPMControlDialog(controlDialog = controlDialogState)
@@ -377,6 +372,8 @@ private fun KPModuleList(
     viewModel: KPModuleViewModel,
     state: LazyListState,
     scrollBehavior: ScrollBehavior,
+    contentPadding: PaddingValues,
+    bottomPadding: Dp,
     scaffoldPadding: PaddingValues = PaddingValues(),
     onShowControlDialog: () -> Unit = {}
 ) {
@@ -429,7 +426,13 @@ private fun KPModuleList(
                     .overScrollVertical()
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
                 state = state,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(
+                    top = contentPadding.calculateTopPadding(),
+                    bottom = bottomPadding + 16.dp + 60.dp,   /*  Scaffold Fab Spacing + Fab container height */
+                    start = 16.dp,
+                    end = 16.dp
+                )
             ) {
                 when {
                     viewModel.moduleList.isEmpty() -> {
