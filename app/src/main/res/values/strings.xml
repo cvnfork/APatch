@@ -85,6 +85,7 @@
     <string name="patch_mode_patch_and_install">Mode: Patch and install</string>
     <string name="patch_mode_install_to_next_slot">Mode: Install to inactive slot (After OTA)</string>
     <string name="patch_mode_uninstall_patch">Mode: Uninstall KPatch</string>
+    <string name="patch_patching">Patching…</string>
     <string name="patch_select_bootimg_btn">Select boot</string>
     <string name="patch_embed_kpm_btn">Embed KPM</string>
     <string name="patch_start_patch_btn">Start</string>
