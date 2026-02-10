@@ -428,7 +428,7 @@ private fun KPModuleList(
                 state = state,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(
-                    top = contentPadding.calculateTopPadding(),
+                    top = contentPadding.calculateTopPadding() + 12.dp,
                     bottom = bottomPadding + 16.dp + 60.dp,   /*  Scaffold Fab Spacing + Fab container height */
                     start = 16.dp,
                     end = 16.dp

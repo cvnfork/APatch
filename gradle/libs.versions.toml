@@ -7,7 +7,7 @@ lifecycle = "2.10.0"
 compose-destination = "2.3.0"
 libsu = "6.0.0"
 sheets-compose-dialogs = "1.3.0"
-miuix = "0.8.0-rc07"
+miuix = "0.8.1"
 navigation-compose = "2.9.7"
 haze = "1.7.1"
 
