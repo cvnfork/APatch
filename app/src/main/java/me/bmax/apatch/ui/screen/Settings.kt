@@ -203,6 +203,7 @@ fun SettingScreen(
                         summary = stringResource(R.string.settings_donot_store_superkey_summary),
                         icon = Icons.Default.KeyOff,
                         checked = bSkipStoreSuperKey,
+                        contentDescription = stringResource(R.string.settings_donot_store_superkey_summary),
                         onCheckedChange = {
                             bSkipStoreSuperKey = it
                             APatchKeyHelper.setShouldSkipStoreSuperKey(bSkipStoreSuperKey)
@@ -216,6 +217,7 @@ fun SettingScreen(
                             summary = stringResource(R.string.settings_global_namespace_mode_summary),
                             icon = Icons.Filled.Engineering,
                             checked = isGlobalNamespaceEnabled,
+                            contentDescription = stringResource(R.string.settings_global_namespace_mode_summary),
                             onCheckedChange = {
                                 setGlobalNamespaceEnabled(
                                     if (isGlobalNamespaceEnabled) "0" else "1"
@@ -236,6 +238,7 @@ fun SettingScreen(
                             summary = stringResource(R.string.enable_web_debugging_summary),
                             icon = Icons.Filled.DeveloperMode,
                             checked = enableWebDebugging,
+                            contentDescription = stringResource(R.string.enable_web_debugging_summary),
                             onCheckedChange = { isChecked ->
                                 enableWebDebugging = isChecked
                                 APApplication.sharedPreferences.edit {
@@ -257,6 +260,7 @@ fun SettingScreen(
                         summary = stringResource(R.string.settings_check_update_summary),
                         icon = Icons.Filled.Update,
                         checked = checkUpdate,
+                        contentDescription = stringResource(R.string.settings_check_update_summary),
                         onCheckedChange = { isChecked ->
                             checkUpdate = isChecked
                             prefs.edit { putBoolean("check_update", isChecked) }

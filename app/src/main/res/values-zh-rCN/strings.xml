@@ -220,7 +220,7 @@
     <string name="enable_web_debugging">启用 WebView 调试</string>
     <string name="home_new_apatch_found">发现新版本：%s，单击升级。</string>
     <string name="settings_check_update_summary">应用启动时自动检测更新</string>
-    <string name="enable_web_debugging_summary">可用于调试 WebUI，请仅在需要时启用。</string>
+    <string name="enable_web_debugging_summary">可用于调试 WebUI，请仅在需要时启用</string>
     <string name="settings_donot_store_superkey">不存储超级密钥</string>
     <string name="settings_donot_store_superkey_summary">每次打开管理器时验证超级密钥</string>
     <string name="home_device_info">设备</string>

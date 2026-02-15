@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
@@ -44,6 +43,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.io.File
 import java.text.SimpleDateFormat
@@ -165,11 +166,19 @@ private fun TopBar(onBack: () -> Unit = {}, onSave: () -> Unit = {}) {
         navigationIcon = {
             IconButton(
                 onClick = onBack
-            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) }
+            ) {
+                Icon(
+                    MiuixIcons.Back,
+                    modifier = Modifier.padding(start = 20.dp),
+                    contentDescription = null
+                )
+            }
         }, actions = {
             IconButton(onClick = onSave) {
                 Icon(
-                    imageVector = Icons.Filled.Save, contentDescription = "Localized description"
+                    imageVector = Icons.Filled.Save,
+                    modifier = Modifier.padding(end = 20.dp),
+                    contentDescription = "Localized description"
                 )
             }
         })
