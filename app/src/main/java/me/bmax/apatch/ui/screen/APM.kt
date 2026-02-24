@@ -330,22 +330,13 @@ private fun getMetaModuleWarningText(
 
 @Composable
 private fun MetaModuleWarningCard(
-    text: String
+    text: String,
+    onClosed: () -> Unit
 ) {
-    var show by remember { mutableStateOf(true) }
-
-    AnimatedVisibility(
-        visible = show,
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically()
-    ) {
-        WarningCard(
-            message = text,
-            onClose = {
-                show = false
-            }
-        )
-    }
+    WarningCard(
+        message = text,
+        onClose = onClosed
+    )
 }
 
 private enum class ShortcutType {
@@ -779,6 +770,8 @@ private fun ModuleList(
         }
     }
 
+    var isWarningManuallyClosed by rememberSaveable { mutableStateOf(false) }
+
     val metaModuleWarningText by produceState<String?>(initialValue = null, viewModel.moduleList) {
         value = withContext(Dispatchers.IO) {
             getMetaModuleWarningText(viewModel, context)
@@ -800,11 +793,21 @@ private fun ModuleList(
                 end = 16.dp
             )
         ) {
-            if (metaModuleWarningText != null) {
-                item {
-                    MetaModuleWarningCard(metaModuleWarningText!!)
+            item(key = "meta_module_warning") {
+                AnimatedVisibility(
+                    visible = metaModuleWarningText != null && !isWarningManuallyClosed,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                        MetaModuleWarningCard(
+                            text = metaModuleWarningText ?: "",
+                            onClosed = { isWarningManuallyClosed = true }
+                        )
+                    }
                 }
             }
+
             when {
                 viewModel.moduleList.isEmpty() -> {
                     item {
