@@ -10,7 +10,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
@@ -289,45 +293,59 @@ fun APModuleScreen(
     }
 }
 
-@Composable
-private fun MetaModuleWarningCard(
-    viewModel: APModuleViewModel
-) {
-    val hasSystemModule = viewModel.moduleList.any { module ->
-        SuFile.open("/data/adb/modules/${module.id}/system").exists()
+private fun getMetaModuleWarningText(
+    viewModel: APModuleViewModel,
+    context: Context
+) : String? {
+    val hasActiveSystemModule = viewModel.moduleList.any { module ->
+        val moduleDir = "/data/adb/modules/${module.id}"
+
+        // Check for modules that need mounting (has system dir and no skip_mount)
+        val hasSystem = SuFile.open("$moduleDir/system").exists()
+        val isSkipped = SuFile.open("$moduleDir/skip_mount").exists()
+
+        hasSystem && !isSkipped
     }
 
+    if (!hasActiveSystemModule) return null
 
-    if (!hasSystemModule) return
+    val metaDir = "/data/adb/metamodule"
+    val metaProp = SuFile.open("$metaDir/module.prop").exists()
+    val metaRemoved = SuFile.open("$metaDir/remove").exists()
+    val metaDisabled = SuFile.open("$metaDir/disable").exists()
 
-    val metaProp = SuFile.open("/data/adb/metamodule/module.prop").exists()
-    val metaRemoved = SuFile.open("/data/adb/metamodule/remove").exists()
-    val metaDisabled = SuFile.open("/data/adb/metamodule/disable").exists()
-
-    val warningText = when {
+    return when {
         !metaProp ->
-            stringResource(R.string.no_meta_module_installed)
+            context.getString(R.string.no_meta_module_installed)
 
-        metaProp && metaRemoved ->
-            stringResource(R.string.meta_module_removed)
+        metaRemoved ->
+            context.getString(R.string.meta_module_removed)
 
-        metaProp && metaDisabled ->
-            stringResource(R.string.meta_module_disabled)
+        metaDisabled ->
+            context.getString(R.string.meta_module_disabled)
 
         else -> null
     }
+}
 
-    if (warningText == null) return
+@Composable
+private fun MetaModuleWarningCard(
+    text: String
+) {
     var show by remember { mutableStateOf(true) }
 
+    AnimatedVisibility(
+        visible = show,
+        enter = fadeIn() + expandVertically(),
+        exit = fadeOut() + shrinkVertically()
+    ) {
         WarningCard(
-            message = warningText,
+            message = text,
             onClose = {
                 show = false
             }
         )
-
-        Spacer(Modifier.height(8.dp))
+    }
 }
 
 private enum class ShortcutType {
@@ -760,6 +778,13 @@ private fun ModuleList(
             openShortcutDialogForType(ShortcutType.WebUI)
         }
     }
+
+    val metaModuleWarningText by produceState<String?>(initialValue = null, viewModel.moduleList) {
+        value = withContext(Dispatchers.IO) {
+            getMetaModuleWarningText(viewModel, context)
+        }
+    }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -775,8 +800,10 @@ private fun ModuleList(
                 end = 16.dp
             )
         ) {
-            item {
-                MetaModuleWarningCard(viewModel)
+            if (metaModuleWarningText != null) {
+                item {
+                    MetaModuleWarningCard(metaModuleWarningText!!)
+                }
             }
             when {
                 viewModel.moduleList.isEmpty() -> {

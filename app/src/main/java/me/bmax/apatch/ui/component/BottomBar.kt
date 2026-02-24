@@ -29,7 +29,7 @@ import me.bmax.apatch.R
 import me.bmax.apatch.ui.LocalHandlePageChange
 import me.bmax.apatch.ui.LocalSelectedPage
 import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationItem
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
 
 @Composable
 fun BottomBar(
@@ -49,13 +49,6 @@ fun BottomBar(
         }
     }
 
-    val navItems = availablePages.mapIndexed { index, d ->
-        NavigationItem(
-            label = stringResource(d.label),
-            icon = if (selectedPage == index) d.iconSelected else d.iconNotSelected
-        )
-    }
-
     NavigationBar(
         modifier = Modifier
             .hazeEffect(hazeState) {
@@ -63,13 +56,22 @@ fun BottomBar(
                 blurRadius = 30.dp
                 noiseFactor = 0f
             },
-        color = Color.Transparent,
-        items = navItems,
-        selected = selectedPage,
-        onClick = handlePageChange
-    )
-}
+        color = Color.Transparent
+    ) {
+        availablePages.forEachIndexed { index, destination ->
+            val isSelected = selectedPage == index
 
+            NavigationBarItem(
+                selected = isSelected,
+                onClick = {
+                    handlePageChange(index)
+                },
+                icon = if (isSelected) destination.iconSelected else destination.iconNotSelected,
+                label = stringResource(destination.label)
+            )
+        }
+    }
+}
 
 enum class BottomBarDestination(
     @param:StringRes val label: Int,
