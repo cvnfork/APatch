@@ -69,6 +69,7 @@ fun WarningCard(
                 Text(
                     text = message,
                     style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.wrapContentHeight(Alignment.CenterVertically)
                 )
             }

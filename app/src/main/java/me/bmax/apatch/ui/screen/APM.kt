@@ -799,7 +799,7 @@ private fun ModuleList(
                     enter = fadeIn() + expandVertically(),
                     exit = fadeOut() + shrinkVertically()
                 ) {
-                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Column(modifier = Modifier.padding(top = 8.dp)) {
                         MetaModuleWarningCard(
                             text = metaModuleWarningText ?: "",
                             onClosed = { isWarningManuallyClosed = true }
