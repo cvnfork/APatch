@@ -17,7 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import me.bmax.apatch.IAPRootService
@@ -31,8 +31,6 @@ import java.text.Collator
 import java.util.Locale
 import kotlin.concurrent.thread
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-
 
 class SuperUserViewModel : ViewModel() {
     companion object {
@@ -91,16 +89,17 @@ class SuperUserViewModel : ViewModel() {
 
     private suspend inline fun connectRootService(
         crossinline onDisconnect: () -> Unit = {}
-    ): Pair<IBinder, ServiceConnection> = suspendCoroutine {
+    ): Pair<IBinder, ServiceConnection> = suspendCancellableCoroutine { cont ->
         val connection = object : ServiceConnection {
             override fun onServiceDisconnected(name: ComponentName?) {
                 onDisconnect()
             }
 
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-                it.resume(binder as IBinder to this)
+                cont.resume(binder as IBinder to this)
             }
         }
+
         val intent = Intent(apApp, RootServices::class.java)
         val task = RootServices.bindOrTask(
             intent,
@@ -108,7 +107,15 @@ class SuperUserViewModel : ViewModel() {
             connection,
         )
         val shell = APatchCli.SHELL
-        task?.let { it1 -> shell.execTask(it1) }
+        task?.let { shell.execTask(it) }
+
+        cont.invokeOnCancellation {
+            try {
+                apApp.unbindService(connection)
+            } catch (e: Exception) {
+                Log.w("SuperUserViewModel", "unbindService failed", e)
+            }
+        }
     }
 
     private fun stopRootService() {
