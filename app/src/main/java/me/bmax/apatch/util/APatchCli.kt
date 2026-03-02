@@ -7,6 +7,7 @@ import android.content.pm.Signature
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.OpenableColumns
 import android.util.Base64
 import android.util.Log
@@ -24,10 +25,12 @@ import java.io.File
 import java.security.MessageDigest
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import java.util.Properties
 import java.util.zip.ZipFile
 
 private const val TAG = "APatchCli"
+
+val dataDir: String
+    get() = Environment.getDataDirectory().absolutePath
 
 private fun getKPatchPath(): String {
     return apApp.applicationInfo.nativeLibraryDir + File.separator + "libkpatch.so"
@@ -35,7 +38,7 @@ private fun getKPatchPath(): String {
 
 class RootShellInitializer : Shell.Initializer() {
     override fun onInit(context: Context, shell: Shell): Boolean {
-        shell.newJob().add("export PATH=\$PATH:/system_ext/bin:/vendor/bin").exec()
+        shell.newJob().add("""export PATH=${'$'}PATH:/system_ext/bin:/vendor/bin""").exec()
         return true
     }
 }
@@ -207,37 +210,32 @@ fun execApd(args: String, newShell: Boolean = false): Boolean {
 
 fun listModules(): String {
     val shell = getRootShell()
-    val out =
-        shell.newJob().add("${APApplication.APD_PATH} module list").to(ArrayList(), null).exec().out
-    withNewRootShell{
-       newJob().add("cp /data/user/*/me.bmax.apatch/patch/ori.img /data/adb/ap/ && rm /data/user/*/me.bmax.apatch/patch/ori.img")
-       .to(ArrayList(),null).exec()
-   }
-    return out.joinToString("\n").ifBlank { "[]" }
-}
+    val out = shell.newJob()
+        .add("${APApplication.APD_PATH} module list")
+        .to(ArrayList(), null)
+        .exec().out
 
-fun hasMetaModule(): Boolean {
-    return getMetaModuleImplement() != "None"
-}
-
-fun getMetaModuleImplement(): String {
     try {
-        val metaModuleProp = SuFile.open("/data/adb/metamodule/module.prop")
-        if (!metaModuleProp.isFile) {
-            Log.i(TAG, "Meta module implement: None")
-            return "None"
+        val dstDir = SuFile("$dataDir/adb/ap/")
+        if (!dstDir.exists()) dstDir.mkdirs()
+
+        SuFile("$dataDir/user").listFiles()?.forEach { userDir ->
+            val oriFile = SuFile(userDir, "me.bmax.apatch/patch/ori.img")
+            if (oriFile.exists()) {
+                val dstFile = SuFile(dstDir, oriFile.name)
+                oriFile.newInputStream().use { input ->
+                    dstFile.newOutputStream(false).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                oriFile.delete()
+            }
         }
-
-        val prop = Properties()
-        prop.load(metaModuleProp.newInputStream())
-
-        val name = prop.getProperty("name")
-        Log.i(TAG, "Meta module implement: $name")
-        return name
-    } catch (t : Throwable) {
-        Log.i(TAG, "Meta module implement: None")
-        return "None"
+    } catch (e: Throwable) {
+        Log.e("ModuleUtil", "SuFile operation failed", e)
     }
+
+    return out.joinToString("\n").ifBlank { "[]" }
 }
 
 fun toggleModule(id: String, enable: Boolean): Boolean {
@@ -332,12 +330,13 @@ fun runAPModuleAction(
 }
 
 fun reboot(reason: String = "") {
+    val shell = getRootShell()
+    val job = shell.newJob()
     if (reason == "recovery") {
-        // KEYCODE_POWER = 26, hide incorrect "Factory data reset" message
-        getRootShell().newJob().add("/system/bin/input keyevent 26").exec()
+        job.add("/system/bin/input keyevent 26")
     }
-    getRootShell().newJob()
-        .add("/system/bin/svc power reboot $reason || /system/bin/reboot $reason").exec()
+    job.add("/system/bin/svc power reboot $reason || /system/bin/reboot $reason")
+    job.exec()
 }
 
 fun hasMagisk(): Boolean {
