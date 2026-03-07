@@ -1,8 +1,8 @@
 [versions]
-agp = "9.0.1"
+agp = "9.1.0"
 kotlin = "2.3.10"
 ksp = "2.3.6"
-compose-bom = "2026.02.00"
+compose-bom = "2026.02.01"
 lifecycle = "2.10.0"
 compose-destination = "2.3.0"
 libsu = "6.0.0"

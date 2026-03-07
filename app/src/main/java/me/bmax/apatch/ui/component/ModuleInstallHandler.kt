@@ -121,6 +121,7 @@ fun ModuleInstallHandler(
                 Text(
                     text = data.name,
                     style = MiuixTheme.textStyles.title4,
+                    color = colorScheme.onSurface,
                     fontWeight = FontWeight(550),
                     textAlign = TextAlign.Center
                 )
@@ -151,6 +152,7 @@ fun ModuleInstallHandler(
                 Text(
                     text = data.description,
                     style = MiuixTheme.textStyles.body2,
+                    color = colorScheme.onSurface,
                     modifier = Modifier
                         .padding(12.dp)
                         .fillMaxWidth(),
@@ -213,6 +215,7 @@ private fun InfoItem(label: String, value: String?) {
         Text(
             text = value ?: "",
             style = MiuixTheme.textStyles.body1,
+            color = colorScheme.onSurface,
             textAlign = TextAlign.End
         )
     }
