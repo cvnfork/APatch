@@ -71,6 +71,7 @@ import me.bmax.apatch.ui.component.SwitchItem
 import me.bmax.apatch.ui.component.rememberLoadingDialog
 import me.bmax.apatch.util.APatchKeyHelper
 import me.bmax.apatch.util.getBugreportFile
+import me.bmax.apatch.util.isGlobalNamespaceEnabled
 import me.bmax.apatch.util.outputStream
 import me.bmax.apatch.util.rootShellForResult
 import me.bmax.apatch.util.setGlobalNamespaceEnabled
@@ -105,6 +106,9 @@ fun SettingScreen(
     }
     var bSkipStoreSuperKey by rememberSaveable {
         mutableStateOf(APatchKeyHelper.shouldSkipStoreSuperKey())
+    }
+    if (kPatchReady && aPatchReady) {
+        isGlobalNamespaceEnabled = isGlobalNamespaceEnabled()
     }
     val showResetSuPathDialog = remember { mutableStateOf(false) }
     val showLogDialog = remember { mutableStateOf(false) }
