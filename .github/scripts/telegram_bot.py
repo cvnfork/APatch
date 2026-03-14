@@ -13,10 +13,10 @@ def get_commit_summary():
     except Exception:
         return "No commit data available"
 
-    summary_lines = []
     commits = event.get("commits", [])
     
-    if commits:
+    if len(commits) > 1:
+        summary_lines = []
         for c in commits[::-1]:
             msg = html.escape(c.get("message", "").split('\n')[0].strip())
             author = html.escape(c.get("author", {}).get("username", "unknown"))
@@ -25,33 +25,46 @@ def get_commit_summary():
             if len(summary_lines) >= 10:
                 summary_lines.append(f"<i>(...and {len(commits) - 10} more)</i>")
                 break
+        return "\n".join(summary_lines)
+
+    elif len(commits) == 1:
+        c = commits[0]
+        full_msg = html.escape(c.get("message", "").strip())
+        author = html.escape(c.get("author", {}).get("username", "unknown"))
+        return f"{full_msg}\n\n— by <b>{author}</b>"
+
     else:
         head = event.get("head_commit", {})
-        msg = html.escape(head.get("message", "Manual Build").split('\n')[0])
-        summary_lines.append(f"• {msg}" if msg else "No new commits.")
-
-    return "\n".join(summary_lines)
+        msg = html.escape(head.get("message", "Manual Build").strip())
+        return msg if msg else "No new commits."
 
 def send_to_telegram(chat_id, file_path):
     token = os.environ.get("BOT_TOKEN")
-    title = html.escape(os.environ.get("TITLE", "Manager"))
+    version = html.escape(os.environ.get("VERSION", "0"))
     branch = html.escape(os.environ.get("BRANCH", "main"))
     run_url = os.environ.get("RUN_URL", "#")
-    
+
     try:
         with open(os.environ.get("GITHUB_EVENT_PATH"), 'r') as f:
             event = json.load(f)
-            compare_url = event.get("compare", run_url)
+            commits = event.get("commits", [])
+
+            if len(commits) == 1:
+                compare_url = commits[0].get("url", run_url)
+                compare_label = "Commit"
+            else:
+                compare_url = event.get("compare", run_url)
+                compare_label = "Compare"
     except:
         compare_url = run_url
 
     summary = get_commit_summary()
-    
+
     caption = (
-        f"<b>{title}</b>\n"
-        f"Branch: <code>{branch}</code>\n\n"
+        f"<b>Manager:</b> <code>v{version}</code>\n"
+        f"<b>Branch:</b> <code>{branch}</code>\n\n"
         f"<blockquote>{summary}</blockquote>\n\n"
-        f"<a href=\"{compare_url}\">Compare</a> | "
+        f"<a href=\"{compare_url}\">{compare_label}</a> | "
         f"<a href=\"{run_url}\">Workflow</a>"
     )
 
@@ -73,7 +86,7 @@ def send_to_telegram(chat_id, file_path):
         f'Content-Type: application/vnd.android.package-archive\r\n\r\n'
     ).encode('utf-8') + file_content + f'\r\n--{boundary}--\r\n'.encode('utf-8')
 
-    req = urllib.request.Request(f"https://api.telegram.org/bot{token}/sendMediaGroup", data=body)
+    req = urllib.request.Request(f"https://api.telegram.org/bot{token}/sendMediaGroup?disable_notification=true", data=body)
     req.add_header('Content-Type', f'multipart/form-data; boundary={boundary}')
     
     try:

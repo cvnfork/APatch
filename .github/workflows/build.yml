@@ -95,7 +95,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
-          TITLE: "Manager v${{ steps.parse_version.outputs.VERSION }}"
+          VERSION: "${{ steps.parse_version.outputs.VERSION }}"
           BRANCH: ${{ github.ref_name }}
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         run: |
