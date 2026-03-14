@@ -66,34 +66,24 @@ jobs:
           workspaces: apd
           cache-targets: false
 
-      - name: Build with Gradle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
+      - name: Write key
         run: |
-          echo 'org.gradle.parallel=true' >> gradle.properties
-          echo 'org.gradle.vfs.watch=true' >> gradle.properties
-          echo 'org.gradle.jvmargs=-Xmx2048m' >> gradle.properties
-          echo 'android.native.buildOutput=verbose' >> gradle.properties
-          sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
-          ./gradlew assembleRelease
-          echo "BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)" >> $GITHUB_ENV
+          if [ -n "${{ secrets.SIGNING_KEY }}" ]; then
+            echo "KEYSTORE_PASSWORD=${{ secrets.KEY_STORE_PASSWORD }}" >> gradle.properties
+            echo "KEY_ALIAS=${{ secrets.ALIAS }}" >> gradle.properties
+            echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> gradle.properties
+            echo "KEYSTORE_FILE=key.jks" >> gradle.properties
+            echo "${{ secrets.SIGNING_KEY }}" | base64 -d > key.jks
+          fi
 
-      - name: Sign Release
-        env:
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
-        if: ${{ env.SIGNING_KEY != '' }}
-        continue-on-error: true
-        uses: kevin-david/zipalign-sign-android-release@v2
-        id: sign_app
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          zipAlign: true
+      - name: Build with Gradle
+        run: |
+          echo "org.gradle.parallel=true" >> gradle.properties
+          echo "org.gradle.vfs.watch=true" >> gradle.properties
+          echo "org.gradle.jvmargs=-Xmx2048m" >> gradle.properties
+          echo "android.native.buildOutput=verbose" >> gradle.properties
+          sed -i '/org.gradle.configuration-cache/d' gradle.properties
+          ./gradlew assembleRelease
 
       - name: Upload mappings
         uses: actions/upload-artifact@v5
@@ -101,17 +91,13 @@ jobs:
           name: "mappings"
           path: "app/build/outputs/mapping/release/"
 
-      - name: Post to channel
-        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/miuix' && github.ref_type != 'tag' }}
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_URL: ${{ github.event.head_commit.url }}
-          COMMIT_ID: ${{ github.event.head_commit.id }}
-          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-        run: |
-          RELEASE_APK="${{ steps.sign_app.outputs.signedReleaseFile }}"
-          URL=$(python3 .github/scripts/telegram_url.py "${CHANNEL_ID}")
-          if [[ -n "$BOT_TOKEN" && -f "$RELEASE_APK" ]]; then
-              curl -v "$URL" -F "Release=@$RELEASE_APK"
-          fi
+      - name: Post to Telegram
+          env:
+            BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+            GITHUB_EVENT_PATH: ${{ github.event_path }}
+            TITLE: "Manager"
+            BRANCH: ${{ github.ref_name }}
+            RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          run: |
+            APK_PATH=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
+            python3 .github/scripts/telegram_bot.py "${{ secrets.CHANNEL_ID }}" "$APK_PATH"
