@@ -92,12 +92,12 @@ jobs:
           path: "app/build/outputs/mapping/release/"
 
       - name: Post to Telegram
-          env:
-            BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-            GITHUB_EVENT_PATH: ${{ github.event_path }}
-            TITLE: "Manager"
-            BRANCH: ${{ github.ref_name }}
-            RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          run: |
-            APK_PATH=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
-            python3 .github/scripts/telegram_bot.py "${{ secrets.CHANNEL_ID }}" "$APK_PATH"
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          TITLE: "Manager v${{ steps.parse_version.outputs.VERSION }}"
+          BRANCH: ${{ github.ref_name }}
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        run: |
+          APK_PATH=$(ls app/build/outputs/apk/release/*.apk | head -n 1)
+          python3 .github/scripts/telegram_bot.py "${{ secrets.CHANNEL_ID }}" "$APK_PATH"
