@@ -1,7 +1,9 @@
 package me.bmax.apatch.ui.screen
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Commit
 import androidx.compose.material.icons.filled.DeveloperMode
 import androidx.compose.material.icons.filled.Engineering
@@ -35,10 +38,12 @@ import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.rounded.Colorize
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,6 +64,7 @@ import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,6 +76,9 @@ import me.bmax.apatch.ui.component.ArrowItem
 import me.bmax.apatch.ui.component.SwitchItem
 import me.bmax.apatch.ui.component.rememberLoadingDialog
 import me.bmax.apatch.util.APatchKeyHelper
+import me.bmax.apatch.util.calculateCacheSize
+import me.bmax.apatch.util.clearAppCache
+import me.bmax.apatch.util.formatSize
 import me.bmax.apatch.util.getBugreportFile
 import me.bmax.apatch.util.isGlobalNamespaceEnabled
 import me.bmax.apatch.util.outputStream
@@ -113,6 +122,12 @@ fun SettingScreen(
     val showResetSuPathDialog = remember { mutableStateOf(false) }
     val showLogDialog = remember { mutableStateOf(false) }
     val showClearKeyDialog = rememberSaveable { mutableStateOf(false) }
+    val showClearDialog = rememberSaveable { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val cacheSize = remember { mutableLongStateOf(0L) }
+    val noClear = stringResource(R.string.no_cache_to_clear)
 
     Scaffold(
         topBar = {
@@ -123,8 +138,9 @@ fun SettingScreen(
         }
     ) { paddingValues ->
 
-        ResetSUPathDialog(showResetSuPathDialog)
-        LogDialog(showLogDialog)
+        ResetSUPathDialog(showResetSuPathDialog, context)
+        ClearDialog(showClearDialog,cacheSize.longValue ,context, scope)
+        LogDialog(showLogDialog, context, scope)
 
         LazyColumn(
             modifier = Modifier
@@ -396,6 +412,29 @@ fun SettingScreen(
                         }
                     )
 
+                    // clean cache
+                    ArrowItem(
+                        title = stringResource(R.string.settings_clean_cache),
+                        summary = stringResource(R.string.settings_clean_cache_summary),
+                        icon = Icons.Filled.CleaningServices,
+                        contentDescription = stringResource(R.string.settings_clean_cache),
+                        onClick = {
+                            scope.launch {
+                                val size = calculateCacheSize(context)
+                                cacheSize.longValue = size
+                                if (size > 0L) {
+                                    showClearDialog.value = true
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        noClear,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                    )
+
                     // log
                     ArrowItem(
                         title = stringResource(R.string.send_log),
@@ -425,10 +464,12 @@ fun SettingScreen(
 }
 
 @Composable
-fun LogDialog(showLogDialog: MutableState<Boolean>) {
-    val scope = rememberCoroutineScope()
+fun LogDialog(
+    showLogDialog: MutableState<Boolean>,
+    context: Context,
+    scope: CoroutineScope
+) {
     val loadingDialog = rememberLoadingDialog()
-    val context = LocalContext.current
     val logSavedMessage = stringResource(R.string.log_saved)
 
     val exportBugreportLauncher = rememberLauncherForActivityResult(
@@ -520,11 +561,11 @@ fun LogDialog(showLogDialog: MutableState<Boolean>) {
     }
 }
 
-
-
 @Composable
-fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
-    val context = LocalContext.current
+fun ResetSUPathDialog(
+    showResetSuDialog: MutableState<Boolean>,
+    context: Context
+) {
     var suPath by remember { mutableStateOf(Natives.suPath()) }
 
     val suPathChecked: (path: String) -> Boolean = {
@@ -532,9 +573,9 @@ fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
     }
 
     WindowDialog(
-        show = showDialog,
+        show = showResetSuDialog,
         title = stringResource(R.string.setting_reset_su_path),
-        onDismissRequest = { showDialog.value = false }
+        onDismissRequest = { showResetSuDialog.value = false }
     ) {
         TextField(
             value = suPath,
@@ -551,7 +592,7 @@ fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
 
             TextButton(
                 stringResource(android.R.string.cancel),
-                onClick = { showDialog.value = false },
+                onClick = { showResetSuDialog.value = false },
                 modifier = Modifier.weight(1f),
             )
 
@@ -560,7 +601,7 @@ fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
             TextButton(
                 stringResource(android.R.string.ok),
                 onClick = {
-                    showDialog.value = false
+                    showResetSuDialog.value = false
                     val success = Natives.resetSuPath(suPath)
                     Toast.makeText(
                         context,
@@ -572,6 +613,59 @@ fun ResetSUPathDialog(showDialog: MutableState<Boolean>) {
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
                 enabled = suPathChecked(suPath)
+            )
+        }
+    }
+}
+
+@Composable
+fun ClearDialog(
+    showCleanDialog: MutableState<Boolean>,
+    initialCacheSize: Long,
+    context: Context,
+    scope: CoroutineScope
+) {
+    val cacheSize = remember { mutableStateOf(formatSize(initialCacheSize)) }
+    val loading = rememberLoadingDialog()
+
+    LaunchedEffect(showCleanDialog.value) {
+        if (showCleanDialog.value) {
+            val size = calculateCacheSize(context)
+            cacheSize.value = formatSize(size)
+        }
+    }
+
+    WindowDialog(
+        show = showCleanDialog,
+        title = stringResource(R.string.clear_cache_title),
+        summary = stringResource(R.string.clear_cache_message, cacheSize.value)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                stringResource(android.R.string.cancel),
+                onClick = { showCleanDialog.value = false },
+                modifier = Modifier.weight(1f),
+            )
+
+            Spacer(Modifier.width(20.dp))
+
+            TextButton(
+                stringResource(android.R.string.ok),
+                onClick = {
+                    showCleanDialog.value = false
+                    scope.launch {
+                        loading.withLoading {
+                            val freed = clearAppCache(context)
+                            Log.i("Cache", "Freed ${formatSize(freed)}")
+                            cacheSize.value = formatSize(calculateCacheSize(context))
+                        }
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
     }

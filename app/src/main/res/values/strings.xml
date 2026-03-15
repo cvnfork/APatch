@@ -38,6 +38,12 @@
     <string name="settings_check_update">Check for updates</string>
     <string name="settings_check_update_summary">Automatically check for updates when opening the app</string>
 
+    <string name="settings_clean_cache">Clear cache</string>
+    <string name="settings_clean_cache_summary">Delete cached files to free up storage</string>
+    <string name="clear_cache_title">Clear Cache</string>
+    <string name="clear_cache_message">This will clear approximately %1$s of cached data. Continue?</string>
+    <string name="no_cache_to_clear">No cache to clear</string>
+
     <string name="home_learn_apatch">Learn APatch</string>
     <string name="home_click_to_learn_apatch">Learn about the features of APatch and how to use</string>
 
