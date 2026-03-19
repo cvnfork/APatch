@@ -107,7 +107,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "me.bmax.apatch"
+        applicationId = "me.bmax.apatch.miuix"
         minSdk = androidMinSdkVersion
         targetSdk = androidTargetSdkVersion
         versionCode = managerVersionCode
