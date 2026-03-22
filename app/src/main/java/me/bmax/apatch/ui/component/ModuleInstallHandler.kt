@@ -79,7 +79,7 @@ fun ModuleInstallHandler(
         val data = previewData!!
 
         WindowDialog(
-            show = showDialog,
+            show = showDialog.value,
             title = apmTitle,
             onDismissRequest = {
                 showDialog.value = false

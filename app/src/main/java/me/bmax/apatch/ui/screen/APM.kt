@@ -530,7 +530,7 @@ private fun ModuleList(
 
     if (showShortcutDialog.value) {
         WindowDialog(
-            show = showShortcutDialog,
+            show = showShortcutDialog.value,
             title = stringResource(R.string.apm_shortcut_title),
             onDismissRequest = {
                 showShortcutDialog.value = false

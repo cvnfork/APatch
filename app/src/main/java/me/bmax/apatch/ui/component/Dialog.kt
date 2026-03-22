@@ -454,9 +454,9 @@ private fun ConfirmDialog(
     showDialog: MutableState<Boolean>
 ) {
     WindowDialog(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
-        show = showDialog,
+        show = showDialog.value,
         title = visuals.title,
+        modifier = Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top)),
         onDismissRequest = {
             dismiss()
             showDialog.value = false

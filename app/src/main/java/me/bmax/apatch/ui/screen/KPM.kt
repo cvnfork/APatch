@@ -200,7 +200,7 @@ fun KPModuleScreen(
                     }
 
                     WindowListPopup(
-                        show = expanded,
+                        show = expanded.value,
                         alignment = PopupPositionProvider.Align.TopEnd,
                         onDismissRequest = { expanded.value = false }
                     ) {
@@ -323,9 +323,9 @@ fun KPMControlDialog(
     }
 
     WindowDialog(
+        show = controlDialog.value,
         title = stringResource(R.string.kpm_control_dialog_title),
         summary = stringResource(R.string.kpm_control_dialog_content),
-        show = controlDialog,
         onDismissRequest = { controlDialog.value = false }
     ) {
         TextField(

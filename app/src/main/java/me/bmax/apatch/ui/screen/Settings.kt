@@ -188,7 +188,7 @@ fun SettingScreen(
 
                         if (showClearKeyDialog.value) {
                             WindowDialog(
-                                show = showClearKeyDialog,
+                                show = showClearKeyDialog.value,
                                 title = clearKeyDialogTitle,
                                 summary = clearKeyDialogContent
                             ) {
@@ -505,7 +505,7 @@ fun LogDialog(
     }
 
     WindowDialog(
-        show = showLogDialog,
+        show = showLogDialog.value,
         title = stringResource(R.string.send_log),
         onDismissRequest = { showLogDialog.value = false }
     ) {
@@ -588,7 +588,7 @@ fun ResetSUPathDialog(
     }
 
     WindowDialog(
-        show = showResetSuDialog,
+        show = showResetSuDialog.value,
         title = stringResource(R.string.setting_reset_su_path),
         onDismissRequest = { showResetSuDialog.value = false }
     ) {
@@ -651,9 +651,10 @@ fun ClearDialog(
     }
 
     WindowDialog(
-        show = showCleanDialog,
+        show = showCleanDialog.value,
         title = stringResource(R.string.clear_cache_title),
-        summary = stringResource(R.string.clear_cache_message, cacheSize.value)
+        summary = stringResource(R.string.clear_cache_message, cacheSize.value),
+        onDismissRequest = { showCleanDialog.value = false }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

@@ -197,7 +197,7 @@ fun SuperTopBar(
                 )
 
                 WindowListPopup(
-                    show = showDropdown,
+                    show = showDropdown.value,
                     onDismissRequest = { showDropdown.value = false }
                 ) {
                     ListPopupColumn {

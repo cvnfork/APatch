@@ -403,8 +403,8 @@ private fun ExtraConfigDialog(
     var args by remember { mutableStateOf(kpmInfo.args) }
 
     WindowDialog(
+        show = show.value,
         title = stringResource(R.string.kpm_control_dialog_title),
-        show = show,
         onDismissRequest = { show.value = false },
     ) {
         TextField(

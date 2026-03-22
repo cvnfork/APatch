@@ -153,9 +153,9 @@ fun HomeScreen(
 @Composable
 fun AuthFailedTipDialog(showDialog: MutableState<Boolean>) {
     WindowDialog(
+        show = showDialog.value,
         title = stringResource(R.string.home_dialog_auth_fail_title),
         summary = stringResource(R.string.home_dialog_auth_fail_content),
-        show = showDialog,
         onDismissRequest = { showDialog.value = false },
     ) {
         Spacer(Modifier.height(12.dp))
@@ -182,7 +182,7 @@ fun AuthSuperKey(showDialog: MutableState<Boolean>, showFailedDialog: MutableSta
     var enable by remember { mutableStateOf(false) }
 
     WindowDialog(
-        show = showDialog,
+        show = showDialog.value,
         title = stringResource(R.string.home_auth_key_title),
         summary = stringResource(R.string.home_auth_key_desc),
         onDismissRequest = { showDialog.value = false }
@@ -288,7 +288,7 @@ private fun TopBar(
                     )
 
                     WindowListPopup(
-                        show = howDropdownReboot,
+                        show = howDropdownReboot.value,
                         alignment = PopupPositionProvider.Align.BottomStart,
                         onDismissRequest = { howDropdownReboot.value = false }
                     ) {
