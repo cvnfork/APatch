@@ -11,8 +11,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.bmax.apatch.util.HanziToPinyin
 import me.bmax.apatch.apApp
+import me.bmax.apatch.util.HanziToPinyin
 import me.bmax.apatch.util.listModules
 import org.json.JSONArray
 import org.json.JSONObject

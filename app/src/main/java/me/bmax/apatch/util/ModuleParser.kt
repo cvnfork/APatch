@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.annotation.StringRes
 import me.bmax.apatch.R
-import me.bmax.apatch.ui.viewmodel.APModuleViewModel
 import java.io.ByteArrayOutputStream
 import java.util.Properties
 import java.util.zip.ZipInputStream

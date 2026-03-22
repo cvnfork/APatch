@@ -20,7 +20,6 @@ import com.topjohnwu.superuser.io.SuFileInputStream
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.MainActivity
 import java.util.Locale
-import kotlin.jvm.java
 
 object Shortcut {
 

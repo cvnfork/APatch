@@ -10,9 +10,9 @@ import android.net.Uri
 import android.os.Environment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import me.bmax.apatch.apApp
-import androidx.core.content.ContextCompat
 
 @SuppressLint("Range")
 fun download(
