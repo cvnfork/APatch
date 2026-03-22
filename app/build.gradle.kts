@@ -309,7 +309,6 @@ ksp {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.webkit)
@@ -347,10 +346,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     implementation(libs.me.zhanghai.android.appiconloader.coil)
-
-    implementation(libs.sheet.compose.dialogs.core)
-    implementation(libs.sheet.compose.dialogs.list)
-    implementation(libs.sheet.compose.dialogs.input)
 
     implementation(libs.markdown)
 

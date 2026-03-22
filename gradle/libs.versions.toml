@@ -6,7 +6,6 @@ compose-bom = "2026.02.01"
 lifecycle = "2.10.0"
 compose-destination = "2.3.0"
 libsu = "6.0.0"
-sheets-compose-dialogs = "1.3.0"
 miuix = "0.8.5"
 navigation-compose = "2.9.7"
 haze = "1.7.2"
@@ -19,7 +18,6 @@ lsplugin-resopt = { id = "org.lsposed.lsplugin.resopt", version = "1.6" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 [libraries]
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.1" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.12.4" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0" }
 androidx-webkit = { group = "androidx.webkit", name = "webkit", version = "1.15.0" }
@@ -56,10 +54,6 @@ me-zhanghai-android-appiconloader-coil = { group = "me.zhanghai.android.appiconl
 
 compose-destinations-core = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destination" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destination" }
-
-sheet-compose-dialogs-core = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "core", version.ref = "sheets-compose-dialogs" }
-sheet-compose-dialogs-list = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "list", version.ref = "sheets-compose-dialogs" }
-sheet-compose-dialogs-input = { group = "com.maxkeppeler.sheets-compose-dialogs", name = "input", version.ref = "sheets-compose-dialogs" }
 
 markdown = { group = "io.noties.markwon", name = "core", version = "4.6.2" }
 

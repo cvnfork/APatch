@@ -1,13 +1,16 @@
 package me.bmax.apatch.ui.screen
 
+import android.app.Activity
+import android.app.LocaleManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.os.LocaleList
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +64,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
-import androidx.core.os.LocaleListCompat
+import androidx.core.app.LocaleManagerCompat
 import com.ramcosta.composedestinations.generated.destinations.AboutScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.CoroutineScope
@@ -369,7 +372,7 @@ fun SettingScreen(
                     val languages = stringArrayResource(R.array.languages)
                     val languagesValues = stringArrayResource(R.array.languages_values)
 
-                    val currentLocales = AppCompatDelegate.getApplicationLocales()
+                    val currentLocales = LocaleManagerCompat.getApplicationLocales(context)
                     val currentLanguageTag = if (currentLocales.isEmpty) {
                         null
                     } else {
@@ -392,17 +395,8 @@ fun SettingScreen(
                         selectedIndex = selectedIndex,
                         onSelectedIndexChange = { newIndex ->
                             selectedIndex = newIndex
-                            if (newIndex == 0) {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.getEmptyLocaleList()
-                                )
-                            } else {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.forLanguageTags(
-                                        languagesValues[newIndex]
-                                    )
-                                )
-                            }
+                            val tag = if (newIndex == 0) "" else languagesValues[newIndex]
+                            updateLanguage(context, tag)
                         },
                         startAction = {
                             Icon(
@@ -460,6 +454,27 @@ fun SettingScreen(
                 Spacer(Modifier.height(bottomPadding))
             }
         }
+    }
+}
+
+fun updateLanguage(context: Context, localeTag: String) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val localeManager = context.getSystemService(LocaleManager::class.java)
+        val locales = if (localeTag.isEmpty()) {
+            LocaleList.getEmptyLocaleList()
+        } else {
+            LocaleList.forLanguageTags(localeTag)
+        }
+        // Native API 33+ handles persistence and lifecycle automatically.
+        localeManager.applicationLocales = locales
+    } else {
+        // For API 26-32, we manually persist the preference.
+        APApplication.sharedPreferences.edit {
+            putString("app_lang", localeTag)
+        }
+
+        // Recreate the activity to apply language changes on legacy API levels.
+        (context as? Activity)?.recreate()
     }
 }
 
