@@ -20,7 +20,7 @@ def get_commit_summary():
         for c in commits[::-1]:
             msg = html.escape(c.get("message", "").split('\n')[0].strip())
             author = html.escape(c.get("author", {}).get("username", "unknown"))
-            summary_lines.append(f"• {msg} by {author}")
+            summary_lines.append(f"{msg} by {author}")
             
             if len(summary_lines) >= 10:
                 summary_lines.append(f"<i>(...and {len(commits) - 10} more)</i>")
@@ -31,7 +31,7 @@ def get_commit_summary():
         c = commits[0]
         full_msg = html.escape(c.get("message", "").strip())
         author = html.escape(c.get("author", {}).get("username", "unknown"))
-        return f"{full_msg}\n\nAuthor: {author}"
+        return f"{full_msg}\n\by {author}"
 
     else:
         head = event.get("head_commit", {})
