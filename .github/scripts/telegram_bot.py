@@ -31,7 +31,7 @@ def get_commit_summary():
         c = commits[0]
         full_msg = html.escape(c.get("message", "").strip())
         author = html.escape(c.get("author", {}).get("username", "unknown"))
-        return f"{full_msg}\n\by {author}"
+        return f"{full_msg}\nby {author}"
 
     else:
         head = event.get("head_commit", {})
