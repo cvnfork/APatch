@@ -69,11 +69,11 @@ import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperSwitch
-import top.yukonga.miuix.kmp.extra.WindowListPopup
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.window.WindowListPopup
 
 @Composable
 fun SuperUserScreen(bottomPadding: Dp) {
@@ -317,7 +317,7 @@ private fun AppItem(app: SuperUserViewModel.AppInfo) {
                 visible = showEditProfile && !rootGranted,
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                SuperSwitch(
+                SwitchPreference(
                     modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.su_pkg_excluded_setting_title),
                     summary = stringResource(R.string.su_pkg_excluded_setting_summary),

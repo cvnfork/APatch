@@ -26,9 +26,9 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.WindowDialog
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowDialog
 
 @Composable
 fun UninstallDialog(
@@ -73,7 +73,7 @@ fun UninstallDialog(
                 Card {
                     Column {
                         UninstallType.entries.filter { it != UninstallType.NONE }.forEach { type ->
-                            SuperArrow(
+                            ArrowPreference(
                                 title = stringResource(type.titleRes),
                                 summary = stringResource(type.summaryRes),
                                 onClick = {

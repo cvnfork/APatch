@@ -38,9 +38,9 @@ import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
@@ -176,7 +176,7 @@ fun LinkItem(
     icon: Painter,
     onClick: () -> Unit
 ) {
-    SuperArrow(
+    ArrowPreference(
         title = title,
         summary = summary,
         onClick = onClick,

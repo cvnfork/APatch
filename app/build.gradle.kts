@@ -330,7 +330,8 @@ dependencies {
     implementation(libs.compose.destinations.core)
     ksp(libs.compose.destinations.ksp)
 
-    implementation(libs.miuix)
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.preference)
     implementation(libs.miuix.icons)
     implementation(libs.haze)
 

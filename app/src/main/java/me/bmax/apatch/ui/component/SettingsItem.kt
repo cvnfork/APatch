@@ -6,8 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 @Composable
@@ -18,7 +18,7 @@ fun ArrowItem(
     contentDescription: String? = null,
     onClick: () -> Unit
 ) {
-    SuperArrow(
+    ArrowPreference(
         title = title,
         summary = summary,
         onClick = onClick,
@@ -43,7 +43,7 @@ fun SwitchItem(
     contentDescription: String? = null,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    SuperSwitch(
+    SwitchPreference(
         title = title,
         summary = summary,
         checked = checked,

@@ -96,9 +96,9 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.WindowDialog
-import top.yukonga.miuix.kmp.extra.WindowDropdown
+import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.window.WindowDialog
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -302,7 +302,7 @@ fun SettingScreen(
                     var themeMode by rememberSaveable {
                         mutableIntStateOf(prefs.getInt("color_mode", 0))
                     }
-                    WindowDropdown(
+                    WindowDropdownPreference(
                         title = stringResource(R.string.settings_theme),
                         summary = stringResource(R.string.settings_theme_summary),
                         items = themeItems,
@@ -350,7 +350,7 @@ fun SettingScreen(
                                     ?: 0
                             )
                         }
-                        WindowDropdown(
+                        WindowDropdownPreference(
                             title = stringResource(R.string.settings_key_color),
                             summary = stringResource(R.string.settings_key_color_summary),
                             items = colorItems,
@@ -388,7 +388,7 @@ fun SettingScreen(
 
                     var selectedIndex by remember { mutableIntStateOf(initialIndex) }
 
-                    WindowDropdown(
+                    WindowDropdownPreference(
                         title = stringResource(R.string.settings_app_language),
                         summary = stringResource(R.string.settings_app_language_summary),
                         items = languages.toList(),

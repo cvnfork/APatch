@@ -35,9 +35,9 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.extra.SuperCheckbox
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.preference.CheckboxPreference
 
 var selectedBootImage: Uri? = null
 
@@ -107,7 +107,7 @@ private fun SelectInstallMethod(navigator: DestinationsNavigator) {
         Card {
             Column {
                 radioOptions.forEach { option ->
-                    SuperCheckbox(
+                    CheckboxPreference(
                         title = stringResource(id = option.label),
                         summary = when (option) {
                             is InstallMethod.SelectFile -> stringResource(R.string.mode_install_method_select_file_summary)
