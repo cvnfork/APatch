@@ -52,10 +52,6 @@ import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -74,7 +70,8 @@ import me.bmax.apatch.ui.viewmodel.SuperUserViewModel
 import me.zhanghai.android.appiconloader.coil.AppIconFetcher
 import me.zhanghai.android.appiconloader.coil.AppIconKeyer
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 
 class MainActivity : ComponentActivity() {
 
@@ -262,11 +259,7 @@ fun MainScreen(
     var animateJob by remember { mutableStateOf<Job?>(null) }
     var lastRequestedPage by remember { mutableIntStateOf(pagerState.currentPage) }
 
-    val hazeState = remember { HazeState() }
-    val hazeStyle = HazeStyle(
-        backgroundColor = colorScheme.surface,
-        tint = HazeTint(colorScheme.surface.copy(0.8f))
-    )
+    val backdrop = rememberLayerBackdrop()
 
     val handlePageChange: (Int) -> Unit = remember(pagerState, coroutineScope, aPatchReady) {
         { page ->
@@ -330,15 +323,15 @@ fun MainScreen(
         LocalHandlePageChange provides handlePageChange,
         LocalSelectedPage provides uiSelectedPage
     ) {
-        Scaffold(
+        Scaffold (
             bottomBar = {
-                BottomBar(hazeState, hazeStyle)
+                BottomBar(backdrop)
             },
         ) { innerPadding ->
             HorizontalPager(
                 modifier = Modifier
                     .fillMaxSize()
-                    .hazeSource(state = hazeState),
+                    .layerBackdrop(backdrop),
                 state = pagerState,
                 beyondViewportPageCount = availablePages.size,
                 userScrollEnabled = userScrollEnabled,
