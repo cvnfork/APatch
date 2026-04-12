@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,6 +64,9 @@ import me.bmax.apatch.ui.component.DropdownItem
 import me.bmax.apatch.ui.component.KStatusCard
 import me.bmax.apatch.ui.component.WarningCard
 import me.bmax.apatch.ui.component.rememberConfirmDialog
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.util.LatestVersionInfo
 import me.bmax.apatch.util.Version
 import me.bmax.apatch.util.Version.getManagerVersion
@@ -84,6 +88,8 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -100,6 +106,7 @@ fun HomeScreen(
     navigator: DestinationsNavigator
 ) {
     val scrollBehavior = MiuixScrollBehavior()
+    val backdrop = rememberMiuixBlurBackdrop(true)
 
     val kpState by APApplication.kpStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     val apState by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
@@ -108,23 +115,28 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopBar(
-                navigator,
-                kpState,
+                navigator = navigator,
+                backdrop = backdrop,
+                kpState = kpState,
                 scrollBehavior = scrollBehavior
             )
         }
     ) { innerPadding ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .padding(horizontal = 16.dp)
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = innerPadding
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding() + 12.dp,
+                bottom = innerPadding.calculateBottomPadding()
+            )
         ) {
             item {
                 Column(
-                    modifier = Modifier.padding(vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     BackupWarningCard()
@@ -251,6 +263,7 @@ fun AuthSuperKey(showDialog: MutableState<Boolean>, showFailedDialog: MutableSta
 @Composable
 private fun TopBar(
     navigator: DestinationsNavigator,
+    backdrop: LayerBackdrop?,
     kpState: APApplication.State,
     scrollBehavior: ScrollBehavior
 ) {
@@ -265,6 +278,8 @@ private fun TopBar(
     )
 
     TopAppBar(
+        modifier = Modifier.miuixBlurEffect(backdrop),
+        color = backdrop.getMiuixAppBarColor(),
         title = stringResource(R.string.app_name),
         actions = {
             IconButton(onClick = dropUnlessResumed {
@@ -278,10 +293,9 @@ private fun TopBar(
 
             if (kpState != APApplication.State.UNKNOWN_STATE) {
                 IconButton(
-                    modifier = Modifier.padding(end = 16.dp),
                     onClick = {
                         howDropdownReboot.value = true
-                }) {
+                    }) {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = stringResource(id = R.string.reboot)
@@ -317,7 +331,6 @@ private fun TopBar(
         }, scrollBehavior = scrollBehavior
     )
 }
-
 
 
 @Composable
@@ -449,7 +462,7 @@ private fun InfoCard(
             )
             InfoText(
                 title = stringResource(R.string.home_fingerprint),
-                content =  Build.FINGERPRINT
+                content = Build.FINGERPRINT
             )
             InfoText(
                 title = stringResource(R.string.home_selinux_status),
@@ -503,11 +516,11 @@ fun LearnMoreCard() {
     val uriHandler = LocalUriHandler.current
     val url = "https://apatch.dev"
 
-    Card (
+    Card(
         modifier = Modifier.fillMaxWidth()
     ) {
         BasicComponent(
-            title =  stringResource(R.string.home_learn_apatch),
+            title = stringResource(R.string.home_learn_apatch),
             summary = stringResource(R.string.home_click_to_learn_apatch),
             endActions = {
                 Icon(

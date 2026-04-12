@@ -29,7 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -38,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -49,7 +47,8 @@ import me.bmax.apatch.R
 import me.bmax.apatch.apApp
 import me.bmax.apatch.ui.component.DropdownItem
 import me.bmax.apatch.ui.component.LoadingIndicator
-import me.bmax.apatch.ui.theme.miuixBlur
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
 import me.bmax.apatch.ui.viewmodel.SuperUserViewModel
 import me.bmax.apatch.util.PkgConfig
 import top.yukonga.miuix.kmp.basic.Card
@@ -65,12 +64,12 @@ import top.yukonga.miuix.kmp.basic.SearchBar
 import top.yukonga.miuix.kmp.basic.Switch
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.window.WindowListPopup
 
@@ -79,7 +78,6 @@ fun SuperUserScreen(bottomPadding: Dp) {
     val viewModel = viewModel<SuperUserViewModel>()
     val scope = rememberCoroutineScope()
     val scrollBehavior = MiuixScrollBehavior()
-    var expanded by remember { mutableStateOf(false) }
 
     val backdrop = rememberLayerBackdrop()
 
@@ -92,40 +90,11 @@ fun SuperUserScreen(bottomPadding: Dp) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Box(
-                modifier = Modifier
-                    .miuixBlur(
-                        backdrop = backdrop,
-                        shape = miuixShape(16.dp)
-                    )
-                    .zIndex(1f)
-            ) {
-                Column {
-                    SuperTopBar(viewModel, scrollBehavior)
-
-                    SearchBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 4.dp),
-                        inputField = {
-                            InputField(
-                                query = viewModel.search,
-                                onQueryChange = { viewModel.search = it },
-                                onSearch = { expanded = false },
-                                expanded = expanded,
-                                onExpandedChange = {
-                                    expanded = it
-                                    if (!it) viewModel.search = ""
-                                }
-                            )
-                        },
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                        content = {
-                        }
-                    )
-                }
-            }
+            SuperTopBar(
+                viewModel = viewModel,
+                backdrop = backdrop,
+                scrollBehavior = scrollBehavior
+            )
         }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
@@ -147,7 +116,7 @@ fun SuperUserScreen(bottomPadding: Dp) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .layerBackdrop(backdrop)
+                            .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                             .overScrollVertical()
                             .nestedScroll(scrollBehavior.nestedScrollConnection),
                         contentPadding = PaddingValues(
@@ -174,14 +143,18 @@ fun SuperUserScreen(bottomPadding: Dp) {
 @Composable
 fun SuperTopBar(
     viewModel: SuperUserViewModel,
+    backdrop: LayerBackdrop,
     scrollBehavior: ScrollBehavior
 ) {
     val scope = rememberCoroutineScope()
     val appListItemsCount = 2
 
+    var expanded by remember { mutableStateOf(false) }
+
     TopAppBar(
+        modifier = Modifier.miuixBlurEffect(backdrop),
+        color = backdrop.getMiuixAppBarColor(),
         title = stringResource(R.string.su_title),
-        color = Color.Transparent,
         actions = {
             val showDropdown = remember { mutableStateOf(false) }
 
@@ -224,7 +197,29 @@ fun SuperTopBar(
             }
         },
         scrollBehavior = scrollBehavior
-    )
+    ) {
+        SearchBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 4.dp),
+            inputField = {
+                InputField(
+                    query = viewModel.search,
+                    onQueryChange = { viewModel.search = it },
+                    onSearch = { expanded = false },
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = it
+                        if (!it) viewModel.search = ""
+                    }
+                )
+            },
+            expanded = expanded,
+            onExpandedChange = { expanded = it },
+            content = {
+            }
+        )
+    }
 }
 
 

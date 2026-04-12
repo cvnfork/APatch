@@ -25,6 +25,9 @@ import com.ramcosta.composedestinations.generated.destinations.PatchesDestinatio
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.rememberConfirmDialog
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
 import me.bmax.apatch.util.isABDevice
 import me.bmax.apatch.util.rootAvailable
@@ -35,6 +38,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
@@ -46,17 +51,21 @@ var selectedBootImage: Uri? = null
 fun ModeSelectScreen(
     navigator: DestinationsNavigator
 ) {
+    val backdrop = rememberMiuixBlurBackdrop(true)
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopBar(
                 title = stringResource(R.string.mode_select_page_title),
+                backdrop = backdrop,
                 onBack = dropUnlessResumed { navigator.popBackStack() }
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
@@ -71,7 +80,8 @@ private fun SelectInstallMethod(navigator: DestinationsNavigator) {
     val isAbDevice = isABDevice()
 
     val alertTitle = stringResource(android.R.string.dialog_alert_title)
-    val inactiveSlotWarning = stringResource(R.string.mode_select_page_install_inactive_slot_warning)
+    val inactiveSlotWarning =
+        stringResource(R.string.mode_select_page_install_inactive_slot_warning)
 
     var selectedOption by remember { mutableStateOf<InstallMethod?>(null) }
 
@@ -141,12 +151,15 @@ private fun SelectInstallMethod(navigator: DestinationsNavigator) {
                             }
                         )
                     }
+
                     is InstallMethod.DirectInstall -> {
                         navigator.navigate(PatchesDestination(PatchesViewModel.PatchMode.PATCH_AND_INSTALL))
                     }
+
                     is InstallMethod.DirectInstallToInactiveSlot -> {
                         confirmDialog.showConfirm(alertTitle, inactiveSlotWarning, true)
                     }
+
                     null -> {}
                 }
             }
@@ -155,22 +168,35 @@ private fun SelectInstallMethod(navigator: DestinationsNavigator) {
 }
 
 sealed class InstallMethod {
-    data class SelectFile(@param:StringRes override val label: Int = R.string.mode_select_page_select_file) : InstallMethod()
-    data object DirectInstall : InstallMethod() { override val label = R.string.mode_select_page_patch_and_install }
-    data object DirectInstallToInactiveSlot : InstallMethod() { override val label = R.string.mode_select_page_install_inactive_slot }
+    data class SelectFile(@param:StringRes override val label: Int = R.string.mode_select_page_select_file) :
+        InstallMethod()
+
+    data object DirectInstall : InstallMethod() {
+        override val label = R.string.mode_select_page_patch_and_install
+    }
+
+    data object DirectInstallToInactiveSlot : InstallMethod() {
+        override val label = R.string.mode_select_page_install_inactive_slot
+    }
+
     abstract val label: Int
 }
 
 @Composable
-private fun TopBar(title: String, onBack: () -> Unit) {
+private fun TopBar(
+    title: String,
+    backdrop: LayerBackdrop?,
+    onBack: () -> Unit
+) {
     SmallTopAppBar(
+        modifier = Modifier.miuixBlurEffect(backdrop),
+        color = backdrop.getMiuixAppBarColor(),
         title = title,
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
                     MiuixIcons.Back,
                     contentDescription = null,
-                    modifier = Modifier.padding(start = 20.dp)
                 )
             }
         },

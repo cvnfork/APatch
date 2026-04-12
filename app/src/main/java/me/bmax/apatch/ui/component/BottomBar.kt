@@ -17,22 +17,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.LocalHandlePageChange
 import me.bmax.apatch.ui.LocalSelectedPage
-import me.bmax.apatch.ui.theme.miuixBlur
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
-import top.yukonga.miuix.kmp.blur.Backdrop
-import top.yukonga.miuix.kmp.theme.miuixShape
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 
 @Composable
-fun BottomBar(backdrop: Backdrop) {
+fun BottomBar(backdrop: LayerBackdrop) {
     val apState by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     val kPatchReady = apState != APApplication.State.UNKNOWN_STATE
     val aPatchReady = apState == APApplication.State.ANDROIDPATCH_INSTALLED
@@ -47,11 +45,8 @@ fun BottomBar(backdrop: Backdrop) {
     }
 
     NavigationBar(
-        modifier = Modifier.miuixBlur(
-            backdrop = backdrop,
-            shape = miuixShape(16.dp)
-        ),
-        color = Color.Transparent
+        modifier = Modifier.miuixBlurEffect(backdrop),
+        color = backdrop.getMiuixAppBarColor()
     ) {
         availablePages.forEachIndexed { index, destination ->
             val isSelected = selectedPage == index

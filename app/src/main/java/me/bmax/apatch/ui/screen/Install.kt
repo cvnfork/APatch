@@ -35,6 +35,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.KeyEventBlocker
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.util.installModule
 import me.bmax.apatch.util.reboot
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
@@ -43,6 +46,8 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -65,6 +70,7 @@ fun InstallScreen(uri: Uri, type: MODULE_TYPE) {
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+    val backdrop = rememberMiuixBlurBackdrop(true)
 
     val context = LocalContext.current
 
@@ -99,19 +105,25 @@ fun InstallScreen(uri: Uri, type: MODULE_TYPE) {
 
     Scaffold(
         topBar = {
-            TopBar(onBack = dropUnlessResumed {
-            }, onSave = {
-                scope.launch {
-                    val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
-                    val date = format.format(Date())
-                    val file = File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        "APatch_install_${type}_log_${date}.log"
-                    )
-                    file.writeText(logContent.toString())
-                    Toast.makeText(context, "Log saved to ${file.absolutePath}", Toast.LENGTH_SHORT).show()
-                }
-            })
+            TopBar(
+                backdrop = backdrop,
+                onBack = dropUnlessResumed {},
+                onSave = {
+                    scope.launch {
+                        val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
+                        val date = format.format(Date())
+                        val file = File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                            "APatch_install_${type}_log_${date}.log"
+                        )
+                        file.writeText(logContent.toString())
+                        Toast.makeText(
+                            context,
+                            "Log saved to ${file.absolutePath}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
         },
         floatingActionButton = {
             if (showFloatAction) {
@@ -142,6 +154,7 @@ fun InstallScreen(uri: Uri, type: MODULE_TYPE) {
         Column(
             modifier = Modifier
                 .fillMaxSize(1f)
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .padding(innerPadding)
                 .padding(10.dp)
                 .verticalScroll(scrollState),
@@ -160,8 +173,14 @@ fun InstallScreen(uri: Uri, type: MODULE_TYPE) {
 }
 
 @Composable
-private fun TopBar(onBack: () -> Unit = {}, onSave: () -> Unit = {}) {
-    SmallTopAppBar (
+private fun TopBar(
+    backdrop: LayerBackdrop?,
+    onBack: () -> Unit = {},
+    onSave: () -> Unit = {}
+) {
+    SmallTopAppBar(
+        modifier = Modifier.miuixBlurEffect(backdrop),
+        color = backdrop.getMiuixAppBarColor(),
         title = stringResource(R.string.apm_install),
         navigationIcon = {
             IconButton(
@@ -181,5 +200,6 @@ private fun TopBar(onBack: () -> Unit = {}, onSave: () -> Unit = {}) {
                     contentDescription = "Localized description"
                 )
             }
-        })
+        }
+    )
 }

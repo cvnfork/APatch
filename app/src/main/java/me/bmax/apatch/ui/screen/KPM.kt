@@ -64,6 +64,9 @@ import me.bmax.apatch.ui.component.LoadingDialogHandle
 import me.bmax.apatch.ui.component.LoadingIndicator
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.component.rememberLoadingDialog
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.KPModel
 import me.bmax.apatch.ui.viewmodel.KPModuleViewModel
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
@@ -85,6 +88,8 @@ import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -104,6 +109,7 @@ fun KPModuleScreen(
     bottomPadding: Dp,
     navigator: DestinationsNavigator
 ) {
+    val backdrop = rememberMiuixBlurBackdrop(true)
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     if (state == APApplication.State.UNKNOWN_STATE) {
@@ -140,8 +146,10 @@ fun KPModuleScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
+                    modifier = Modifier.miuixBlurEffect(backdrop),
+                    color = backdrop.getMiuixAppBarColor(),
                     title = stringResource(R.string.kpm),
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
                 )
             },
             floatingActionButton = {
@@ -245,6 +253,7 @@ fun KPModuleScreen(
         ) { innerPadding ->
             KPModuleList(
                 viewModel = viewModel,
+                backdrop = backdrop,
                 state = kpModuleListState,
                 scrollBehavior = scrollBehavior,
                 contentPadding = innerPadding,
@@ -370,6 +379,7 @@ fun KPMControlDialog(
 @Composable
 private fun KPModuleList(
     viewModel: KPModuleViewModel,
+    backdrop: LayerBackdrop?,
     state: LazyListState,
     scrollBehavior: ScrollBehavior,
     contentPadding: PaddingValues,
@@ -423,6 +433,7 @@ private fun KPModuleList(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
+                    .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                     .overScrollVertical()
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
                 state = state,
@@ -553,7 +564,8 @@ private fun KPModuleItem(
                 )
 
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
                         .padding(horizontal = 16.dp),
                     thickness = 0.5.dp,
                     color = colorScheme.outline.copy(alpha = 0.5f)

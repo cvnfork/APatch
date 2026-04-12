@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -69,6 +68,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.LoadingIndicator
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.KPModel
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
 import me.bmax.apatch.util.Version
@@ -86,11 +88,14 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.window.WindowDialog
 
 private const val TAG = "Patches"
@@ -106,6 +111,7 @@ fun Patches(
     val context = LocalContext.current
 
     val scrollState = rememberScrollState()
+    val backdrop = rememberMiuixBlurBackdrop(true)
 
     val selectFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -136,7 +142,8 @@ fun Patches(
             Manifest.permission.READ_EXTERNAL_STORAGE
         )
         val toRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(context, it
+            ContextCompat.checkSelfPermission(
+                context, it
             ) != PackageManager.PERMISSION_GRANTED
         }
         if (toRequest.isNotEmpty()) {
@@ -158,6 +165,7 @@ fun Patches(
         topBar = {
             TopBar(
                 title = stringResource(R.string.patch_config_title),
+                backdrop = backdrop,
                 scrollBehavior = scrollBehavior,
                 onBack = dropUnlessResumed { navigator.popBackStack() }
             )
@@ -175,121 +183,117 @@ fun Patches(
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(innerPadding)
+                .fillMaxSize()
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .verticalScroll(scrollState)
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .overScrollVertical()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Text(
+                text = stringResource(mode.sId),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
 
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            // error info
+            if (viewModel.error.isNotEmpty()) {
+                ErrorView(viewModel.error)
+            }
+
+            // kpming info
+            if (viewModel.kpimgInfo.version.isNotEmpty()) {
+                KernelPatchImageView(viewModel.kpimgInfo)
+            }
+
+            // slot info
+            if (viewModel.bootSlot.isNotEmpty()
+                || viewModel.bootDev.isNotEmpty()
             ) {
-
-                Text(
-                    text = stringResource(mode.sId),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                BootimgView(
+                    slot = viewModel.bootSlot,
+                    boot = viewModel.bootDev
                 )
+            }
 
-                // error info
-                if (viewModel.error.isNotEmpty()) {
-                    ErrorView(viewModel.error)
-                }
+            // Kernel image
+            if (viewModel.kimgInfo.banner.isNotEmpty()) {
+                KernelImageView(viewModel.kimgInfo)
+            }
 
-                // kpming info
-                if (viewModel.kpimgInfo.version.isNotEmpty()) {
-                    KernelPatchImageView(viewModel.kpimgInfo)
-                }
+            // Superkey view
+            if (mode != PatchesViewModel.PatchMode.UNPATCH &&
+                viewModel.kimgInfo.banner.isNotEmpty()
+            ) {
+                SetSuperKeyView(viewModel)
+            }
 
-                // slot info
-                if (viewModel.bootSlot.isNotEmpty()
-                    || viewModel.bootDev.isNotEmpty()
-                ) {
-                    BootimgView(
-                        slot = viewModel.bootSlot,
-                        boot = viewModel.bootDev
+            // Select slot
+            if (mode != PatchesViewModel.PatchMode.UNPATCH) {
+                viewModel.existedExtras.toList().forEach { extra ->
+                    ExtraItem(
+                        extra = extra,
+                        existed = true,
+                        onDelete = {
+                            viewModel.existedExtras.remove(extra)
+                        }
                     )
                 }
 
-                // Kernel image
-                if (viewModel.kimgInfo.banner.isNotEmpty()) {
-                    KernelImageView(viewModel.kimgInfo)
-                }
-
-                // Superkey view
-                if (mode != PatchesViewModel.PatchMode.UNPATCH &&
-                    viewModel.kimgInfo.banner.isNotEmpty()
-                ) {
-                    SetSuperKeyView(viewModel)
-                }
-
-                // Select slot
-                if (mode != PatchesViewModel.PatchMode.UNPATCH) {
-                    viewModel.existedExtras.toList().forEach { extra ->
-                        ExtraItem(
-                            extra = extra,
-                            existed = true,
-                            onDelete = {
-                                viewModel.existedExtras.remove(extra)
-                            }
-                        )
-                    }
-
-                    // KPM item
-                    viewModel.newExtras.toList().forEach { extra ->
-                        ExtraItem(
-                            extra = extra,
-                            existed = false,
-                            onDelete = {
-                                val idx =
-                                    viewModel.newExtras.indexOf(extra)
-                                viewModel.newExtras.remove(extra)
-                                viewModel.newExtrasFileName.removeAt(idx)
-                            }
-                        )
-                    }
-
-                    // Add KPM module
-                    if (viewModel.superkey.isNotEmpty()
-                        && !viewModel.patching
-                        && !viewModel.patchdone
-                    ) {
-                        AddKpmItem { uri ->
-                            viewModel.embedKPM(uri)
+                // KPM item
+                viewModel.newExtras.toList().forEach { extra ->
+                    ExtraItem(
+                        extra = extra,
+                        existed = false,
+                        onDelete = {
+                            val idx =
+                                viewModel.newExtras.indexOf(extra)
+                            viewModel.newExtras.remove(extra)
+                            viewModel.newExtrasFileName.removeAt(idx)
                         }
-                    }
+                    )
                 }
 
-                // Patch log
-                AnimatedVisibility(
-                    visible = viewModel.patching || viewModel.patchdone
+                // Add KPM module
+                if (viewModel.superkey.isNotEmpty()
+                    && !viewModel.patching
+                    && !viewModel.patchdone
                 ) {
-                    Card(Modifier.fillMaxWidth()) {
-                        SelectionContainer {
-                            Text(
-                                modifier = Modifier
-                                    .padding(12.dp)
-                                    .fillMaxWidth(),
-                                text = viewModel.patchLog,
-                                fontSize = 11.sp,
-                                fontFamily = FontFamily.Monospace,
-                                lineHeight = 16.sp
-                            )
-                        }
+                    AddKpmItem { uri ->
+                        viewModel.embedKPM(uri)
+                    }
+                }
+            }
+
+            // Patch log
+            AnimatedVisibility(
+                visible = viewModel.patching || viewModel.patchdone
+            ) {
+                Card(Modifier.fillMaxWidth()) {
+                    SelectionContainer {
+                        Text(
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .fillMaxWidth(),
+                            text = viewModel.patchLog,
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            lineHeight = 16.sp
+                        )
                     }
                 }
             }
         }
-        if (viewModel.running) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(colorScheme.surface.copy(alpha = 0.8f)),
-                contentAlignment = Alignment.Center
-            ) {
-                LoadingIndicator()
-            }
+    }
+    if (viewModel.running) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorScheme.surface.copy(alpha = 0.8f)),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingIndicator()
         }
     }
 }
@@ -315,7 +319,9 @@ private fun BottomButtons(
                 Button(
                     enabled = false,
                     onClick = {},
-                    modifier = Modifier.fillMaxWidth().height(52.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         InfiniteProgressIndicator()
@@ -328,7 +334,9 @@ private fun BottomButtons(
             viewModel.needReboot -> {
                 TextButton(
                     text = stringResource(R.string.reboot),
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     onClick = {
                         scope.launch {
@@ -341,7 +349,9 @@ private fun BottomButtons(
             viewModel.patchdone -> {
                 TextButton(
                     text = stringResource(android.R.string.ok),
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     onClick = { navigator.popBackStack() }
                 )
@@ -352,7 +362,9 @@ private fun BottomButtons(
 
                 TextButton(
                     text = stringResource(R.string.patch_select_bootimg_btn),
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
                     colors = ButtonDefaults.textButtonColorsPrimary(),
                     onClick = {
                         val intent = Intent(Intent.ACTION_GET_CONTENT).apply { type = "*/*" }
@@ -378,7 +390,9 @@ private fun BottomButtons(
                             else
                                 R.string.patch_start_patch_btn
                         ),
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
                         colors = ButtonDefaults.textButtonColorsPrimary(),
                         onClick = {
                             if (canUnpatch) {
@@ -466,9 +480,11 @@ private fun ExtraItem(extra: KPModel.IExtraInfo, existed: Boolean, onDelete: () 
     }
 
     Card {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -498,7 +514,10 @@ private fun ExtraItem(extra: KPModel.IExtraInfo, existed: Boolean, onDelete: () 
                     DetailText(stringResource(R.string.patch_item_extra_version), extra.version)
                     DetailText(stringResource(R.string.patch_item_extra_kpm_license), extra.license)
                     DetailText(stringResource(R.string.patch_item_extra_author), extra.author)
-                    DetailText(stringResource(R.string.patch_item_extra_kpm_desciption), extra.description)
+                    DetailText(
+                        stringResource(R.string.patch_item_extra_kpm_desciption),
+                        extra.description
+                    )
                 }
             }
         }
@@ -591,7 +610,7 @@ private fun SetSuperKeyView(viewModel: PatchesViewModel) {
                 )
             }
 
-            Box (Modifier.padding(top = 6.dp)) {
+            Box(Modifier.padding(top = 6.dp)) {
                 TextField(
                     value = skey,
                     label = stringResource(id = R.string.patch_set_superkey),
@@ -738,15 +757,19 @@ private fun ErrorView(error: String) {
 @Composable
 private fun TopBar(
     title: String,
+    backdrop: LayerBackdrop?,
     scrollBehavior: ScrollBehavior,
     onBack: () -> Unit
 ) {
     SmallTopAppBar(
+        modifier = Modifier.miuixBlurEffect(backdrop),
+        color = backdrop.getMiuixAppBarColor(),
         title = title,
         scrollBehavior = scrollBehavior,
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(MiuixIcons.Back,
+                Icon(
+                    MiuixIcons.Back,
                     contentDescription = null,
                     modifier = Modifier.padding(start = 20.dp)
                 )

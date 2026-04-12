@@ -69,7 +69,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.generated.destinations.ExecuteAPMActionScreenDestination
@@ -90,7 +89,9 @@ import me.bmax.apatch.ui.component.ModuleStateIndicator
 import me.bmax.apatch.ui.component.WarningCard
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.component.rememberLoadingDialog
-import me.bmax.apatch.ui.theme.miuixBlur
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.APModuleViewModel
 import me.bmax.apatch.util.DownloadListener
 import me.bmax.apatch.util.Shortcut
@@ -125,7 +126,6 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -135,7 +135,6 @@ import top.yukonga.miuix.kmp.icon.extended.Play
 import top.yukonga.miuix.kmp.icon.extended.Undo
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.theme.miuixShape
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.window.WindowDialog
@@ -150,7 +149,7 @@ fun APModuleScreen(
     val scrollBehavior = MiuixScrollBehavior()
     var expanded by remember { mutableStateOf(false) }
 
-    val backdrop = rememberLayerBackdrop()
+    val backdrop = rememberMiuixBlurBackdrop(true)
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
 
@@ -183,42 +182,32 @@ fun APModuleScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Box(
-                modifier = Modifier
-                    .miuixBlur(
-                        backdrop = backdrop,
-                        shape = miuixShape(16.dp)
-                    )
-                    .zIndex(1f)
+            TopAppBar(
+                modifier = Modifier.miuixBlurEffect(backdrop),
+                color = backdrop.getMiuixAppBarColor(),
+                title = stringResource(R.string.apm),
+                scrollBehavior = scrollBehavior,
             ) {
-                Column {
-                    TopAppBar(
-                        title = stringResource(R.string.apm),
-                        scrollBehavior = scrollBehavior,
-                        color = Color.Transparent
-                    )
-
-                    SearchBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 4.dp),
-                        inputField = {
-                            InputField(
-                                query = viewModel.search,
-                                onQueryChange = { viewModel.search = it },
-                                onSearch = { expanded = false },
-                                expanded = expanded,
-                                onExpandedChange = {
-                                    expanded = it
-                                    if (!it) viewModel.search = ""
-                                }
-                            )
-                        },
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                        content = {}
-                    )
-                }
+                SearchBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 4.dp),
+                    inputField = {
+                        InputField(
+                            query = viewModel.search,
+                            onQueryChange = { viewModel.search = it },
+                            onSearch = { expanded = false },
+                            expanded = expanded,
+                            onExpandedChange = {
+                                expanded = it
+                                if (!it) viewModel.search = ""
+                            }
+                        )
+                    },
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                    content = {}
+                )
             }
         },
         floatingActionButton = {
@@ -364,7 +353,7 @@ private fun ModuleList(
     navigator: DestinationsNavigator,
     viewModel: APModuleViewModel,
     state: LazyListState,
-    backdrop: LayerBackdrop,
+    backdrop: LayerBackdrop?,
     contentPadding: PaddingValues,
     bottomPadding: Dp,
     onInstallModule: (Uri) -> Unit,
@@ -797,7 +786,7 @@ private fun ModuleList(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .layerBackdrop(backdrop)
+            .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
             .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         state = state,

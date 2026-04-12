@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
@@ -22,22 +21,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.dropUnlessResumed
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import me.bmax.apatch.BuildConfig
 import me.bmax.apatch.R
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.util.Version
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
-import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.preference.ArrowPreference
@@ -51,26 +52,33 @@ fun AboutScreen(navigator: DestinationsNavigator) {
     val scrollBehavior = MiuixScrollBehavior()
     val uriHandler = LocalUriHandler.current
 
+    val topBarBackdrop = rememberMiuixBlurBackdrop(true)
+
     Scaffold(
         topBar = {
-            TopBar(
-                onBack = dropUnlessResumed { navigator.popBackStack() },
-                scrollBehavior = scrollBehavior
+            TopAppBar(
+                modifier = Modifier.miuixBlurEffect(topBarBackdrop),
+                title = stringResource(R.string.about),
+                color = topBarBackdrop.getMiuixAppBarColor(),
+                scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    IconButton(onClick = {navigator.popBackStack()}) {
+                        Icon(imageVector = MiuixIcons.Back, contentDescription = null)
+                    }
+                },
             )
         }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
+                .then(topBarBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .fillMaxSize()
-                .padding(innerPadding)
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = innerPadding,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             item {
-                Spacer(modifier = Modifier.height(40.dp))
-
                 Surface(
                     modifier = Modifier.size(95.dp),
                     color = colorResource(id = R.color.ic_launcher_background),
@@ -79,11 +87,13 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_launcher_foreground),
                         contentDescription = "icon",
-                        modifier = Modifier.scale(1.4f)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            item {
                 Text(
                     text = stringResource(id = R.string.app_name),
                     style = MiuixTheme.textStyles.title2,
@@ -107,9 +117,10 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                     color = MiuixTheme.colorScheme.onSurfaceVariantActions,
                     modifier = Modifier.padding(top = 5.dp)
                 )
-
                 Spacer(modifier = Modifier.height(20.dp))
+            }
 
+            item {
                 Card(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
@@ -145,9 +156,10 @@ fun AboutScreen(navigator: DestinationsNavigator) {
                         uriHandler.openUri("https://t.me/apatch_discuss")
                     }
                 }
-
                 Spacer(modifier = Modifier.height(12.dp))
+            }
 
+            item {
                 Card(
                     modifier = Modifier.padding(horizontal = 16.dp),
                 ) {
@@ -187,27 +199,5 @@ fun LinkItem(
                 modifier = Modifier.size(24.dp)
             )
         }
-    )
-}
-
-@Composable
-private fun TopBar(
-    onBack: () -> Unit = {},
-    scrollBehavior: ScrollBehavior
-) {
-    TopAppBar(
-        title = stringResource(R.string.about),
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
-            IconButton(
-                modifier = Modifier.padding(start = 16.dp),
-                onClick = onBack
-            ) {
-                Icon(
-                    imageVector = MiuixIcons.Back,
-                    contentDescription = null
-                )
-            }
-        },
     )
 }

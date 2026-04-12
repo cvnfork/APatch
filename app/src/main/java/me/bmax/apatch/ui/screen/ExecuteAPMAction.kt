@@ -34,12 +34,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.KeyEventBlocker
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.util.runAPModuleAction
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -55,6 +60,8 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     var actionResult: Boolean
+
+    val backdrop = rememberMiuixBlurBackdrop(true)
 
 
     val fromShortcut = remember(activity) {
@@ -97,6 +104,7 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
     Scaffold(
         topBar = {
             TopBar(
+                backdrop = backdrop,
                 onBack = dropUnlessResumed {
                     navigator.popBackStack()
                 },
@@ -117,8 +125,10 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
         KeyEventBlocker {
             it.key == Key.VolumeDown || it.key == Key.VolumeUp
         }
+
         Column(
             modifier = Modifier
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .fillMaxSize(1f)
                 .padding(innerPadding)
                 .verticalScroll(scrollState),
@@ -137,8 +147,15 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
 }
 
 @Composable
-private fun TopBar(onBack: () -> Unit = {}, onSave: () -> Unit = {}) {
+private fun TopBar(
+    backdrop: LayerBackdrop?,
+    onBack: () -> Unit = {},
+    onSave: () -> Unit = {}
+) {
+
     SmallTopAppBar(
+        modifier = Modifier.miuixBlurEffect(backdrop),
+        color = backdrop.getMiuixAppBarColor(),
         title = stringResource(R.string.apm_action),
         navigationIcon = {
             IconButton(

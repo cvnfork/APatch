@@ -78,6 +78,9 @@ import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.ArrowItem
 import me.bmax.apatch.ui.component.SwitchItem
 import me.bmax.apatch.ui.component.rememberLoadingDialog
+import me.bmax.apatch.ui.theme.getMiuixAppBarColor
+import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
 import me.bmax.apatch.util.APatchKeyHelper
 import me.bmax.apatch.util.calculateCacheSize
 import me.bmax.apatch.util.clearAppCache
@@ -96,6 +99,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.WindowDropdownPreference
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.window.WindowDialog
@@ -108,6 +112,7 @@ fun SettingScreen(
     navigator: DestinationsNavigator
 ) {
     val scrollBehavior = MiuixScrollBehavior()
+    val backdrop = rememberMiuixBlurBackdrop(true)
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     val kPatchReady = state != APApplication.State.UNKNOWN_STATE
@@ -135,6 +140,8 @@ fun SettingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.miuixBlurEffect(backdrop),
+                color = backdrop.getMiuixAppBarColor(),
                 title = stringResource(R.string.settings),
                 scrollBehavior = scrollBehavior
             )
@@ -142,12 +149,13 @@ fun SettingScreen(
     ) { paddingValues ->
 
         ResetSUPathDialog(showResetSuPathDialog, context)
-        ClearDialog(showClearDialog,cacheSize.longValue ,context, scope)
+        ClearDialog(showClearDialog, cacheSize.longValue, context, scope)
         LogDialog(showLogDialog, context, scope)
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .then(backdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
             contentPadding = PaddingValues(
@@ -176,7 +184,8 @@ fun SettingScreen(
                     // clear key
                     if (kPatchReady) {
                         val clearKeyDialogTitle = stringResource(R.string.clear_super_key)
-                        val clearKeyDialogContent = stringResource(R.string.settings_clear_super_key_dialog)
+                        val clearKeyDialogContent =
+                            stringResource(R.string.settings_clear_super_key_dialog)
 
                         ArrowItem(
                             title = stringResource(R.string.clear_super_key),
@@ -346,7 +355,8 @@ fun SettingScreen(
                         )
                         var keyColorIndex by rememberSaveable {
                             mutableIntStateOf(
-                                colorValues.indexOf(prefs.getInt("key_color", 0)).takeIf { it >= 0 }
+                                colorValues.indexOf(prefs.getInt("key_color", 0))
+                                    .takeIf { it >= 0 }
                                     ?: 0
                             )
                         }
