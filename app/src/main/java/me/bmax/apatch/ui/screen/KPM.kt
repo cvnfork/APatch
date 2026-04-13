@@ -64,9 +64,9 @@ import me.bmax.apatch.ui.component.LoadingDialogHandle
 import me.bmax.apatch.ui.component.LoadingIndicator
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.component.rememberLoadingDialog
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.KPModel
 import me.bmax.apatch.ui.viewmodel.KPModuleViewModel
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
@@ -109,7 +109,7 @@ fun KPModuleScreen(
     bottomPadding: Dp,
     navigator: DestinationsNavigator
 ) {
-    val backdrop = rememberMiuixBlurBackdrop(true)
+    val backdrop = rememberBlurBackdrop(true)
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     if (state == APApplication.State.UNKNOWN_STATE) {
@@ -146,8 +146,8 @@ fun KPModuleScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    modifier = Modifier.miuixBlurEffect(backdrop),
-                    color = backdrop.getMiuixAppBarColor(),
+                    modifier = Modifier.blurEffect(backdrop),
+                    color = backdrop.getAppBarColor(),
                     title = stringResource(R.string.kpm),
                     scrollBehavior = scrollBehavior,
                 )

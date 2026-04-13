@@ -68,9 +68,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.LoadingIndicator
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.KPModel
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
 import me.bmax.apatch.util.Version
@@ -111,7 +111,7 @@ fun Patches(
     val context = LocalContext.current
 
     val scrollState = rememberScrollState()
-    val backdrop = rememberMiuixBlurBackdrop(true)
+    val backdrop = rememberBlurBackdrop(true)
 
     val selectFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -762,8 +762,8 @@ private fun TopBar(
     onBack: () -> Unit
 ) {
     SmallTopAppBar(
-        modifier = Modifier.miuixBlurEffect(backdrop),
-        color = backdrop.getMiuixAppBarColor(),
+        modifier = Modifier.blurEffect(backdrop),
+        color = backdrop.getAppBarColor(),
         title = title,
         scrollBehavior = scrollBehavior,
         navigationIcon = {

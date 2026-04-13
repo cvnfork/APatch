@@ -47,8 +47,8 @@ import me.bmax.apatch.R
 import me.bmax.apatch.apApp
 import me.bmax.apatch.ui.component.DropdownItem
 import me.bmax.apatch.ui.component.LoadingIndicator
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
 import me.bmax.apatch.ui.viewmodel.SuperUserViewModel
 import me.bmax.apatch.util.PkgConfig
 import top.yukonga.miuix.kmp.basic.Card
@@ -152,8 +152,8 @@ fun SuperTopBar(
     var expanded by remember { mutableStateOf(false) }
 
     TopAppBar(
-        modifier = Modifier.miuixBlurEffect(backdrop),
-        color = backdrop.getMiuixAppBarColor(),
+        modifier = Modifier.blurEffect(backdrop),
+        color = backdrop.getAppBarColor(),
         title = stringResource(R.string.su_title),
         actions = {
             val showDropdown = remember { mutableStateOf(false) }

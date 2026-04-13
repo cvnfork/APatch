@@ -78,9 +78,9 @@ import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.ArrowItem
 import me.bmax.apatch.ui.component.SwitchItem
 import me.bmax.apatch.ui.component.rememberLoadingDialog
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.util.APatchKeyHelper
 import me.bmax.apatch.util.calculateCacheSize
 import me.bmax.apatch.util.clearAppCache
@@ -112,7 +112,7 @@ fun SettingScreen(
     navigator: DestinationsNavigator
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val backdrop = rememberMiuixBlurBackdrop(true)
+    val backdrop = rememberBlurBackdrop(true)
 
     val state by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     val kPatchReady = state != APApplication.State.UNKNOWN_STATE
@@ -140,8 +140,8 @@ fun SettingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.miuixBlurEffect(backdrop),
-                color = backdrop.getMiuixAppBarColor(),
+                modifier = Modifier.blurEffect(backdrop),
+                color = backdrop.getAppBarColor(),
                 title = stringResource(R.string.settings),
                 scrollBehavior = scrollBehavior
             )

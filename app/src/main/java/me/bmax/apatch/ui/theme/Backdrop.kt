@@ -23,7 +23,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * @return A LayerBackdrop instance if supported and enabled, null otherwise.
  */
 @Composable
-fun rememberMiuixBlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
+fun rememberBlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
     if (!enableBlur || !isRenderEffectSupported()) return null
     val surfaceColor = MiuixTheme.colorScheme.surface
     return rememberLayerBackdrop {
@@ -37,7 +37,7 @@ fun rememberMiuixBlurBackdrop(enableBlur: Boolean): LayerBackdrop? {
  * @return Transparent if Backdrop is active, otherwise the default surface color.
  */
 @Composable
-fun LayerBackdrop?.getMiuixAppBarColor(): Color =
+fun LayerBackdrop?.getAppBarColor(): Color =
     this?.let { Color.Transparent } ?: MiuixTheme.colorScheme.surface
 
 /**
@@ -48,7 +48,7 @@ fun LayerBackdrop?.getMiuixAppBarColor(): Color =
  * @param shape The clipping shape for the blurred area.
  */
 @Composable
-fun Modifier.miuixBlurEffect(
+fun Modifier.blurEffect(
     backdrop: LayerBackdrop?,
     enabled: Boolean = true,
     blurRadius: Float = 25f,

@@ -25,9 +25,9 @@ import com.ramcosta.composedestinations.generated.destinations.PatchesDestinatio
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.rememberConfirmDialog
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
 import me.bmax.apatch.util.isABDevice
 import me.bmax.apatch.util.rootAvailable
@@ -51,7 +51,7 @@ var selectedBootImage: Uri? = null
 fun ModeSelectScreen(
     navigator: DestinationsNavigator
 ) {
-    val backdrop = rememberMiuixBlurBackdrop(true)
+    val backdrop = rememberBlurBackdrop(true)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -189,8 +189,8 @@ private fun TopBar(
     onBack: () -> Unit
 ) {
     SmallTopAppBar(
-        modifier = Modifier.miuixBlurEffect(backdrop),
-        color = backdrop.getMiuixAppBarColor(),
+        modifier = Modifier.blurEffect(backdrop),
+        color = backdrop.getAppBarColor(),
         title = title,
         navigationIcon = {
             IconButton(onClick = onBack) {

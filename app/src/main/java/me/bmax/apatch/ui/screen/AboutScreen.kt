@@ -26,9 +26,9 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import me.bmax.apatch.BuildConfig
 import me.bmax.apatch.R
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.util.Version
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -52,14 +52,14 @@ fun AboutScreen(navigator: DestinationsNavigator) {
     val scrollBehavior = MiuixScrollBehavior()
     val uriHandler = LocalUriHandler.current
 
-    val topBarBackdrop = rememberMiuixBlurBackdrop(true)
+    val topBarBackdrop = rememberBlurBackdrop(true)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.miuixBlurEffect(topBarBackdrop),
+                modifier = Modifier.blurEffect(topBarBackdrop),
                 title = stringResource(R.string.about),
-                color = topBarBackdrop.getMiuixAppBarColor(),
+                color = topBarBackdrop.getAppBarColor(),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = {navigator.popBackStack()}) {

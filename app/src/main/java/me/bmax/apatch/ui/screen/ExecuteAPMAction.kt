@@ -34,9 +34,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.KeyEventBlocker
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.util.runAPModuleAction
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -61,7 +61,7 @@ fun ExecuteAPMActionScreen(navigator: DestinationsNavigator, moduleId: String) {
     val scrollState = rememberScrollState()
     var actionResult: Boolean
 
-    val backdrop = rememberMiuixBlurBackdrop(true)
+    val backdrop = rememberBlurBackdrop(true)
 
 
     val fromShortcut = remember(activity) {
@@ -154,8 +154,8 @@ private fun TopBar(
 ) {
 
     SmallTopAppBar(
-        modifier = Modifier.miuixBlurEffect(backdrop),
-        color = backdrop.getMiuixAppBarColor(),
+        modifier = Modifier.blurEffect(backdrop),
+        color = backdrop.getAppBarColor(),
         title = stringResource(R.string.apm_action),
         navigationIcon = {
             IconButton(

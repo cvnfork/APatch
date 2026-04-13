@@ -64,9 +64,9 @@ import me.bmax.apatch.ui.component.DropdownItem
 import me.bmax.apatch.ui.component.KStatusCard
 import me.bmax.apatch.ui.component.WarningCard
 import me.bmax.apatch.ui.component.rememberConfirmDialog
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.util.LatestVersionInfo
 import me.bmax.apatch.util.Version
 import me.bmax.apatch.util.Version.getManagerVersion
@@ -106,7 +106,7 @@ fun HomeScreen(
     navigator: DestinationsNavigator
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val backdrop = rememberMiuixBlurBackdrop(true)
+    val backdrop = rememberBlurBackdrop(true)
 
     val kpState by APApplication.kpStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
     val apState by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
@@ -278,8 +278,8 @@ private fun TopBar(
     )
 
     TopAppBar(
-        modifier = Modifier.miuixBlurEffect(backdrop),
-        color = backdrop.getMiuixAppBarColor(),
+        modifier = Modifier.blurEffect(backdrop),
+        color = backdrop.getAppBarColor(),
         title = stringResource(R.string.app_name),
         actions = {
             IconButton(onClick = dropUnlessResumed {

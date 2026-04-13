@@ -35,9 +35,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.component.KeyEventBlocker
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
-import me.bmax.apatch.ui.theme.rememberMiuixBlurBackdrop
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.util.installModule
 import me.bmax.apatch.util.reboot
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
@@ -70,7 +70,7 @@ fun InstallScreen(uri: Uri, type: MODULE_TYPE) {
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-    val backdrop = rememberMiuixBlurBackdrop(true)
+    val backdrop = rememberBlurBackdrop(true)
 
     val context = LocalContext.current
 
@@ -179,8 +179,8 @@ private fun TopBar(
     onSave: () -> Unit = {}
 ) {
     SmallTopAppBar(
-        modifier = Modifier.miuixBlurEffect(backdrop),
-        color = backdrop.getMiuixAppBarColor(),
+        modifier = Modifier.blurEffect(backdrop),
+        color = backdrop.getAppBarColor(),
         title = stringResource(R.string.apm_install),
         navigationIcon = {
             IconButton(

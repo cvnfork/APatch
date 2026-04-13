@@ -23,8 +23,8 @@ import me.bmax.apatch.APApplication
 import me.bmax.apatch.R
 import me.bmax.apatch.ui.LocalHandlePageChange
 import me.bmax.apatch.ui.LocalSelectedPage
-import me.bmax.apatch.ui.theme.getMiuixAppBarColor
-import me.bmax.apatch.ui.theme.miuixBlurEffect
+import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
@@ -45,8 +45,8 @@ fun BottomBar(backdrop: LayerBackdrop) {
     }
 
     NavigationBar(
-        modifier = Modifier.miuixBlurEffect(backdrop),
-        color = backdrop.getMiuixAppBarColor()
+        modifier = Modifier.blurEffect(backdrop),
+        color = backdrop.getAppBarColor()
     ) {
         availablePages.forEachIndexed { index, destination ->
             val isSelected = selectedPage == index
