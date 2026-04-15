@@ -2,6 +2,7 @@ package me.bmax.apatch.ui.screen
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,26 +48,30 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.generated.destinations.InstallScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.PatchesDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.topjohnwu.superuser.nio.ExtendedFile
+import com.topjohnwu.superuser.nio.FileSystemManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.bmax.apatch.APApplication
+import me.bmax.apatch.Natives
 import me.bmax.apatch.R
+import me.bmax.apatch.apApp
 import me.bmax.apatch.ui.component.ConfirmResult
 import me.bmax.apatch.ui.component.DropdownItem
 import me.bmax.apatch.ui.component.IconTextButton
+import me.bmax.apatch.ui.component.LoadingDialogHandle
 import me.bmax.apatch.ui.component.LoadingIndicator
 import me.bmax.apatch.ui.component.rememberConfirmDialog
 import me.bmax.apatch.ui.component.rememberLoadingDialog
-import me.bmax.apatch.ui.theme.blurEffect
 import me.bmax.apatch.ui.theme.getAppBarColor
+import me.bmax.apatch.ui.theme.blurEffect
 import me.bmax.apatch.ui.theme.rememberBlurBackdrop
 import me.bmax.apatch.ui.viewmodel.KPModel
 import me.bmax.apatch.ui.viewmodel.KPModuleViewModel
 import me.bmax.apatch.ui.viewmodel.PatchesViewModel
-import me.bmax.apatch.util.controlKernelModule
-import me.bmax.apatch.util.loadKernelModule
-import me.bmax.apatch.util.unloadKernelModule
+import me.bmax.apatch.util.inputStream
+import me.bmax.apatch.util.writeTo
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.FloatingActionButton
@@ -94,6 +99,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.window.WindowListPopup
+import java.io.IOException
 
 private const val TAG = "KernelPatchModule"
 private lateinit var targetKPMToControl: KPModel.KPMInfo
@@ -175,9 +181,7 @@ fun KPModuleScreen(
                     val uri = data.data ?: return@rememberLauncherForActivityResult
 
                     scope.launch {
-                        val rc = loadingDialog.withLoading {
-                            loadKernelModule(uri, "")
-                        }
+                        val rc = loadModule(loadingDialog, uri, "")
                         val toastText = if (rc == 0) successToastText else "$failToastText: $rc"
                         withContext(Dispatchers.Main) {
                             Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show()
@@ -263,6 +267,33 @@ fun KPModuleScreen(
     }
 }
 
+
+suspend fun loadModule(loadingDialog: LoadingDialogHandle, uri: Uri, args: String): Int {
+    val rc = loadingDialog.withLoading {
+        withContext(Dispatchers.IO) {
+            run {
+                val kpmDir: ExtendedFile =
+                    FileSystemManager.getLocal().getFile(apApp.filesDir.parent, "kpm")
+                kpmDir.deleteRecursively()
+                kpmDir.mkdirs()
+                val rand = (1..4).map { ('a'..'z').random() }.joinToString("")
+                val kpm = kpmDir.getChildFile("${rand}.kpm")
+                Log.d(TAG, "save tmp kpm: ${kpm.path}")
+                var rc = -1
+                try {
+                    uri.inputStream().buffered().writeTo(kpm)
+                    rc = Natives.loadKernelPatchModule(kpm.path, args).toInt()
+                } catch (e: IOException) {
+                    Log.e(TAG, "Copy kpm error: $e")
+                }
+                Log.d(TAG, "load ${kpm.path} rc: $rc")
+                rc
+            }
+        }
+    }
+    return rc
+}
+
 @Composable
 fun KPMControlDialog(
     controlDialog: MutableState<Boolean>
@@ -276,9 +307,13 @@ fun KPMControlDialog(
     val okStringRes = stringResource(id = R.string.kpm_control_ok)
     val failedStringRes = stringResource(id = R.string.kpm_control_failed)
 
+    lateinit var controlResult: Natives.KPMCtlRes
+
     suspend fun onModuleControl(module: KPModel.KPMInfo) {
-        val controlResult = loadingDialog.withLoading {
-            controlKernelModule(module.name, controlParam)
+        loadingDialog.withLoading {
+            withContext(Dispatchers.IO) {
+                controlResult = Natives.kernelPatchModuleControl(module.name, controlParam)
+            }
         }
 
         if (controlResult.rc >= 0) {
@@ -374,7 +409,9 @@ private fun KPModuleList(
         }
 
         val success = loadingDialog.withLoading {
-            unloadKernelModule(module.name)
+            withContext(Dispatchers.IO) {
+                Natives.unloadKernelPatchModule(module.name) == 0L
+            }
         }
 
         if (success) {
