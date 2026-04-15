@@ -1,7 +1,5 @@
 package me.bmax.apatch.ui.screen
 
-import android.os.Build
-import android.system.Os
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -30,11 +28,11 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -51,27 +49,25 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ramcosta.composedestinations.generated.destinations.ModeSelectScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import me.bmax.apatch.APApplication
 import me.bmax.apatch.Natives
 import me.bmax.apatch.R
 import me.bmax.apatch.apApp
+import me.bmax.apatch.ui.LocalHandlePageChange
 import me.bmax.apatch.ui.component.AStatusCard
+import me.bmax.apatch.ui.component.BottomBarDestination
 import me.bmax.apatch.ui.component.DropdownItem
 import me.bmax.apatch.ui.component.KStatusCard
 import me.bmax.apatch.ui.component.WarningCard
 import me.bmax.apatch.ui.component.rememberConfirmDialog
-import me.bmax.apatch.ui.theme.getAppBarColor
 import me.bmax.apatch.ui.theme.blurEffect
+import me.bmax.apatch.ui.theme.getAppBarColor
 import me.bmax.apatch.ui.theme.rememberBlurBackdrop
-import me.bmax.apatch.util.LatestVersionInfo
-import me.bmax.apatch.util.Version
+import me.bmax.apatch.ui.viewmodel.HomeViewModel
 import me.bmax.apatch.util.Version.getManagerVersion
-import me.bmax.apatch.util.checkNewVersion
-import me.bmax.apatch.util.getSELinuxStatus
 import me.bmax.apatch.util.reboot
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -98,18 +94,36 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.window.WindowListPopup
 
-private val managerVersion = getManagerVersion()
-
 @Composable
 fun HomeScreen(
     bottomPadding: Dp,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    viewModel: HomeViewModel = viewModel()
 ) {
+    val handlePageChange = LocalHandlePageChange.current
+
     val scrollBehavior = MiuixScrollBehavior()
     val backdrop = rememberBlurBackdrop(true)
 
-    val kpState by APApplication.kpStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
-    val apState by APApplication.apStateLiveData.observeAsState(APApplication.State.UNKNOWN_STATE)
+    val kpState by viewModel.kpState.collectAsState(APApplication.State.UNKNOWN_STATE)
+    val apState by viewModel.apState.collectAsState(APApplication.State.UNKNOWN_STATE)
+    val apmCount by viewModel.apmCount.collectAsState()
+    val kpmCount by viewModel.kpmCount.collectAsState()
+
+    val kPatchReady = apState != APApplication.State.UNKNOWN_STATE
+    val aPatchReady = apState == APApplication.State.ANDROIDPATCH_INSTALLED
+
+    val availablePages = remember(kPatchReady, aPatchReady) {
+        BottomBarDestination.entries.filter { d ->
+            !(d.kPatchRequired && !kPatchReady) && !(d.aPatchRequired && !aPatchReady)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (APApplication.sharedPreferences.getBoolean("check_update", true)) {
+            viewModel.checkUpdate()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -143,7 +157,18 @@ fun HomeScreen(
                     KStatusCard(
                         kpState = kpState,
                         apState = apState,
-                        navigator = navigator
+                        navigator = navigator,
+                        apmCount = apmCount,
+                        kpmCount = kpmCount,
+                        onVerifySuperKey = { key -> viewModel.verifySuperKey(key) },
+                        onApmClick = {
+                            val index = availablePages.indexOf(BottomBarDestination.AModule)
+                            if (index != -1) handlePageChange(index)
+                        },
+                        onKpmClick = {
+                            val index = availablePages.indexOf(BottomBarDestination.KModule)
+                            if (index != -1) handlePageChange(index)
+                        }
                     )
                     if (kpState != APApplication.State.UNKNOWN_STATE && apState != APApplication.State.ANDROIDPATCH_INSTALLED) {
                         AStatusCard(apState)
@@ -151,9 +176,9 @@ fun HomeScreen(
                     val checkUpdate =
                         APApplication.sharedPreferences.getBoolean("check_update", true)
                     if (checkUpdate) {
-                        UpdateCard()
+                        UpdateCard(viewModel)
                     }
-                    InfoCard(kpState, apState)
+                    InfoCard(kpState, viewModel)
                     LearnMoreCard()
                 }
                 Spacer(Modifier.height(bottomPadding))
@@ -188,7 +213,11 @@ val checkSuperKeyValidation: (superKey: String) -> Boolean = { superKey ->
 }
 
 @Composable
-fun AuthSuperKey(showDialog: MutableState<Boolean>, showFailedDialog: MutableState<Boolean>) {
+fun AuthSuperKey(
+    showDialog: MutableState<Boolean>,
+    showFailedDialog: MutableState<Boolean>,
+    onVerify: (String) -> Boolean
+) {
     var key by remember { mutableStateOf("") }
     var keyVisible by remember { mutableStateOf(false) }
     var enable by remember { mutableStateOf(false) }
@@ -248,9 +277,8 @@ fun AuthSuperKey(showDialog: MutableState<Boolean>, showFailedDialog: MutableSta
                 stringResource(id = android.R.string.ok),
                 onClick = {
                     showDialog.value = false
-                    val ok = Natives.nativeReady(key)
-                    if (ok) APApplication.superKey = key
-                    else showFailedDialog.value = true
+                    val ok = onVerify(key)
+                    if (!ok) showFailedDialog.value = true
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
@@ -386,26 +414,22 @@ fun BackupWarningCard() {
     }
 }
 
-private fun getSystemVersion(): String {
-    return "${Build.VERSION.RELEASE} ${if (Build.VERSION.PREVIEW_SDK_INT != 0) "Preview" else ""} (API ${Build.VERSION.SDK_INT})"
-}
-
-private fun getDeviceInfo(): String {
-    var manufacturer =
-        Build.MANUFACTURER[0].uppercaseChar().toString() + Build.MANUFACTURER.substring(1)
-    if (!Build.BRAND.equals(Build.MANUFACTURER, ignoreCase = true)) {
-        manufacturer += " " + Build.BRAND[0].uppercaseChar() + Build.BRAND.substring(1)
-    }
-    manufacturer += " " + Build.MODEL + " "
-    return manufacturer
-}
-
 
 @Composable
 private fun InfoCard(
     kpState: APApplication.State,
-    apState: APApplication.State
+    viewModel: HomeViewModel
 ) {
+
+    val systemInfo by viewModel.systemInfo.collectAsState()
+
+    val selinuxText = when (systemInfo.selinux) {
+        "Enforcing" -> stringResource(R.string.home_selinux_status_enforcing)
+        "Permissive" -> stringResource(R.string.home_selinux_status_permissive)
+        "Disabled" -> stringResource(R.string.home_selinux_status_disabled)
+        else -> stringResource(R.string.home_selinux_status_unknown)
+    }
+
     @Composable
     fun InfoText(
         title: String,
@@ -426,7 +450,6 @@ private fun InfoCard(
         )
     }
     Card {
-        val uname = Os.uname()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -434,39 +457,29 @@ private fun InfoCard(
         ) {
             if (kpState != APApplication.State.UNKNOWN_STATE) {
                 InfoText(
-                    title = stringResource(R.string.home_kpatch_version),
-                    content = Version.installedKPVString()
-                )
-                InfoText(
                     title = stringResource(R.string.home_su_path),
                     content = Natives.suPath()
                 )
             }
-            if (apState != APApplication.State.UNKNOWN_STATE && apState != APApplication.State.ANDROIDPATCH_NOT_INSTALLED) {
-                InfoText(
-                    title = stringResource(R.string.home_apatch_version),
-                    content = managerVersion.second.toString()
-                )
-            }
             InfoText(
                 title = stringResource(R.string.home_device_info),
-                content = getDeviceInfo(),
+                content = systemInfo.deviceInfo,
             )
             InfoText(
                 title = stringResource(R.string.home_kernel),
-                content = uname.release
+                content = systemInfo.kernelVersion
             )
             InfoText(
                 title = stringResource(R.string.home_system_version),
-                content = getSystemVersion()
+                content = systemInfo.androidVersion
             )
             InfoText(
                 title = stringResource(R.string.home_fingerprint),
-                content = Build.FINGERPRINT
+                content = systemInfo.fingerprint
             )
             InfoText(
                 title = stringResource(R.string.home_selinux_status),
-                content = getSELinuxStatus(),
+                content = selinuxText,
                 bottomPadding = 0.dp
             )
         }
@@ -474,38 +487,34 @@ private fun InfoCard(
 }
 
 @Composable
-fun UpdateCard() {
-    val latestVersionInfo = LatestVersionInfo()
-    val newVersion by produceState(initialValue = latestVersionInfo) {
-        value = withContext(Dispatchers.IO) {
-            checkNewVersion()
-        }
-    }
-    val currentVersionCode = managerVersion.second
-    val newVersionCode = newVersion.versionCode
-    val newVersionUrl = newVersion.downloadUrl
-    val changelog = newVersion.changelog
-
+fun UpdateCard(viewModel: HomeViewModel) {
+    val newVersion by viewModel.newVersionInfo.collectAsState()
     val uriHandler = LocalUriHandler.current
-    val title = stringResource(id = R.string.apm_changelog)
-    val updateText = stringResource(id = R.string.apm_update)
 
-    AnimatedVisibility(
-        visible = newVersionCode > currentVersionCode,
-        enter = fadeIn() + expandVertically(),
-        exit = shrinkVertically() + fadeOut()
-    ) {
-        val updateDialog = rememberConfirmDialog(onConfirm = { uriHandler.openUri(newVersionUrl) })
-        WarningCard(
-            message = stringResource(id = R.string.home_new_apatch_found).format(newVersionCode),
-            colorScheme.outline
+    val currentCode = remember { getManagerVersion().second }
+
+    newVersion?.let { info ->
+        AnimatedVisibility(
+            visible = info.versionCode > currentCode,
+            enter = fadeIn() + expandVertically(),
+            exit = shrinkVertically() + fadeOut()
         ) {
-            if (changelog.isEmpty()) {
-                uriHandler.openUri(newVersionUrl)
-            } else {
-                updateDialog.showConfirm(
-                    title = title, content = changelog, markdown = true, confirm = updateText
-                )
+            val updateDialog = rememberConfirmDialog(onConfirm = { uriHandler.openUri(info.downloadUrl) })
+
+            WarningCard(
+                message = stringResource(id = R.string.home_new_apatch_found).format(info.versionCode),
+                colorScheme.outline
+            ) {
+                if (info.changelog.isEmpty()) {
+                    uriHandler.openUri(info.downloadUrl)
+                } else {
+                    updateDialog.showConfirm(
+                        title = stringResource(id = R.string.apm_changelog),
+                        content = info.changelog,
+                        markdown = true,
+                        confirm = stringResource(id = R.string.apm_update)
+                    )
+                }
             }
         }
     }

@@ -21,6 +21,7 @@ import me.bmax.apatch.APApplication.Companion.SUPERCMD
 import me.bmax.apatch.BuildConfig
 import me.bmax.apatch.apApp
 import me.bmax.apatch.ui.screen.MODULE_TYPE
+import org.json.JSONArray
 import java.io.File
 import java.security.MessageDigest
 
@@ -233,6 +234,14 @@ fun listModules(): String {
     }
 
     return out.joinToString("\n").ifBlank { "[]" }
+}
+
+fun getModuleCount(): Int {
+    val result = listModules()
+    runCatching {
+        val array = JSONArray(result)
+        return array.length()
+    }.getOrElse { return 0 }
 }
 
 fun toggleModule(id: String, enable: Boolean): Boolean {

@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.bmax.apatch.Natives
+import me.bmax.apatch.util.listKernelModules
 import java.text.Collator
 import java.util.Locale
 
@@ -39,34 +39,16 @@ class KPModuleViewModel : ViewModel() {
     fun fetchModuleList() {
         viewModelScope.launch(Dispatchers.IO) {
             isRefreshing = true
-
-            // Artificial delay to prevent state coalescing in Compose
             delay(50)
-
             val start = SystemClock.elapsedRealtime()
-
             try {
-                var names = Natives.kernelPatchModuleList()
-                if (Natives.kernelPatchModuleNum() <= 0) names = ""
-                val nameList = names.split('\n').filter { it.isNotEmpty() }
-
-                modules = nameList.map { id ->
-                    val infoline = Natives.kernelPatchModuleInfo(id)
-                    val spi = infoline.split('\n')
-
-                    fun getVal(key: String) = spi.find { it.startsWith("$key=") }?.substringAfter('=') ?: ""
-
-                    KPModel.KPMInfo(
-                        KPModel.ExtraType.KPM,
-                        getVal("name"), "", getVal("args"), getVal("version"),
-                        getVal("license"), getVal("author"), getVal("description")
-                    )
-                }
+                val result = listKernelModules()
+                modules = result
                 isNeedRefresh = false
+
             } catch (e: Exception) {
                 Log.e(TAG, "fetch failed", e)
             } finally {
-                // Always reset refreshing state here
                 isRefreshing = false
                 Log.i(TAG, "load cost: ${SystemClock.elapsedRealtime() - start}")
             }
